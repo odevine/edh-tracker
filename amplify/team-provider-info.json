@@ -1,0 +1,20 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-edhtracker-dev-1bfda-authRole",
+      "UnauthRoleArn": "arn:aws:iam::471112850924:role/amplify-edhtracker-dev-1bfda-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::471112850924:role/amplify-edhtracker-dev-1bfda-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-edhtracker-dev-1bfda-deployment",
+      "UnauthRoleName": "amplify-edhtracker-dev-1bfda-unauthRole",
+      "StackName": "amplify-edhtracker-dev-1bfda",
+      "StackId": "arn:aws:cloudformation:us-east-1:471112850924:stack/amplify-edhtracker-dev-1bfda/7c283da0-0596-11ef-9ee0-0e23066ac2a3",
+      "AmplifyAppId": "d2gc75fz6kd7cg"
+    },
+    "categories": {
+      "auth": {
+        "edhtracker7b29e6af": {}
+      }
+    }
+  }
+}
