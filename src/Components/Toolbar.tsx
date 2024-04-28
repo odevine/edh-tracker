@@ -15,9 +15,7 @@ import { useAuthenticator } from "@aws-amplify/ui-react";
 import { ThemeToggle } from "@/Components";
 
 export const Toolbar = () => {
-  const { user, signOut, toSignIn } = useAuthenticator((context) => [
-    context.user,
-  ]);
+  const { user, signOut } = useAuthenticator((context) => [context.user]);
 
   const [userMenuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
 

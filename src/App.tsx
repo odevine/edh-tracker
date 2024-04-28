@@ -1,4 +1,4 @@
-import { useRoutes, Link, Redirect } from "raviger";
+import { useRoutes, Redirect } from "raviger";
 import { Amplify } from "aws-amplify";
 import { Authenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
