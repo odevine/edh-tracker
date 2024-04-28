@@ -22,7 +22,7 @@ const ProtectedRoutes = () => {
 
   return (
     <Authenticator>
-      {({ signOut, user }) => (
+      {({ signOut }) => (
         <div>
           {routeResult || <h1>404 Not Found</h1>}
           <button onClick={signOut}>Sign out</button>
