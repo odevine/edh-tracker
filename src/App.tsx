@@ -1,11 +1,12 @@
-import { useRoutes, Redirect } from "raviger";
-import { Amplify } from "aws-amplify";
 import { Authenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
+import { Box } from "@mui/material";
+import { Amplify } from "aws-amplify";
+import { Redirect, useRoutes } from "raviger";
 
-import config from "./aws-exports";
-import { Home, Protected } from "@/Pages";
 import { Toolbar } from "@/Components";
+import { Decks, Home, Matches, Profile } from "@/Pages";
+import config from "./aws-exports";
 
 Amplify.configure(config);
 
@@ -16,12 +17,13 @@ const baseRoutes = {
 
 const protectedRoutes = {
   "/login": () => <Redirect to="/" />,
-  "/protected": () => <Protected />,
+  "/decks": () => <Decks />,
+  "/matches": () => <Matches />,
+  "/profile": () => <Profile />,
 };
 
 const ProtectedRoutes = () => {
   const routeResult = useRoutes(protectedRoutes);
-
   return <Authenticator hideSignUp>{routeResult}</Authenticator>;
 };
 
@@ -31,7 +33,9 @@ export const App = () => {
   return (
     <>
       <Toolbar />
-      {routeResult || <h1>404 Not Found</h1>}
+      <Box sx={{ height: "calc(100% - 64px)", overflowY: "auto" }}>
+        {routeResult || <h1>404 Not Found</h1>}
+      </Box>
     </>
   );
 };
