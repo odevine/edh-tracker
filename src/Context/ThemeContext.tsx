@@ -1,3 +1,7 @@
+import {
+  Theme as AmpTheme,
+  ThemeProvider as AmpThemeProvider,
+} from "@aws-amplify/ui-react";
 import "@fontsource/noto-mono";
 import {
   CssBaseline,
@@ -26,8 +30,17 @@ export const useTheme = () => useContext(ThemeContext);
 
 export const ThemeProvider = (props: PropsWithChildren) => {
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
-  const defaultTheme =
-    localStorage.getItem("theme") ?? prefersDarkMode ? "dark" : "light";
+  const previousThemeMode = localStorage.getItem("theme");
+  let defaultTheme = "dark";
+
+  if (!prefersDarkMode) {
+    defaultTheme = "light";
+  }
+
+  if (previousThemeMode) {
+    defaultTheme = previousThemeMode;
+  }
+
   const [mode, setMode] = useState<PaletteMode>(defaultTheme as PaletteMode);
 
   useEffect(() => {
@@ -45,7 +58,7 @@ export const ThemeProvider = (props: PropsWithChildren) => {
     [mode],
   );
 
-  const theme = useMemo(
+  const muiTheme = useMemo(
     () =>
       createTheme({
         typography: {
@@ -118,9 +131,69 @@ export const ThemeProvider = (props: PropsWithChildren) => {
     [mode],
   );
 
+  const ampTheme = useMemo(
+    (): AmpTheme => ({
+      name: "heheTheme",
+      tokens: {
+        colors: {
+          ...(mode === "light"
+            ? {
+                font: {
+                  primary: "#2c292d",
+                  secondary: "#514b53",
+                  focus: "#fc8d57",
+                  active: "#fc8d57",
+                },
+                background: {
+                  primary: "#fffcf4",
+                },
+                border: {
+                  primary: "#514b53",
+                  focus: "#2c292d",
+                },
+                primary: {
+                  10: "#2c292d",
+                  20: "#514b53",
+                  80: "#fc8d57",
+                  90: "#ff9958",
+                },
+              }
+            : {
+                font: {
+                  primary: "#fafbfb",
+                  secondary: "#c7c7c7",
+                  focus: "#ab9df2",
+                },
+                background: {
+                  primary: "#2d2a2e",
+                },
+                border: {
+                  primary: "#c7c7c7",
+                  focus: "#fafbfb",
+                },
+                primary: {
+                  10: "#fafbfb",
+                  20: "#c7c7c7",
+                  80: "#ab9df2",
+                  90: "#746ba5",
+                },
+              }),
+        },
+        components: {
+          authenticator: {
+            modal: {
+              height: { value: "calc(100vh - 64px)" }
+            }
+          }
+        }
+      },
+    }),
+    [mode],
+  );
+
   return (
     <ThemeContext.Provider value={colorMode}>
-      <MuiThemeProvider theme={theme}>
+      <MuiThemeProvider theme={muiTheme}>
         <CssBaseline />
         <GlobalStyles
           styles={{
@@ -135,7 +208,8 @@ export const ThemeProvider = (props: PropsWithChildren) => {
             },
           }}
         />
-        {props.children}
+        {/* {props.children} */}
+        <AmpThemeProvider theme={ampTheme}>{props.children}</AmpThemeProvider>
       </MuiThemeProvider>
     </ThemeContext.Provider>
   );
