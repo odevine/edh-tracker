@@ -22,10 +22,9 @@ const protectedRoutes = {
   "/profile": () => <Profile />,
 };
 
-const ProtectedRoutes = () => {
-  const routeResult = useRoutes(protectedRoutes);
-  return <Authenticator hideSignUp>{routeResult}</Authenticator>;
-};
+const ProtectedRoutes = () => (
+  <Authenticator hideSignUp>{useRoutes(protectedRoutes)}</Authenticator>
+);
 
 export const App = () => {
   const routeResult = useRoutes(baseRoutes);
@@ -33,7 +32,13 @@ export const App = () => {
   return (
     <>
       <Toolbar />
-      <Box sx={{ height: "calc(100% - 64px)", overflowY: "auto" }}>
+      <Box
+        sx={{
+          height: "calc(100% - 64px)",
+          overflowY: "auto",
+          scrollbarGutter: 8,
+        }}
+      >
         {routeResult || <h1>404 Not Found</h1>}
       </Box>
     </>

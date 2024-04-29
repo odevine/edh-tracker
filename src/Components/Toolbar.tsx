@@ -36,6 +36,7 @@ export const Toolbar = () => {
   };
 
   const handleSignOut = async () => {
+    navigate("/");
     signOut();
     handleUserMenuClose();
   };
@@ -85,10 +86,10 @@ export const Toolbar = () => {
           <CustomMenuItem onClick={() => navigate("/")}>
             overview
           </CustomMenuItem>
-          <CustomMenuItem onClick={() => navigate("/decks")}>
+          <CustomMenuItem onClick={() => navigate("/decks")} disabled={!user}>
             decks
           </CustomMenuItem>
-          <CustomMenuItem onClick={() => navigate("/matches")}>
+          <CustomMenuItem onClick={() => navigate("/matches")} disabled={!user}>
             matches
           </CustomMenuItem>
         </Stack>
