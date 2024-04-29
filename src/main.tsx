@@ -1,6 +1,6 @@
+import { Authenticator } from "@aws-amplify/ui-react";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { Authenticator } from "@aws-amplify/ui-react";
 
 import { App } from "./App";
 
