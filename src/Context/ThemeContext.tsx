@@ -63,6 +63,9 @@ export const ThemeProvider = (props: PropsWithChildren) => {
       createTheme({
         typography: {
           fontFamily: "Noto Mono, monospace",
+          button: {
+            textTransform: "none",
+          },
         },
         palette: {
           mode,
@@ -182,10 +185,10 @@ export const ThemeProvider = (props: PropsWithChildren) => {
         components: {
           authenticator: {
             modal: {
-              height: { value: "calc(100vh - 64px)" }
-            }
-          }
-        }
+              height: { value: "calc(100vh - 64px)" },
+            },
+          },
+        },
       },
     }),
     [mode],
