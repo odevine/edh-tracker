@@ -1,15 +1,15 @@
 {
-  "dev": {
+  "master": {
     "awscloudformation": {
-      "AuthRoleName": "amplify-edhtracker-dev-1bfda-authRole",
-      "UnauthRoleArn": "arn:aws:iam::471112850924:role/amplify-edhtracker-dev-1bfda-unauthRole",
-      "AuthRoleArn": "arn:aws:iam::471112850924:role/amplify-edhtracker-dev-1bfda-authRole",
+      "AuthRoleName": "amplify-edhtracker-master-c66d9-authRole",
+      "UnauthRoleArn": "arn:aws:iam::471112850924:role/amplify-edhtracker-master-c66d9-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::471112850924:role/amplify-edhtracker-master-c66d9-authRole",
       "Region": "us-east-1",
-      "DeploymentBucketName": "amplify-edhtracker-dev-1bfda-deployment",
-      "UnauthRoleName": "amplify-edhtracker-dev-1bfda-unauthRole",
-      "StackName": "amplify-edhtracker-dev-1bfda",
-      "StackId": "arn:aws:cloudformation:us-east-1:471112850924:stack/amplify-edhtracker-dev-1bfda/7c283da0-0596-11ef-9ee0-0e23066ac2a3",
-      "AmplifyAppId": "d2gc75fz6kd7cg"
+      "DeploymentBucketName": "amplify-edhtracker-master-c66d9-deployment",
+      "UnauthRoleName": "amplify-edhtracker-master-c66d9-unauthRole",
+      "StackName": "amplify-edhtracker-master-c66d9",
+      "StackId": "arn:aws:cloudformation:us-east-1:471112850924:stack/amplify-edhtracker-master-c66d9/b880d530-059d-11ef-bed2-0affd20caca5",
+      "AmplifyAppId": "da8env0pzxt6y"
     },
     "categories": {
       "auth": {
