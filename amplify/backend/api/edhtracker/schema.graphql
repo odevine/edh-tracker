@@ -34,5 +34,4 @@ type Matches @model @auth(rules: [{allow: private, operations: [create, read, up
   isArchived: Boolean!
   MatchParticipants: [MatchParticipants] @hasMany(indexName: "byMatches", fields: ["id"])
   datePlayed: AWSDate!
-}
- 
+} 
