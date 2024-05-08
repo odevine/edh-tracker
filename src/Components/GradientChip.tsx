@@ -89,7 +89,9 @@ export const GradientChip = (props: GradientChipProps): JSX.Element => {
     <Chip
       {...otherProps}
       sx={{
-        border: `double ${BORDER_WIDTH}px transparent`,
+        position: "relative",
+        // If multi-colored, the outline is gold, but if mono-colored, we want the border to take up that space
+        border: `double ${multiColored ? BORDER_WIDTH : OUTLINE_BORDER + BORDER_WIDTH}px transparent`,
         borderRadius: BORDER_RADIUS,
         backgroundImage: (theme): string =>
           `linear-gradient(90deg,
@@ -98,11 +100,12 @@ export const GradientChip = (props: GradientChipProps): JSX.Element => {
           ), ${borderGradient}`,
         backgroundOrigin: "border-box",
         backgroundClip: "content-box, border-box",
+        // Outline is used to add a gold border to multicolored commanders
         outline: (): string => {
           const outlineWidth = outerContrastBorder
             ? OUTLINE_BORDER
             : OUTLINE_BORDER + 1;
-          return `${outlineWidth}px solid ${multiColored ? multiGold : monoColor}`;
+          return multiColored ? `${outlineWidth}px solid ${multiGold}` : "none";
         },
         boxShadow: (theme): string => {
           let boxShadowArr = [];
@@ -111,7 +114,7 @@ export const GradientChip = (props: GradientChipProps): JSX.Element => {
           }
           if (outerContrastBorder) {
             boxShadowArr.push(
-              `0 0 0 ${OUTLINE_BORDER + 1}px ${theme.palette.text.primary}`,
+              `0 0 0 ${multiColored ? OUTLINE_BORDER + 1 : 1}px ${theme.palette.text.primary}`,
             );
           }
           return boxShadowArr.join(", ");
