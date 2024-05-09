@@ -1,4 +1,4 @@
-type MatchParticipants @model @auth(rules: [{allow: public}]) {
+type MatchParticipants @model @auth(rules: [{allow: private}]) {
   id: ID!
   decksID: ID! @index(name: "byDecks")
   matchesID: ID! @index(name: "byMatches")
