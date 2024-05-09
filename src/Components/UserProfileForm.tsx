@@ -15,8 +15,8 @@ import { updateUserProfile } from "@/Logic";
 
 export const UserProfileForm: React.FC = () => {
   const { authenticatedUser, userProfile, setUserProfile } = useUser();
-  const [displayName, setDisplayName] = useState(userProfile?.displayName);
-  const [themeColor, setThemeColor] = useState(userProfile?.themeColor);
+  const [displayName, setDisplayName] = useState(userProfile?.displayName ?? "");
+  const [themeColor, setThemeColor] = useState(userProfile?.themeColor ?? "");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent) => {

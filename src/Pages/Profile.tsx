@@ -77,8 +77,6 @@ const testDecks = [
   },
 ];
 
-const handleProfileUpdate = () => {};
-
 const DeckEntry = (props: { deck: any }) => {
   return (
     <Stack direction="row">
