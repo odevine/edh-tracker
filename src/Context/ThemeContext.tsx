@@ -2,7 +2,7 @@ import {
   Theme as AmpTheme,
   ThemeProvider as AmpThemeProvider,
 } from "@aws-amplify/ui-react";
-import "@fontsource/noto-mono";
+import "@fontsource-variable/noto-sans-mono";
 import {
   CssBaseline,
   GlobalStyles,
@@ -60,7 +60,7 @@ export const ThemeProvider = (props: PropsWithChildren) => {
     () =>
       createTheme({
         typography: {
-          fontFamily: "Noto Mono, monospace",
+          fontFamily: "Noto Sans Mono Variable, monospace, sans-serif",
           button: {
             textTransform: "none",
           },
