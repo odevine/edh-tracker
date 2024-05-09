@@ -1,6 +1,6 @@
 import { Authenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
-import { Box } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import { Amplify } from "aws-amplify";
 import { Redirect, useRoutes } from "raviger";
 
@@ -10,16 +10,27 @@ import config from "./aws-exports";
 
 Amplify.configure(config);
 
+const NotFoundPage = () => (
+  <Stack sx={{ height: "100%" }} justifyContent="center" alignItems="center">
+    <Typography variant="h1">404</Typography>
+    <Typography variant="h5">couldn't find what you're looking for</Typography>
+  </Stack>
+);
+
 const baseRoutes = {
   "/": () => <Home />,
   "/*": () => <ProtectedRoutes />,
+  "*": () => <NotFoundPage />,
 };
 
 const protectedRoutes = {
   "/login": () => <Redirect to="/" />,
   "/decks": () => <Decks />,
   "/matches": () => <Matches />,
-  "/profile": () => <Profile />,
+  "/profile/:profileId": (routeParams: { profileId: string }) => (
+    <Profile profileId={routeParams.profileId} />
+  ),
+  "*": () => <NotFoundPage />,
 };
 
 const ProtectedRoutes = () => (
