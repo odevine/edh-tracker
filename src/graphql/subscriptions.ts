@@ -74,7 +74,6 @@ export const onCreateUsers = /* GraphQL */ `subscription OnCreateUsers($filter: 
     }
     createdAt
     updatedAt
-    owner
     __typename
   }
 }
@@ -100,7 +99,6 @@ export const onUpdateUsers = /* GraphQL */ `subscription OnUpdateUsers($filter: 
     }
     createdAt
     updatedAt
-    owner
     __typename
   }
 }
@@ -126,7 +124,6 @@ export const onDeleteUsers = /* GraphQL */ `subscription OnDeleteUsers($filter: 
     }
     createdAt
     updatedAt
-    owner
     __typename
   }
 }
@@ -150,7 +147,6 @@ export const onCreateDecks = /* GraphQL */ `subscription OnCreateDecks($filter: 
     cost
     createdAt
     updatedAt
-    owner
     __typename
   }
 }
@@ -174,7 +170,6 @@ export const onUpdateDecks = /* GraphQL */ `subscription OnUpdateDecks($filter: 
     cost
     createdAt
     updatedAt
-    owner
     __typename
   }
 }
@@ -198,7 +193,6 @@ export const onDeleteDecks = /* GraphQL */ `subscription OnDeleteDecks($filter: 
     cost
     createdAt
     updatedAt
-    owner
     __typename
   }
 }

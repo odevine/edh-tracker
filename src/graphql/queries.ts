@@ -122,7 +122,6 @@ export const getUsers = /* GraphQL */ `query GetUsers($id: ID!) {
     }
     createdAt
     updatedAt
-    owner
     __typename
   }
 }
@@ -142,7 +141,6 @@ export const listUsers = /* GraphQL */ `query ListUsers(
       role
       createdAt
       updatedAt
-      owner
       __typename
     }
     nextToken
@@ -166,7 +164,6 @@ export const getDecks = /* GraphQL */ `query GetDecks($id: ID!) {
     cost
     createdAt
     updatedAt
-    owner
     __typename
   }
 }
@@ -188,7 +185,6 @@ export const listDecks = /* GraphQL */ `query ListDecks(
       cost
       createdAt
       updatedAt
-      owner
       __typename
     }
     nextToken
@@ -221,7 +217,6 @@ export const decksByDeckOwnerID = /* GraphQL */ `query DecksByDeckOwnerID(
       cost
       createdAt
       updatedAt
-      owner
       __typename
     }
     nextToken

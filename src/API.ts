@@ -113,7 +113,6 @@ export type ModelUsersConditionInput = {
   not?: ModelUsersConditionInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
-  owner?: ModelStringInput | null,
 };
 
 export type Users = {
@@ -124,39 +123,10 @@ export type Users = {
   lastLoggedIn?: string | null,
   profilePicture?: string | null,
   role?: string | null,
-  Decks?: ModelDecksConnection | null,
+  Decks?: ModelMatchesConnection | null,
   WinningUser?: ModelMatchesConnection | null,
   createdAt: string,
   updatedAt: string,
-  owner?: string | null,
-};
-
-export type ModelDecksConnection = {
-  __typename: "ModelDecksConnection",
-  items:  Array<Decks | null >,
-  nextToken?: string | null,
-};
-
-export type Decks = {
-  __typename: "Decks",
-  id: string,
-  deckOwnerID: string,
-  deckName: string,
-  commanderName: string,
-  commanderColors?: Array< string > | null,
-  deckType: string,
-  MatchParticipants?: ModelMatchParticipantsConnection | null,
-  link?: string | null,
-  cost?: number | null,
-  createdAt: string,
-  updatedAt: string,
-  owner?: string | null,
-};
-
-export type ModelMatchParticipantsConnection = {
-  __typename: "ModelMatchParticipantsConnection",
-  items:  Array<MatchParticipants | null >,
-  nextToken?: string | null,
 };
 
 export type ModelMatchesConnection = {
@@ -175,6 +145,12 @@ export type Matches = {
   datePlayed: string,
   createdAt: string,
   updatedAt: string,
+};
+
+export type ModelMatchParticipantsConnection = {
+  __typename: "ModelMatchParticipantsConnection",
+  items:  Array<MatchParticipants | null >,
+  nextToken?: string | null,
 };
 
 export type UpdateUsersInput = {
@@ -214,7 +190,6 @@ export type ModelDecksConditionInput = {
   not?: ModelDecksConditionInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
-  owner?: ModelStringInput | null,
 };
 
 export type ModelFloatInput = {
@@ -227,6 +202,21 @@ export type ModelFloatInput = {
   between?: Array< number | null > | null,
   attributeExists?: boolean | null,
   attributeType?: ModelAttributeTypes | null,
+};
+
+export type Decks = {
+  __typename: "Decks",
+  id: string,
+  deckOwnerID: string,
+  deckName: string,
+  commanderName: string,
+  commanderColors?: Array< string > | null,
+  deckType: string,
+  MatchParticipants?: ModelMatchParticipantsConnection | null,
+  link?: string | null,
+  cost?: number | null,
+  createdAt: string,
+  updatedAt: string,
 };
 
 export type UpdateDecksInput = {
@@ -312,7 +302,6 @@ export type ModelUsersFilterInput = {
   and?: Array< ModelUsersFilterInput | null > | null,
   or?: Array< ModelUsersFilterInput | null > | null,
   not?: ModelUsersFilterInput | null,
-  owner?: ModelStringInput | null,
 };
 
 export type ModelUsersConnection = {
@@ -335,7 +324,12 @@ export type ModelDecksFilterInput = {
   and?: Array< ModelDecksFilterInput | null > | null,
   or?: Array< ModelDecksFilterInput | null > | null,
   not?: ModelDecksFilterInput | null,
-  owner?: ModelStringInput | null,
+};
+
+export type ModelDecksConnection = {
+  __typename: "ModelDecksConnection",
+  items:  Array<Decks | null >,
+  nextToken?: string | null,
 };
 
 export type ModelMatchesFilterInput = {
@@ -402,7 +396,6 @@ export type ModelSubscriptionUsersFilterInput = {
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionUsersFilterInput | null > | null,
   or?: Array< ModelSubscriptionUsersFilterInput | null > | null,
-  owner?: ModelStringInput | null,
 };
 
 export type ModelSubscriptionDecksFilterInput = {
@@ -418,7 +411,6 @@ export type ModelSubscriptionDecksFilterInput = {
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionDecksFilterInput | null > | null,
   or?: Array< ModelSubscriptionDecksFilterInput | null > | null,
-  owner?: ModelStringInput | null,
 };
 
 export type ModelSubscriptionFloatInput = {
@@ -513,7 +505,7 @@ export type CreateUsersMutation = {
     profilePicture?: string | null,
     role?: string | null,
     Decks?:  {
-      __typename: "ModelDecksConnection",
+      __typename: "ModelMatchesConnection",
       nextToken?: string | null,
     } | null,
     WinningUser?:  {
@@ -522,7 +514,6 @@ export type CreateUsersMutation = {
     } | null,
     createdAt: string,
     updatedAt: string,
-    owner?: string | null,
   } | null,
 };
 
@@ -541,7 +532,7 @@ export type UpdateUsersMutation = {
     profilePicture?: string | null,
     role?: string | null,
     Decks?:  {
-      __typename: "ModelDecksConnection",
+      __typename: "ModelMatchesConnection",
       nextToken?: string | null,
     } | null,
     WinningUser?:  {
@@ -550,7 +541,6 @@ export type UpdateUsersMutation = {
     } | null,
     createdAt: string,
     updatedAt: string,
-    owner?: string | null,
   } | null,
 };
 
@@ -569,7 +559,7 @@ export type DeleteUsersMutation = {
     profilePicture?: string | null,
     role?: string | null,
     Decks?:  {
-      __typename: "ModelDecksConnection",
+      __typename: "ModelMatchesConnection",
       nextToken?: string | null,
     } | null,
     WinningUser?:  {
@@ -578,7 +568,6 @@ export type DeleteUsersMutation = {
     } | null,
     createdAt: string,
     updatedAt: string,
-    owner?: string | null,
   } | null,
 };
 
@@ -604,7 +593,6 @@ export type CreateDecksMutation = {
     cost?: number | null,
     createdAt: string,
     updatedAt: string,
-    owner?: string | null,
   } | null,
 };
 
@@ -630,7 +618,6 @@ export type UpdateDecksMutation = {
     cost?: number | null,
     createdAt: string,
     updatedAt: string,
-    owner?: string | null,
   } | null,
 };
 
@@ -656,7 +643,6 @@ export type DeleteDecksMutation = {
     cost?: number | null,
     createdAt: string,
     updatedAt: string,
-    owner?: string | null,
   } | null,
 };
 
@@ -822,7 +808,7 @@ export type GetUsersQuery = {
     profilePicture?: string | null,
     role?: string | null,
     Decks?:  {
-      __typename: "ModelDecksConnection",
+      __typename: "ModelMatchesConnection",
       nextToken?: string | null,
     } | null,
     WinningUser?:  {
@@ -831,7 +817,6 @@ export type GetUsersQuery = {
     } | null,
     createdAt: string,
     updatedAt: string,
-    owner?: string | null,
   } | null,
 };
 
@@ -854,7 +839,6 @@ export type ListUsersQuery = {
       role?: string | null,
       createdAt: string,
       updatedAt: string,
-      owner?: string | null,
     } | null >,
     nextToken?: string | null,
   } | null,
@@ -881,7 +865,6 @@ export type GetDecksQuery = {
     cost?: number | null,
     createdAt: string,
     updatedAt: string,
-    owner?: string | null,
   } | null,
 };
 
@@ -906,7 +889,6 @@ export type ListDecksQuery = {
       cost?: number | null,
       createdAt: string,
       updatedAt: string,
-      owner?: string | null,
     } | null >,
     nextToken?: string | null,
   } | null,
@@ -935,7 +917,6 @@ export type DecksByDeckOwnerIDQuery = {
       cost?: number | null,
       createdAt: string,
       updatedAt: string,
-      owner?: string | null,
     } | null >,
     nextToken?: string | null,
   } | null,
@@ -1069,7 +1050,7 @@ export type OnCreateUsersSubscription = {
     profilePicture?: string | null,
     role?: string | null,
     Decks?:  {
-      __typename: "ModelDecksConnection",
+      __typename: "ModelMatchesConnection",
       nextToken?: string | null,
     } | null,
     WinningUser?:  {
@@ -1078,7 +1059,6 @@ export type OnCreateUsersSubscription = {
     } | null,
     createdAt: string,
     updatedAt: string,
-    owner?: string | null,
   } | null,
 };
 
@@ -1096,7 +1076,7 @@ export type OnUpdateUsersSubscription = {
     profilePicture?: string | null,
     role?: string | null,
     Decks?:  {
-      __typename: "ModelDecksConnection",
+      __typename: "ModelMatchesConnection",
       nextToken?: string | null,
     } | null,
     WinningUser?:  {
@@ -1105,7 +1085,6 @@ export type OnUpdateUsersSubscription = {
     } | null,
     createdAt: string,
     updatedAt: string,
-    owner?: string | null,
   } | null,
 };
 
@@ -1123,7 +1102,7 @@ export type OnDeleteUsersSubscription = {
     profilePicture?: string | null,
     role?: string | null,
     Decks?:  {
-      __typename: "ModelDecksConnection",
+      __typename: "ModelMatchesConnection",
       nextToken?: string | null,
     } | null,
     WinningUser?:  {
@@ -1132,7 +1111,6 @@ export type OnDeleteUsersSubscription = {
     } | null,
     createdAt: string,
     updatedAt: string,
-    owner?: string | null,
   } | null,
 };
 
@@ -1157,7 +1135,6 @@ export type OnCreateDecksSubscription = {
     cost?: number | null,
     createdAt: string,
     updatedAt: string,
-    owner?: string | null,
   } | null,
 };
 
@@ -1182,7 +1159,6 @@ export type OnUpdateDecksSubscription = {
     cost?: number | null,
     createdAt: string,
     updatedAt: string,
-    owner?: string | null,
   } | null,
 };
 
@@ -1207,7 +1183,6 @@ export type OnDeleteDecksSubscription = {
     cost?: number | null,
     createdAt: string,
     updatedAt: string,
-    owner?: string | null,
   } | null,
 };
 

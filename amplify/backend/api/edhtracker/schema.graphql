@@ -4,18 +4,18 @@ type MatchParticipants @model @auth(rules: [{allow: public}]) {
   matchesID: ID! @index(name: "byMatches")
 }
 
-type Users @model @auth(rules: [{allow: owner, operations: [update]}, {allow: private, operations: [read]}]) {
+type Users @model @auth(rules: [{allow: private}]) {
   id: ID!
   displayName: String
   themeColor: String
   lastLoggedIn: AWSDateTime
   profilePicture: String
   role: String
-  Decks: [Decks] @hasMany(indexName: "byUsers", fields: ["id"])
+  Decks: [Matches] @hasMany(indexName: "byUsers", fields: ["id"])
   WinningUser: [Matches] @hasMany(indexName: "byUsers", fields: ["id"])
 }
 
-type Decks @model @auth(rules: [{allow: owner, operations: [create, update]}, {allow: private, operations: [read]}]) {
+type Decks @model @auth(rules: [{allow: private}]) {
   id: ID!
   deckOwnerID: ID! @index(name: "byUsers")
   deckName: String!
@@ -27,11 +27,12 @@ type Decks @model @auth(rules: [{allow: owner, operations: [create, update]}, {a
   cost: Float
 }
 
-type Matches @model @auth(rules: [{allow: private, operations: [create, read, update]}]) {
+type Matches @model @auth(rules: [{allow: private}]) {
   id: ID!
   winningUserID: ID! @index(name: "byUsers")
   matchType: String!
   isArchived: Boolean!
   MatchParticipants: [MatchParticipants] @hasMany(indexName: "byMatches", fields: ["id"])
   datePlayed: AWSDate!
-} 
+}
+ 

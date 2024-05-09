@@ -80,7 +80,6 @@ export const createUsers = /* GraphQL */ `mutation CreateUsers(
     }
     createdAt
     updatedAt
-    owner
     __typename
   }
 }
@@ -109,7 +108,6 @@ export const updateUsers = /* GraphQL */ `mutation UpdateUsers(
     }
     createdAt
     updatedAt
-    owner
     __typename
   }
 }
@@ -138,7 +136,6 @@ export const deleteUsers = /* GraphQL */ `mutation DeleteUsers(
     }
     createdAt
     updatedAt
-    owner
     __typename
   }
 }
@@ -165,7 +162,6 @@ export const createDecks = /* GraphQL */ `mutation CreateDecks(
     cost
     createdAt
     updatedAt
-    owner
     __typename
   }
 }
@@ -192,7 +188,6 @@ export const updateDecks = /* GraphQL */ `mutation UpdateDecks(
     cost
     createdAt
     updatedAt
-    owner
     __typename
   }
 }
@@ -219,7 +214,6 @@ export const deleteDecks = /* GraphQL */ `mutation DeleteDecks(
     cost
     createdAt
     updatedAt
-    owner
     __typename
   }
 }
