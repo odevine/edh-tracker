@@ -26,8 +26,6 @@ export const ThemeContext = createContext({
   mode: "dark",
 });
 
-export const useTheme = () => useContext(ThemeContext);
-
 export const ThemeProvider = (props: PropsWithChildren) => {
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
   const previousThemeMode = localStorage.getItem("theme");
@@ -216,4 +214,12 @@ export const ThemeProvider = (props: PropsWithChildren) => {
       </MuiThemeProvider>
     </ThemeContext.Provider>
   );
+};
+
+export const useTheme = () => {
+  const context = useContext(ThemeContext);
+  if (!context) {
+    throw new Error("useTheme must be used within a ThemeProvider");
+  }
+  return context;
 };
