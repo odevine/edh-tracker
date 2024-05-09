@@ -14,8 +14,14 @@ import { useUser } from "@/Context";
 import { updateUserProfile } from "@/Logic";
 
 export const UserProfileForm: React.FC = () => {
-  const { authenticatedUser, userProfile, setUserProfile } = useUser();
-  const [displayName, setDisplayName] = useState(userProfile?.displayName ?? "");
+  const {
+    authenticatedUser,
+    currentUserProfile: userProfile,
+    setCurrentUserProfile: setUserProfile,
+  } = useUser();
+  const [displayName, setDisplayName] = useState(
+    userProfile?.displayName ?? "",
+  );
   const [themeColor, setThemeColor] = useState(userProfile?.themeColor ?? "");
   const [loading, setLoading] = useState(false);
 
@@ -60,8 +66,17 @@ export const UserProfileForm: React.FC = () => {
         </Stack>
       </CardContent>
       <CardActions sx={{ justifyContent: "flex-end" }}>
-        <Button type="submit" variant="contained" disabled={loading} sx={{ width: 150, height: 40 }}>
-          {loading ? <CircularProgress size={24} sx={{ color: "inherit" }} /> : "update profile"}
+        <Button
+          type="submit"
+          variant="contained"
+          disabled={loading}
+          sx={{ width: 150, height: 40 }}
+        >
+          {loading ? (
+            <CircularProgress size={24} sx={{ color: "inherit" }} />
+          ) : (
+            "update profile"
+          )}
         </Button>
       </CardActions>
     </form>

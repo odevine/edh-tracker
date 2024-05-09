@@ -9,13 +9,14 @@ import {
 } from "react";
 
 import { Users } from "@/API";
-import { getCurrentUserProfile } from "@/Logic";
+import { getAllUsers } from "@/Logic";
 
 // Define the type for the user profile context
 interface UserProfileContextType {
-  userProfile: Users | null;
-  setUserProfile: React.Dispatch<React.SetStateAction<Users | null>>;
-  loading: boolean;
+  allUserProfiles: Users[];
+  currentUserProfile: Users | null;
+  setCurrentUserProfile: React.Dispatch<React.SetStateAction<Users | null>>;
+  usersLoading: boolean;
   authenticatedUser: AuthUser | null;
 }
 
@@ -27,28 +28,41 @@ const UserContext = createContext<UserProfileContextType | undefined>(
 // UserProvider component
 export const UserProvider = (props: PropsWithChildren) => {
   const { user } = useAuthenticator((context) => [context.user]);
-  const [userProfile, setUserProfile] = useState<Users | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [allUserProfiles, setAllUserProfiles] = useState<Users[]>([]);
+  const [currentUserProfile, setCurrentUserProfile] = useState<Users | null>(
+    null,
+  );
+  const [usersLoading, setUsersLoading] = useState<boolean>(true);
 
   useEffect(() => {
     if (user) {
-      setLoading(true);
-      getCurrentUserProfile(user)
-        .then((profile) => {
-          setUserProfile(profile);
-          setLoading(false);
+      setUsersLoading(true);
+      getAllUsers()
+        .then((userProfiles) => {
+          const allUsers = userProfiles ?? [];
+          setAllUserProfiles(allUsers);
+          const currentUser = allUsers.filter(
+            (profile) => profile.id === user.userId,
+          )[0];
+          setCurrentUserProfile(currentUser ?? null);
+          setUsersLoading(false);
         })
         .catch((error) => {
-          console.error("Failed to fetch user profile:", error);
-          setUserProfile(null);
-          setLoading(false);
+          console.error("Failed to fetch user profiles", error);
+          setUsersLoading(false);
         });
     }
   }, [user]);
 
   return (
     <UserContext.Provider
-      value={{ userProfile, setUserProfile, loading, authenticatedUser: user }}
+      value={{
+        allUserProfiles,
+        currentUserProfile,
+        setCurrentUserProfile,
+        usersLoading,
+        authenticatedUser: user,
+      }}
     >
       {props.children}
     </UserContext.Provider>

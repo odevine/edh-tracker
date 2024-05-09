@@ -5,13 +5,14 @@ import { useTheme } from "@/Context";
 type mtgColors = "W" | "B" | "U" | "R" | "G";
 
 interface GradientChipProps extends ChipProps {
-  colors: mtgColors[];
+  colors: string[];
 }
 
 export const GradientChip = (props: GradientChipProps): JSX.Element => {
   const { mode } = useTheme();
 
   const { colors, ...otherProps } = props;
+  const castColors = colors as mtgColors[]
   const mtgHexes = {
     W: "#f9faf4",
     U: "#0e68ab",
@@ -23,10 +24,6 @@ export const GradientChip = (props: GradientChipProps): JSX.Element => {
   const multiColored = colors.length >= 2;
   const multiGold = "#f3db6f";
 
-  let monoColor = mtgHexes.C;
-  if (colors.length === 1) {
-    monoColor = mtgHexes[colors[0]];
-  }
 
   let outerContrastBorder = false;
   let innerContrastBorder = false;
@@ -49,34 +46,34 @@ export const GradientChip = (props: GradientChipProps): JSX.Element => {
   let borderGradient = `linear-gradient(90deg, ${mtgHexes.C} 0%, ${mtgHexes.C} 100%)`;
   switch (colors.length) {
     case 1:
-      borderGradient = `linear-gradient(90deg, ${mtgHexes[colors[0]]} 0%, ${mtgHexes[colors[0]]} 100%)`;
+      borderGradient = `linear-gradient(90deg, ${mtgHexes[castColors[0]]} 0%, ${mtgHexes[castColors[0]]} 100%)`;
       break;
     case 2:
-      borderGradient = `linear-gradient(90deg, ${mtgHexes[colors[0]]} 33%, ${mtgHexes[colors[1]]} 67%)`;
+      borderGradient = `linear-gradient(90deg, ${mtgHexes[castColors[0]]} 33%, ${mtgHexes[castColors[1]]} 67%)`;
       break;
     case 3:
       borderGradient = `linear-gradient(90deg,
-        ${mtgHexes[colors[0]]} 20%,
-        ${mtgHexes[colors[1]]} 40%,
-        ${mtgHexes[colors[1]]} 60%,
-        ${mtgHexes[colors[2]]} 80%
+        ${mtgHexes[castColors[0]]} 20%,
+        ${mtgHexes[castColors[1]]} 40%,
+        ${mtgHexes[castColors[1]]} 60%,
+        ${mtgHexes[castColors[2]]} 80%
       )`;
       break;
     case 4:
       borderGradient = `linear-gradient(90deg,
-        ${mtgHexes[colors[0]]} 8%,
-        ${mtgHexes[colors[1]]} 33%,
-        ${mtgHexes[colors[2]]} 67%,
-        ${mtgHexes[colors[3]]} 92%
+        ${mtgHexes[castColors[0]]} 8%,
+        ${mtgHexes[castColors[1]]} 33%,
+        ${mtgHexes[castColors[2]]} 67%,
+        ${mtgHexes[castColors[3]]} 92%
       )`;
       break;
     case 5:
       borderGradient = `linear-gradient(90deg,
-        ${mtgHexes[colors[0]]} 8%,
-        ${mtgHexes[colors[1]]} 29%,
-        ${mtgHexes[colors[2]]} 50%,
-        ${mtgHexes[colors[3]]} 71%,
-        ${mtgHexes[colors[4]]} 92%
+        ${mtgHexes[castColors[0]]} 8%,
+        ${mtgHexes[castColors[1]]} 29%,
+        ${mtgHexes[castColors[2]]} 50%,
+        ${mtgHexes[castColors[3]]} 71%,
+        ${mtgHexes[castColors[4]]} 92%
       )`;
       break;
   }

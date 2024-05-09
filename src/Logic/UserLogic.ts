@@ -1,11 +1,32 @@
 import { createUsers, updateUsers } from "@/graphql/mutations";
-import { getUsers } from "@/graphql/queries";
 import { AuthUser } from "aws-amplify/auth";
 import { generateClient } from "aws-amplify/data";
 
 import { CreateUsersInput, UpdateUsersInput, Users } from "@/API";
+import { getUsers, listUsers } from "@/graphql/queries";
 
 const client = generateClient();
+
+/**
+ * Retrieves or creates a user profile based on the provided user object.
+ * @param {AuthUser} user - The authenticated user object.
+ * @returns {Promise<Users | null>} The user profile object or null in case of errors.
+ */
+export async function getAllUsers(): Promise<Users[]> {
+  try {
+    const allUsersResponse = await client.graphql({
+      query: listUsers,
+    });
+
+    if (allUsersResponse.data && allUsersResponse.data.listUsers) {
+      return allUsersResponse.data.listUsers.items as Users[];
+    }
+    return [];
+  } catch (error) {
+    console.error("Error retrieving users:", error);
+    return []; // Handle errors appropriately in your application context
+  }
+}
 
 /**
  * Retrieves or creates a user profile based on the provided user object.

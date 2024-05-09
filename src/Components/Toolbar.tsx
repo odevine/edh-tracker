@@ -42,7 +42,10 @@ export const Toolbar = () => {
   };
 
   const loggedInOptions = [
-    <MenuItem key="profile" onClick={() => handleNavigate("/profile")}>
+    <MenuItem
+      key="profile"
+      onClick={() => handleNavigate(`/profile/${user.userId}`)}
+    >
       View Profile
     </MenuItem>,
     <MenuItem key="logout" onClick={handleSignOut}>
