@@ -6,7 +6,7 @@ type MatchParticipants @model @auth(rules: [{allow: private}]) {
 
 type Users @model @auth(rules: [{allow: private}]) {
   id: ID!
-  displayName: String
+  displayName: String!
   lightThemeColor: String
   darkThemeColor: String
   profilePictureURL: String

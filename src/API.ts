@@ -95,7 +95,7 @@ export type DeleteMatchParticipantsInput = {
 
 export type CreateUsersInput = {
   id?: string | null,
-  displayName?: string | null,
+  displayName: string,
   lightThemeColor?: string | null,
   darkThemeColor?: string | null,
   profilePictureURL?: string | null,
@@ -120,7 +120,7 @@ export type ModelUsersConditionInput = {
 export type Users = {
   __typename: "Users",
   id: string,
-  displayName?: string | null,
+  displayName: string,
   lightThemeColor?: string | null,
   darkThemeColor?: string | null,
   profilePictureURL?: string | null,
@@ -505,7 +505,7 @@ export type CreateUsersMutation = {
   createUsers?:  {
     __typename: "Users",
     id: string,
-    displayName?: string | null,
+    displayName: string,
     lightThemeColor?: string | null,
     darkThemeColor?: string | null,
     profilePictureURL?: string | null,
@@ -533,7 +533,7 @@ export type UpdateUsersMutation = {
   updateUsers?:  {
     __typename: "Users",
     id: string,
-    displayName?: string | null,
+    displayName: string,
     lightThemeColor?: string | null,
     darkThemeColor?: string | null,
     profilePictureURL?: string | null,
@@ -561,7 +561,7 @@ export type DeleteUsersMutation = {
   deleteUsers?:  {
     __typename: "Users",
     id: string,
-    displayName?: string | null,
+    displayName: string,
     lightThemeColor?: string | null,
     darkThemeColor?: string | null,
     profilePictureURL?: string | null,
@@ -811,7 +811,7 @@ export type GetUsersQuery = {
   getUsers?:  {
     __typename: "Users",
     id: string,
-    displayName?: string | null,
+    displayName: string,
     lightThemeColor?: string | null,
     darkThemeColor?: string | null,
     profilePictureURL?: string | null,
@@ -842,7 +842,7 @@ export type ListUsersQuery = {
     items:  Array< {
       __typename: "Users",
       id: string,
-      displayName?: string | null,
+      displayName: string,
       lightThemeColor?: string | null,
       darkThemeColor?: string | null,
       profilePictureURL?: string | null,
@@ -1055,7 +1055,7 @@ export type OnCreateUsersSubscription = {
   onCreateUsers?:  {
     __typename: "Users",
     id: string,
-    displayName?: string | null,
+    displayName: string,
     lightThemeColor?: string | null,
     darkThemeColor?: string | null,
     profilePictureURL?: string | null,
@@ -1082,7 +1082,7 @@ export type OnUpdateUsersSubscription = {
   onUpdateUsers?:  {
     __typename: "Users",
     id: string,
-    displayName?: string | null,
+    displayName: string,
     lightThemeColor?: string | null,
     darkThemeColor?: string | null,
     profilePictureURL?: string | null,
@@ -1109,7 +1109,7 @@ export type OnDeleteUsersSubscription = {
   onDeleteUsers?:  {
     __typename: "Users",
     id: string,
-    displayName?: string | null,
+    displayName: string,
     lightThemeColor?: string | null,
     darkThemeColor?: string | null,
     profilePictureURL?: string | null,
