@@ -53,6 +53,7 @@ export const DecksPage = (): JSX.Element => {
   const { allUserProfiles } = useUser();
 
   const [filterType, setFilterType] = useState("all");
+  const [filterUser, setFilterUser] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [order, setOrder] = useState<ColumnSortOrder>("desc");
   const [orderBy, setOrderBy] = useState<keyof Decks>("updatedAt");
@@ -78,13 +79,12 @@ export const DecksPage = (): JSX.Element => {
     const lowercasedQuery = searchQuery.toLowerCase();
     return allDecks.filter(
       (deck) =>
+        (filterUser === "all" ||
+          allUserProfiles.find((profile) => profile.id === deck.deckOwnerID)
+            ?.displayName === filterUser) &&
         (filterType === "all" || deck.deckType === filterType) &&
-        (deck.id.toLowerCase().includes(lowercasedQuery) ||
-          deck.deckOwnerID.toLowerCase().includes(lowercasedQuery) ||
-          deck.deckName.toLowerCase().includes(lowercasedQuery) ||
-          deck.deckType.toLowerCase().includes(lowercasedQuery) ||
-          deck.commanderName.toLowerCase().includes(lowercasedQuery) ||
-          deck.cost?.toString().includes(lowercasedQuery)),
+        (deck.deckName.toLowerCase().includes(lowercasedQuery) ||
+          deck.commanderName.toLowerCase().includes(lowercasedQuery)),
     );
   }, [allDecks, searchQuery, filterType]);
 
@@ -97,28 +97,52 @@ export const DecksPage = (): JSX.Element => {
 
   return (
     <Paper sx={{ m: 3 }}>
-      <Toolbar sx={{ p: 2 }}>
-        <Stack direction="row" alignItems="center" sx={{ width: "100%" }}>
+      <Toolbar sx={{ p: 2, justifyContent: "space-between" }}>
+          <Stack direction="row" spacing={2}>
+            <TextField
+              select
+              size="small"
+              value={filterType}
+              label="type"
+              onChange={(e) => setFilterType(e.target.value)}
+              sx={{ minWidth: 140 }}
+            >
+              <MenuItem value="all">all types</MenuItem>
+              {[...new Set(allDecks.map((deck) => deck.deckType))].map(
+                (type) => (
+                  <MenuItem key={type} value={type}>
+                    {type}
+                  </MenuItem>
+                ),
+              )}
+            </TextField>
+            <TextField
+              select
+              size="small"
+              value={filterUser}
+              label="player"
+              onChange={(e) => setFilterUser(e.target.value)}
+              sx={{ minWidth: 140 }}
+            >
+              <MenuItem value="all">all users</MenuItem>
+              {[
+                ...new Set(
+                  allUserProfiles.map((profile) => profile.displayName),
+                ),
+              ].map((name) => (
+                <MenuItem key={name} value={name}>
+                  {name}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Stack>
           <TextField
             size="small"
-            value={filterType}
-            label="Deck Type"
-            onChange={(e) => setFilterType(e.target.value)}
-          >
-            <MenuItem value="all">All Types</MenuItem>
-            {[...new Set(allDecks.map((deck) => deck.deckType))].map((type) => (
-              <MenuItem key={type} value={type}>
-                {type}
-              </MenuItem>
-            ))}
-          </TextField>
-          <TextField
-            size="small"
-            label="Search Decks"
+            label="search decks"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            sx={{ minWidth: 140 }}
           />
-        </Stack>
       </Toolbar>
       <TableContainer>
         <Table size="small">
