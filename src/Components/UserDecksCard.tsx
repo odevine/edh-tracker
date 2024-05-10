@@ -27,7 +27,7 @@ export const UserDecksCard = (props: {
   profileId: string;
 }) => {
   const { ownUser, profileId } = props;
-  const { allDecks, decksLoading, deleteDeckById } = useDecks();
+  const { allDecks, deleteDeckById } = useDecks();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingDeckId, setEditingDeckId] = useState("");
@@ -40,7 +40,7 @@ export const UserDecksCard = (props: {
         <CardHeader title={`${ownUser ? "your" : ""} decks`} />
         <Divider />
         <CardContent sx={{ minHeight: 154, overflowX: "auto" }}>
-          {decksLoading ? (
+          {userDecks.length === 0 ? (
             <Stack justifyContent="center" alignItems="center" sx={{ pt: 3 }}>
               <Typography variant="h5">no decks found</Typography>
               <Typography variant="caption">

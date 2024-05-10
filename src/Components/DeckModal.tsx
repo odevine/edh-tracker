@@ -66,6 +66,7 @@ export const DeckModal = (props: {
       setDeckName("");
       setCommander(null);
       setCommanderSearchTerm("");
+      setCommanderOptions([]);
       setDeckFormat("");
       setDeckLink("");
       setDeckCost("");
@@ -129,7 +130,7 @@ export const DeckModal = (props: {
     }
   };
 
-  const handleCommanderChange = (searchTerm: string) => {
+  const handleCommanderSearchChange = (searchTerm: string) => {
     setCommanderSearchTerm(searchTerm);
     if (searchTerm.length >= 3) {
       commanderSearch(searchTerm);
@@ -185,6 +186,7 @@ export const DeckModal = (props: {
               onChange={(event) => setDeckName(event?.target.value)}
             />
             <Autocomplete
+              key={open ? "open" : "closed"}
               fullWidth
               freeSolo
               options={commanderOptions.map((option) => ({
@@ -192,7 +194,9 @@ export const DeckModal = (props: {
                 colors: option.colors,
               }))}
               value={commander}
-              onInputChange={(_event, value) => handleCommanderChange(value)}
+              onInputChange={(_event, value) =>
+                handleCommanderSearchChange(value)
+              }
               onChange={(_event, value) => setCommander(value as ICommander)}
               renderInput={(params) => (
                 <TextField
