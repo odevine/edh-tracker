@@ -1,0 +1,38 @@
+type MatchParticipants @model @auth(rules: [{allow: private}]) {
+  id: ID!
+  decksID: ID! @index(name: "byDecks")
+  matchesID: ID! @index(name: "byMatches")
+}
+
+type Users @model @auth(rules: [{allow: private}]) {
+  id: ID!
+  displayName: String
+  themeColor: String
+  lastLoggedIn: AWSDateTime
+  profilePicture: String
+  role: String
+  Decks: [Matches] @hasMany(indexName: "byUsers", fields: ["id"])
+  WinningUser: [Matches] @hasMany(indexName: "byUsers", fields: ["id"])
+}
+
+type Decks @model @auth(rules: [{allow: private}]) {
+  id: ID!
+  deckOwnerID: ID! @index(name: "byUsers")
+  deckName: String!
+  commanderName: String!
+  commanderColors: [String!]
+  deckType: String!
+  MatchParticipants: [MatchParticipants] @hasMany(indexName: "byDecks", fields: ["id"])
+  link: String
+  cost: Float
+}
+
+type Matches @model @auth(rules: [{allow: private}]) {
+  id: ID!
+  winningUserID: ID! @index(name: "byUsers")
+  matchType: String!
+  isArchived: Boolean!
+  MatchParticipants: [MatchParticipants] @hasMany(indexName: "byMatches", fields: ["id"])
+  datePlayed: AWSDate!
+}
+ 

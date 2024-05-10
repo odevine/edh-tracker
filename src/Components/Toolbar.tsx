@@ -1,16 +1,17 @@
-import { useState } from "react";
-import { navigate } from "raviger";
+import { useAuthenticator } from "@aws-amplify/ui-react";
+import { AccountCircle, Login } from "@mui/icons-material";
 import {
+  AppBar,
   Box,
   IconButton,
-  AppBar,
   Menu,
   MenuItem,
+  MenuItemProps,
   Toolbar as MuiToolbar,
-  Typography,
+  Stack,
 } from "@mui/material";
-import { AccountCircle, Login } from "@mui/icons-material";
-import { useAuthenticator } from "@aws-amplify/ui-react";
+import { navigate } from "raviger";
+import { useState } from "react";
 
 import { ThemeToggle } from "@/Components";
 
@@ -29,24 +30,31 @@ export const Toolbar = () => {
     setMenuAnchor(null);
   };
 
-  const handleSignIn = () => {
-    navigate("/login");
+  const handleNavigate = (path: string) => {
+    navigate(path);
     handleUserMenuClose();
   };
 
   const handleSignOut = async () => {
+    navigate("/");
     signOut();
     handleUserMenuClose();
   };
 
   const loggedInOptions = [
+    <MenuItem
+      key="profile"
+      onClick={() => handleNavigate(`/profile/${user.userId}`)}
+    >
+      View Profile
+    </MenuItem>,
     <MenuItem key="logout" onClick={handleSignOut}>
       Log Out
     </MenuItem>,
   ];
 
   const loggedOutOptions = [
-    <MenuItem key="login" onClick={handleSignIn}>
+    <MenuItem key="login" onClick={() => handleNavigate("/login")}>
       Log In
     </MenuItem>,
   ];
@@ -58,7 +66,6 @@ export const Toolbar = () => {
         vertical: "bottom",
         horizontal: "right",
       }}
-      id={"user-menu"}
       keepMounted
       transformOrigin={{
         vertical: "top",
@@ -71,22 +78,32 @@ export const Toolbar = () => {
     </Menu>
   );
 
+  const CustomMenuItem = (props: MenuItemProps) => (
+    <MenuItem sx={{ borderRadius: 2 }} {...props} />
+  );
+
   return (
     <AppBar position="static">
       <MuiToolbar>
-        <Typography
-          variant="h6"
-          noWrap
-          component="div"
-          sx={{ display: { xs: "none", sm: "block" } }}
-        >
-          EDH Tracker
-        </Typography>
+        <Stack direction="row" spacing={1}>
+          <CustomMenuItem onClick={() => navigate("/")}>
+            overview
+          </CustomMenuItem>
+          <CustomMenuItem onClick={() => navigate("/decks")} disabled={!user}>
+            decks
+          </CustomMenuItem>
+          <CustomMenuItem onClick={() => navigate("/matches")} disabled={!user}>
+            matches
+          </CustomMenuItem>
+        </Stack>
+
         <Box flexGrow={1} />
-        <ThemeToggle />
-        <IconButton onClick={handleUserMenuOpen}>
-          {user ? <AccountCircle /> : <Login />}
-        </IconButton>
+        <Stack direction="row" spacing={1}>
+          <ThemeToggle />
+          <IconButton onClick={handleUserMenuOpen}>
+            {user ? <AccountCircle /> : <Login />}
+          </IconButton>
+        </Stack>
       </MuiToolbar>
       {renderUserMenu}
     </AppBar>

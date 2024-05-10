@@ -1,0 +1,12 @@
+{
+  "AppSyncApiName": "edhtracker",
+  "DynamoDBBillingMode": "PAY_PER_REQUEST",
+  "DynamoDBEnableServerSideEncryption": false,
+  "AuthCognitoUserPoolId": {
+    "Fn::GetAtt": [
+      "authedhtracker7b29e6af",
+      "Outputs.UserPoolId"
+    ]
+  },
+  "AuthModeLastUpdated": "2024-05-09T21:36:51.309Z"
+}

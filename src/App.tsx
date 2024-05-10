@@ -1,29 +1,41 @@
-import { useRoutes, Redirect } from "raviger";
-import { Amplify } from "aws-amplify";
 import { Authenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
+import { Box, Stack, Typography } from "@mui/material";
+import { Amplify } from "aws-amplify";
+import { Redirect, useRoutes } from "raviger";
 
-import config from "./aws-exports";
-import { Home, Protected } from "@/Pages";
 import { Toolbar } from "@/Components";
+import { Decks, Home, Matches, Profile } from "@/Pages";
+import config from "./aws-exports";
 
 Amplify.configure(config);
+
+const NotFoundPage = () => (
+  <Stack sx={{ height: "100%" }} justifyContent="center" alignItems="center">
+    <Typography variant="h1">404</Typography>
+    <Typography variant="h5">couldn't find what you're looking for</Typography>
+  </Stack>
+);
 
 const baseRoutes = {
   "/": () => <Home />,
   "/*": () => <ProtectedRoutes />,
+  "*": () => <NotFoundPage />,
 };
 
 const protectedRoutes = {
   "/login": () => <Redirect to="/" />,
-  "/protected": () => <Protected />,
+  "/decks": () => <Decks />,
+  "/matches": () => <Matches />,
+  "/profile/:profileId": (routeParams: { profileId: string }) => (
+    <Profile profileId={routeParams.profileId} />
+  ),
+  "*": () => <NotFoundPage />,
 };
 
-const ProtectedRoutes = () => {
-  const routeResult = useRoutes(protectedRoutes);
-
-  return <Authenticator hideSignUp>{routeResult}</Authenticator>;
-};
+const ProtectedRoutes = () => (
+  <Authenticator hideSignUp>{useRoutes(protectedRoutes)}</Authenticator>
+);
 
 export const App = () => {
   const routeResult = useRoutes(baseRoutes);
@@ -31,7 +43,15 @@ export const App = () => {
   return (
     <>
       <Toolbar />
-      {routeResult || <h1>404 Not Found</h1>}
+      <Box
+        sx={{
+          height: "calc(100% - 64px)",
+          overflowY: "auto",
+          scrollbarGutter: 8,
+        }}
+      >
+        {routeResult || <h1>404 Not Found</h1>}
+      </Box>
     </>
   );
 };

@@ -1,2 +1,4 @@
+export * from "./Decks";
 export * from "./Home";
-export * from "./Protected";
+export * from "./Matches";
+export * from "./Profile";

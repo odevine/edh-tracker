@@ -1,33 +1,44 @@
 import {
+  Theme as AmpTheme,
+  ThemeProvider as AmpThemeProvider,
+} from "@aws-amplify/ui-react";
+import "@fontsource-variable/noto-sans-mono";
+import {
+  CssBaseline,
+  GlobalStyles,
+  ThemeProvider as MuiThemeProvider,
+  PaletteColorOptions,
+  PaletteMode,
+  createTheme,
+  useMediaQuery,
+} from "@mui/material";
+import {
+  PropsWithChildren,
+  createContext,
+  useContext,
   useEffect,
   useMemo,
   useState,
-  PropsWithChildren,
-  useContext,
-  createContext,
 } from "react";
-import {
-  createTheme,
-  ThemeProvider as MuiThemeProvider,
-  GlobalStyles,
-  useMediaQuery,
-  CssBaseline,
-  PaletteMode,
-  PaletteColorOptions,
-} from "@mui/material";
-import "@fontsource/noto-mono";
 
 export const ThemeContext = createContext({
   toggleTheme: () => {},
   mode: "dark",
 });
 
-export const useTheme = () => useContext(ThemeContext);
-
 export const ThemeProvider = (props: PropsWithChildren) => {
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
-  const defaultTheme =
-    localStorage.getItem("theme") ?? prefersDarkMode ? "dark" : "light";
+  const previousThemeMode = localStorage.getItem("theme");
+  let defaultTheme = "dark";
+
+  if (!prefersDarkMode) {
+    defaultTheme = "light";
+  }
+
+  if (previousThemeMode) {
+    defaultTheme = previousThemeMode;
+  }
+
   const [mode, setMode] = useState<PaletteMode>(defaultTheme as PaletteMode);
 
   useEffect(() => {
@@ -45,11 +56,14 @@ export const ThemeProvider = (props: PropsWithChildren) => {
     [mode],
   );
 
-  const theme = useMemo(
+  const muiTheme = useMemo(
     () =>
       createTheme({
         typography: {
-          fontFamily: "Noto Mono, monospace",
+          fontFamily: "Noto Sans Mono Variable, monospace, sans-serif",
+          button: {
+            textTransform: "none",
+          },
         },
         palette: {
           mode,
@@ -91,32 +105,24 @@ export const ThemeProvider = (props: PropsWithChildren) => {
           MuiCssBaseline: {
             styleOverrides: {
               html: {
-                "&::-webkit-scrollbar, & ::-webkit-scrollbar": {
-                  backgroundColor: "#403e41",
-                  width: 12,
-                  height: 12,
-                  borderRadius: 6,
+                "*::-webkit-scrollbar": {
+                  width: 8,
                 },
-                "&::-webkit-scrollbar-thumb, &::-webkit-scrollbar-thumb": {
-                  borderRadius: 6,
-                  backgroundColor: "#403e41",
+                "*::-webkit-scrollbar-track": {
+                  backgroundColor: mode === "light" ? "#ccc9c3" : "#2d2a2e",
+                },
+                "*::-webkit-scrollbar-thumb": {
+                  backgroundColor: mode === "light" ? "#999692" : "#524c54",
                   minHeight: 24,
-                  border: "2px solid #403e41",
                 },
-                "&::-webkit-scrollbar-thumb:focus, & ::-webkit-scrollbar-thumb:focus":
-                  {
-                    backgroundColor: "#2d2a2e",
-                  },
-                "&::-webkit-scrollbar-thumb:active, &::-webkit-scrollbar-thumb:active":
-                  {
-                    backgroundColor: "#2d2a2e",
-                  },
-                "&::-webkit-scrollbar-thumb:hover, & ::-webkit-scrollbar-thumb:hover":
-                  {
-                    backgroundColor: "#2d2a2e",
-                  },
-                "&::-webkit-scrollbar-corner, &::-webkit-scrollbar-corner": {
-                  backgroundColor: "#403e41",
+                "*::-webkit-scrollbar-thumb:focus": {
+                  backgroundColor: mode === "light" ? "#656461" : "#776e7a",
+                },
+                "*::-webkit-scrollbar-thumb:active": {
+                  backgroundColor: mode === "light" ? "#656461" : "#776e7a",
+                },
+                "*::-webkit-scrollbar-thumb:hover": {
+                  backgroundColor: mode === "light" ? "#656461" : "#776e7a",
                 },
               },
             },
@@ -126,9 +132,69 @@ export const ThemeProvider = (props: PropsWithChildren) => {
     [mode],
   );
 
+  const ampTheme = useMemo(
+    (): AmpTheme => ({
+      name: "heheTheme",
+      tokens: {
+        colors: {
+          ...(mode === "light"
+            ? {
+                font: {
+                  primary: "#2c292d",
+                  secondary: "#514b53",
+                  focus: "#fc8d57",
+                  active: "#fc8d57",
+                },
+                background: {
+                  primary: "#fffcf4",
+                },
+                border: {
+                  primary: "#514b53",
+                  focus: "#2c292d",
+                },
+                primary: {
+                  10: "#2c292d",
+                  20: "#514b53",
+                  80: "#fc8d57",
+                  90: "#ff9958",
+                },
+              }
+            : {
+                font: {
+                  primary: "#fafbfb",
+                  secondary: "#c7c7c7",
+                  focus: "#ab9df2",
+                },
+                background: {
+                  primary: "#2d2a2e",
+                },
+                border: {
+                  primary: "#c7c7c7",
+                  focus: "#fafbfb",
+                },
+                primary: {
+                  10: "#fafbfb",
+                  20: "#c7c7c7",
+                  80: "#ab9df2",
+                  90: "#746ba5",
+                },
+              }),
+        },
+        components: {
+          authenticator: {
+            modal: {
+              height: { value: "calc(100vh - 64px)" },
+            },
+          },
+        },
+      },
+    }),
+    [mode],
+  );
+
   return (
     <ThemeContext.Provider value={colorMode}>
-      <MuiThemeProvider theme={theme}>
+      <MuiThemeProvider theme={muiTheme}>
         <CssBaseline />
         <GlobalStyles
           styles={{
@@ -143,8 +209,17 @@ export const ThemeProvider = (props: PropsWithChildren) => {
             },
           }}
         />
-        {props.children}
+        {/* {props.children} */}
+        <AmpThemeProvider theme={ampTheme}>{props.children}</AmpThemeProvider>
       </MuiThemeProvider>
     </ThemeContext.Provider>
   );
+};
+
+export const useTheme = () => {
+  const context = useContext(ThemeContext);
+  if (!context) {
+    throw new Error("useTheme must be used within a ThemeProvider");
+  }
+  return context;
 };
