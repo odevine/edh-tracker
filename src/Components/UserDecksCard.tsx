@@ -19,22 +19,28 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 
-import { GradientChip, NewDeckModal } from "@/Components";
+import { DeckModal, GradientChip } from "@/Components";
 import { useDecks } from "@/Context";
-import { deleteDeck } from "@/Logic";
 
-export const UserDecksCard = (props: { ownUser: boolean }) => {
-  const { ownUser } = props;
-  const { userDecks, decksLoading } = useDecks();
+export const UserDecksCard = (props: {
+  ownUser: boolean;
+  profileId: string;
+}) => {
+  const { ownUser, profileId } = props;
+  const { allDecks, deleteDeckById } = useDecks();
+
   const [modalOpen, setModalOpen] = useState(false);
+  const [editingDeckId, setEditingDeckId] = useState("");
+
+  const userDecks = allDecks.filter((deck) => deck.deckOwnerID === profileId);
 
   return (
     <>
       <Card>
         <CardHeader title={`${ownUser ? "your" : ""} decks`} />
         <Divider />
-        <CardContent sx={{ minHeight: 154 }}>
-          {decksLoading ? (
+        <CardContent sx={{ minHeight: 154, overflowX: "auto" }}>
+          {userDecks.length === 0 ? (
             <Stack justifyContent="center" alignItems="center" sx={{ pt: 3 }}>
               <Typography variant="h5">no decks found</Typography>
               <Typography variant="caption">
@@ -79,20 +85,28 @@ export const UserDecksCard = (props: { ownUser: boolean }) => {
                     </TableCell>
                     {ownUser && (
                       <TableCell align="right">
-                        <Tooltip arrow title="edit deck">
-                          <IconButton size="small">
-                            <Edit fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                        {/* TODO: deleting decks should not be an option if it appears as any match participant */}
-                        <Tooltip arrow title="delete deck">
-                          <IconButton
-                            size="small"
-                            onClick={() => deleteDeck(deck.id)}
-                          >
-                            <Delete fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
+                        <Stack direction="row">
+                          <Tooltip arrow title="edit deck">
+                            <IconButton
+                              size="small"
+                              onClick={() => {
+                                setEditingDeckId(deck.id);
+                                setModalOpen(true);
+                              }}
+                            >
+                              <Edit fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          {/* TODO: deleting decks should not be an option if it appears as any match participant */}
+                          <Tooltip arrow title="delete deck">
+                            <IconButton
+                              size="small"
+                              onClick={() => deleteDeckById(deck.id)}
+                            >
+                              <Delete fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </Stack>
                       </TableCell>
                     )}
                   </TableRow>
@@ -109,7 +123,14 @@ export const UserDecksCard = (props: { ownUser: boolean }) => {
           </CardActions>
         )}
       </Card>
-      <NewDeckModal open={modalOpen} onClose={() => setModalOpen(false)} />
+      <DeckModal
+        editingDeckId={editingDeckId}
+        open={modalOpen}
+        onClose={() => {
+          setEditingDeckId("");
+          setModalOpen(false);
+        }}
+      />
     </>
   );
 };

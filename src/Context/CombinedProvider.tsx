@@ -4,10 +4,10 @@ import { DecksProvider, ThemeProvider, UserProvider } from "@/Context";
 
 export const CombinedProvider = (props: PropsWithChildren) => {
   return (
-    <ThemeProvider>
-      <UserProvider>
+    <UserProvider>
+      <ThemeProvider>
         <DecksProvider>{props.children}</DecksProvider>
-      </UserProvider>
-    </ThemeProvider>
+      </ThemeProvider>
+    </UserProvider>
   );
 };

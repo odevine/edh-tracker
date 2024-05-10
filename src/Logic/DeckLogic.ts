@@ -1,7 +1,7 @@
 import { AuthUser } from "aws-amplify/auth";
 import { generateClient } from "aws-amplify/data";
 import axios from "axios";
-import { debounce } from "radash";
+import { debounce } from "lodash";
 import { useEffect, useRef, useState } from "react";
 
 import {
@@ -9,13 +9,14 @@ import {
   Decks,
   DecksByDeckOwnerIDQueryVariables,
   DeleteDecksInput,
+  UpdateDecksInput,
 } from "@/API";
-import { createDecks, deleteDecks } from "@/graphql/mutations";
+import { createDecks, deleteDecks, updateDecks } from "@/graphql/mutations";
 import { decksByDeckOwnerID, listDecks } from "@/graphql/queries";
 
 const client = generateClient();
 
-export async function getAllDecks(): Promise<Decks[] | null> {
+export const getAllDecks = async (): Promise<Decks[] | null> => {
   try {
     const allDecksResponse = await client.graphql({ query: listDecks });
 
@@ -27,9 +28,11 @@ export async function getAllDecks(): Promise<Decks[] | null> {
     console.error("Error fetching decks:", error);
     return null;
   }
-}
+};
 
-export async function getDecksByOwner(user: AuthUser): Promise<Decks[] | null> {
+export const getDecksByOwner = async (
+  user: AuthUser,
+): Promise<Decks[] | null> => {
   // Return early if user object is not valid
   if (!user || !user.userId) {
     console.error("Invalid or missing user object");
@@ -54,11 +57,11 @@ export async function getDecksByOwner(user: AuthUser): Promise<Decks[] | null> {
     console.error("Error fetching decks by owner ID:", error);
     return null;
   }
-}
+};
 
-export async function createDeck(
+export const createDeck = async (
   newDeck: CreateDecksInput,
-): Promise<Decks | null> {
+): Promise<Decks | null> => {
   try {
     const newDeckResponse = await client.graphql({
       query: createDecks,
@@ -75,14 +78,34 @@ export async function createDeck(
     console.error("Error creating new deck:", error);
     return null;
   }
-}
+};
+
+export const updateDeck = async (
+  updatedDeck: UpdateDecksInput,
+): Promise<Decks | null> => {
+  try {
+    const updatedDeckResponse = await client.graphql({
+      query: updateDecks,
+      variables: { input: updatedDeck },
+    });
+    if (updatedDeckResponse.data && updatedDeckResponse.data.updateDecks) {
+      return updatedDeckResponse.data.updateDecks as Decks;
+    } else {
+      console.log(`No deck found for ${updatedDeck.id}, or update failed`);
+      return null;
+    }
+  } catch (error) {
+    console.error("Error updating deck:", error);
+    return null;
+  }
+};
 
 /**
  * Deletes a deck by its ID.
  * @param {string} deckId - The ID of the deck to delete.
  * @returns {Promise<boolean>} - True if the operation was successful, false otherwise.
  */
-export async function deleteDeck(deckId: string): Promise<boolean> {
+export const deleteDeck = async (deckId: string): Promise<boolean> => {
   const input: DeleteDecksInput = {
     id: deckId,
   };
@@ -109,14 +132,15 @@ export async function deleteDeck(deckId: string): Promise<boolean> {
     console.error("Error deleting deck:", error);
     return false;
   }
-}
+};
 
 export const useCommanderSearch = () => {
   const [commanderSearchTerm, setCommanderSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
 
+  // Initialize debouncedSearch with Lodash's debounce
   const debouncedSearch = useRef(
-    debounce({ delay: 300 }, async (searchTerm: string) => {
+    debounce(async (searchTerm: string) => {
       if (searchTerm.length >= 3) {
         try {
           const response = await axios.get(
@@ -127,19 +151,19 @@ export const useCommanderSearch = () => {
           console.error("Scryfall search failed", err);
         }
       }
-    }), // Debouncing period in milliseconds
-  );
+    }, 300),
+  ).current;
 
   useEffect(() => {
-    // Cleanup function to cancel the debounce on component unmount
+    // This will make sure the effect cleanup only runs once when the component unmounts.
     return () => {
-      debouncedSearch.current.cancel();
+      debouncedSearch.cancel();
     };
-  }, []);
+  }, [debouncedSearch]);
 
   const commanderSearch = (searchTerm: string) => {
     setCommanderSearchTerm(searchTerm);
-    debouncedSearch.current(searchTerm);
+    debouncedSearch(searchTerm);
   };
 
   return {

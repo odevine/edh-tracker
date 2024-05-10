@@ -11,26 +11,68 @@ import {
 import { useEffect, useState } from "react";
 
 import { useDecks, useUser } from "@/Context";
-import { createDeck, useCommanderSearch } from "@/Logic";
+import { useCommanderSearch } from "@/Logic";
 
 interface ICommander {
   label: string;
-  id: string;
   colors: string[];
   [key: string]: any;
 }
 
-export const NewDeckModal = (props: { open: boolean; onClose: () => void }) => {
+const colorOrder = ["W", "B", "U", "R", "G"];
+const sortColors = (arr: string[]) => {
+  return arr.sort((a, b) => {
+    return colorOrder.indexOf(a) - colorOrder.indexOf(b);
+  });
+};
+
+export const DeckModal = (props: {
+  open: boolean;
+  onClose: () => void;
+  editingDeckId?: string;
+}) => {
+  const { open, onClose, editingDeckId } = props;
   const { authenticatedUser } = useUser();
-  const { allDecks } = useDecks();
+  const { allDecks, createNewDeck, updateExistingDeck } = useDecks();
+
+  // Find the editing deck based on the editingDeckId
+  const editingDeck = allDecks.find((deck) => deck.id === editingDeckId);
+
+  // State for the deck fields
   const [deckName, setDeckName] = useState("");
-  const [commander, setCommander] = useState<null | ICommander>(null);
+  const [commander, setCommander] = useState<ICommander | null>(null);
   const [commanderSearchTerm, setCommanderSearchTerm] = useState("");
   const [commanderOptions, setCommanderOptions] = useState<ICommander[]>([]);
   const [deckFormat, setDeckFormat] = useState("");
   const [deckLink, setDeckLink] = useState("");
   const [deckCost, setDeckCost] = useState("");
   const [errors, setErrors] = useState<string[]>([]);
+
+  // Update state when editingDeck changes
+  useEffect(() => {
+    if (editingDeck) {
+      const existingCommander = {
+        label: editingDeck.commanderName,
+        colors: editingDeck.commanderColors ?? [],
+      };
+      setDeckName(editingDeck.deckName);
+      setCommander(existingCommander);
+      setCommanderSearchTerm(editingDeck.commanderName);
+      setDeckFormat(editingDeck.deckType);
+      setDeckLink(editingDeck?.link ?? "");
+      setDeckCost(String(editingDeck?.cost) ?? "");
+    } else {
+      // Reset state if no deck is found (or if editingDeckId is null)
+      setDeckName("");
+      setCommander(null);
+      setCommanderSearchTerm("");
+      setCommanderOptions([]);
+      setDeckFormat("");
+      setDeckLink("");
+      setDeckCost("");
+      setErrors([]);
+    }
+  }, [editingDeck]);
 
   const { commanderSearch, searchResults } = useCommanderSearch();
   useEffect(() => {
@@ -42,7 +84,19 @@ export const NewDeckModal = (props: { open: boolean; onClose: () => void }) => {
     if (deckName === "") {
       newErrors.push("Deck name is required.");
     }
-    if (allDecks.some((deck) => deck.deckName === deckName)) {
+    // Check for uniqueness but exclude the current editing deck (if it exists)
+    if (
+      editingDeckId &&
+      allDecks.some(
+        (deck) => deck.deckName === deckName && deck.id !== editingDeckId,
+      )
+    ) {
+      newErrors.push("Deck name must be unique.");
+    } else if (
+      !editingDeckId &&
+      allDecks.some((deck) => deck.deckName === deckName)
+    ) {
+      // If there's no editingDeckId, just check for any match
       newErrors.push("Deck name must be unique.");
     }
     if (!commander) {
@@ -57,20 +111,26 @@ export const NewDeckModal = (props: { open: boolean; onClose: () => void }) => {
 
   const handleSubmit = () => {
     if (authenticatedUser && validateDeckDetails()) {
-      createDeck({
+      const deckInput = {
         deckOwnerID: authenticatedUser.userId,
         deckName,
         commanderName: commander?.label ?? "",
-        commanderColors: commander?.colors,
+        commanderColors: sortColors(commander?.colors ?? []),
         deckType: deckFormat,
         cost: deckCost !== "" ? Number(deckCost) : undefined,
         link: deckLink !== "" ? deckLink : undefined,
-      });
-      props.onClose();
+      };
+
+      if (editingDeck) {
+        updateExistingDeck({ ...deckInput, id: editingDeck.id });
+      } else {
+        createNewDeck(deckInput);
+      }
+      onClose();
     }
   };
 
-  const handleCommanderChange = (searchTerm: string) => {
+  const handleCommanderSearchChange = (searchTerm: string) => {
     setCommanderSearchTerm(searchTerm);
     if (searchTerm.length >= 3) {
       commanderSearch(searchTerm);
@@ -93,7 +153,7 @@ export const NewDeckModal = (props: { open: boolean; onClose: () => void }) => {
   };
 
   return (
-    <Modal open={props.open} onClose={props.onClose}>
+    <Modal open={open} onClose={onClose}>
       <Box
         sx={{
           position: "absolute",
@@ -114,7 +174,7 @@ export const NewDeckModal = (props: { open: boolean; onClose: () => void }) => {
         }}
       >
         <Typography variant="h4" sx={{ mb: 2 }}>
-          New Deck
+          {editingDeck ? "update" : "new"} deck
         </Typography>
         <Stack height={"100%"} justifyContent="space-between" spacing={3}>
           <Stack spacing={2}>
@@ -126,14 +186,17 @@ export const NewDeckModal = (props: { open: boolean; onClose: () => void }) => {
               onChange={(event) => setDeckName(event?.target.value)}
             />
             <Autocomplete
+              key={open ? "open" : "closed"}
               fullWidth
               freeSolo
               options={commanderOptions.map((option) => ({
                 label: option.name,
-                id: option.id,
                 colors: option.colors,
               }))}
-              onInputChange={(_event, value) => handleCommanderChange(value)}
+              value={commander}
+              onInputChange={(_event, value) =>
+                handleCommanderSearchChange(value)
+              }
               onChange={(_event, value) => setCommander(value as ICommander)}
               renderInput={(params) => (
                 <TextField
@@ -185,7 +248,7 @@ export const NewDeckModal = (props: { open: boolean; onClose: () => void }) => {
               variant="contained"
               sx={{ width: 150, height: 40 }}
             >
-              add deck
+              {editingDeck ? "update" : "add"} deck
             </Button>
           </Stack>
         </Stack>

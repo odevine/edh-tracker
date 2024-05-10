@@ -53,7 +53,7 @@ export async function getCurrentUserProfile(
       console.log(
         `No user profile found for ${user.userId}, creating new user profile`,
       );
-      return await createUserProfile(user);
+      return await createUser(user);
     }
   } catch (error) {
     console.error("Error retrieving or creating user information:", error);
@@ -66,7 +66,7 @@ export async function getCurrentUserProfile(
  * @param {AuthUser} user - The authenticated user object.
  * @returns {Promise<Users>} The newly created user profile.
  */
-async function createUserProfile(user: AuthUser): Promise<Users> {
+export async function createUser(user: AuthUser): Promise<Users> {
   const newUser: CreateUsersInput = {
     id: user.userId,
     displayName: user.username, // Assuming username exists
@@ -99,15 +99,9 @@ async function createUserProfile(user: AuthUser): Promise<Users> {
  * @param {UpdateUsersInput} updateData - The data to update the user profile with.
  * @returns {Promise<Users | null>} The updated user profile or null in case of errors.
  */
-export async function updateUserProfile(
-  userId: string,
+export async function updateUser(
   updateData: UpdateUsersInput,
 ): Promise<Users | null> {
-  if (!userId) {
-    console.error("Invalid or missing user ID");
-    return null; // Return early if the user ID is not valid
-  }
-
   try {
     const updatedUserProfileResponse = await client.graphql({
       query: updateUsers,
@@ -120,7 +114,9 @@ export async function updateUserProfile(
     ) {
       return updatedUserProfileResponse.data.updateUsers as Users;
     } else {
-      console.log(`No user profile found for ${userId}, or update failed`);
+      console.log(
+        `No user profile found for ${updateData.id}, or update failed`,
+      );
       return null;
     }
   } catch (error) {

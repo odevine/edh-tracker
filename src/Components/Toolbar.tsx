@@ -1,9 +1,9 @@
 import { useAuthenticator } from "@aws-amplify/ui-react";
-import { AccountCircle, Login } from "@mui/icons-material";
+import { Login } from "@mui/icons-material";
 import {
   AppBar,
+  Avatar,
   Box,
-  IconButton,
   Menu,
   MenuItem,
   MenuItemProps,
@@ -14,9 +14,11 @@ import { navigate } from "raviger";
 import { useState } from "react";
 
 import { ThemeToggle } from "@/Components";
+import { useUser } from "@/Context";
 
 export const Toolbar = () => {
-  const { user, signOut } = useAuthenticator((context) => [context.user]);
+  const { signOut } = useAuthenticator((context) => [context.user]);
+  const { authenticatedUser, currentUserProfile } = useUser();
 
   const [userMenuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
 
@@ -44,7 +46,7 @@ export const Toolbar = () => {
   const loggedInOptions = [
     <MenuItem
       key="profile"
-      onClick={() => handleNavigate(`/profile/${user.userId}`)}
+      onClick={() => handleNavigate(`/profile/${authenticatedUser?.userId}`)}
     >
       View Profile
     </MenuItem>,
@@ -74,7 +76,7 @@ export const Toolbar = () => {
       open={isUserMenuOpen}
       onClose={handleUserMenuClose}
     >
-      {user ? loggedInOptions : loggedOutOptions}
+      {authenticatedUser ? loggedInOptions : loggedOutOptions}
     </Menu>
   );
 
@@ -89,10 +91,16 @@ export const Toolbar = () => {
           <CustomMenuItem onClick={() => navigate("/")}>
             overview
           </CustomMenuItem>
-          <CustomMenuItem onClick={() => navigate("/decks")} disabled={!user}>
+          <CustomMenuItem
+            onClick={() => navigate("/decks")}
+            disabled={!authenticatedUser}
+          >
             decks
           </CustomMenuItem>
-          <CustomMenuItem onClick={() => navigate("/matches")} disabled={!user}>
+          <CustomMenuItem
+            onClick={() => navigate("/matches")}
+            disabled={!authenticatedUser}
+          >
             matches
           </CustomMenuItem>
         </Stack>
@@ -100,9 +108,18 @@ export const Toolbar = () => {
         <Box flexGrow={1} />
         <Stack direction="row" spacing={1}>
           <ThemeToggle />
-          <IconButton onClick={handleUserMenuOpen}>
-            {user ? <AccountCircle /> : <Login />}
-          </IconButton>
+          <Avatar
+            onClick={handleUserMenuOpen}
+            src={currentUserProfile?.profilePictureURL ?? ""}
+            sx={{
+              backgroundColor: (theme) => theme.palette.primary.main,
+              cursor: "pointer",
+            }}
+          >
+            {!authenticatedUser && <Login sx={{
+              color: (theme) => theme.palette.text.primary,
+            }} />}
+          </Avatar>
         </Stack>
       </MuiToolbar>
       {renderUserMenu}
