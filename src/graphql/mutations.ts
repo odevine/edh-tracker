@@ -66,9 +66,9 @@ export const createUsers = /* GraphQL */ `mutation CreateUsers(
   createUsers(input: $input, condition: $condition) {
     id
     displayName
-    themeColor
-    lastLoggedIn
-    profilePicture
+    lightThemeColor
+    darkThemeColor
+    profilePictureURL
     role
     Decks {
       nextToken
@@ -78,6 +78,7 @@ export const createUsers = /* GraphQL */ `mutation CreateUsers(
       nextToken
       __typename
     }
+    lastLoggedIn
     createdAt
     updatedAt
     __typename
@@ -94,9 +95,9 @@ export const updateUsers = /* GraphQL */ `mutation UpdateUsers(
   updateUsers(input: $input, condition: $condition) {
     id
     displayName
-    themeColor
-    lastLoggedIn
-    profilePicture
+    lightThemeColor
+    darkThemeColor
+    profilePictureURL
     role
     Decks {
       nextToken
@@ -106,6 +107,7 @@ export const updateUsers = /* GraphQL */ `mutation UpdateUsers(
       nextToken
       __typename
     }
+    lastLoggedIn
     createdAt
     updatedAt
     __typename
@@ -122,9 +124,9 @@ export const deleteUsers = /* GraphQL */ `mutation DeleteUsers(
   deleteUsers(input: $input, condition: $condition) {
     id
     displayName
-    themeColor
-    lastLoggedIn
-    profilePicture
+    lightThemeColor
+    darkThemeColor
+    profilePictureURL
     role
     Decks {
       nextToken
@@ -134,6 +136,7 @@ export const deleteUsers = /* GraphQL */ `mutation DeleteUsers(
       nextToken
       __typename
     }
+    lastLoggedIn
     createdAt
     updatedAt
     __typename

@@ -60,9 +60,9 @@ export const onCreateUsers = /* GraphQL */ `subscription OnCreateUsers($filter: 
   onCreateUsers(filter: $filter) {
     id
     displayName
-    themeColor
-    lastLoggedIn
-    profilePicture
+    lightThemeColor
+    darkThemeColor
+    profilePictureURL
     role
     Decks {
       nextToken
@@ -72,6 +72,7 @@ export const onCreateUsers = /* GraphQL */ `subscription OnCreateUsers($filter: 
       nextToken
       __typename
     }
+    lastLoggedIn
     createdAt
     updatedAt
     __typename
@@ -85,9 +86,9 @@ export const onUpdateUsers = /* GraphQL */ `subscription OnUpdateUsers($filter: 
   onUpdateUsers(filter: $filter) {
     id
     displayName
-    themeColor
-    lastLoggedIn
-    profilePicture
+    lightThemeColor
+    darkThemeColor
+    profilePictureURL
     role
     Decks {
       nextToken
@@ -97,6 +98,7 @@ export const onUpdateUsers = /* GraphQL */ `subscription OnUpdateUsers($filter: 
       nextToken
       __typename
     }
+    lastLoggedIn
     createdAt
     updatedAt
     __typename
@@ -110,9 +112,9 @@ export const onDeleteUsers = /* GraphQL */ `subscription OnDeleteUsers($filter: 
   onDeleteUsers(filter: $filter) {
     id
     displayName
-    themeColor
-    lastLoggedIn
-    profilePicture
+    lightThemeColor
+    darkThemeColor
+    profilePictureURL
     role
     Decks {
       nextToken
@@ -122,6 +124,7 @@ export const onDeleteUsers = /* GraphQL */ `subscription OnDeleteUsers($filter: 
       nextToken
       __typename
     }
+    lastLoggedIn
     createdAt
     updatedAt
     __typename

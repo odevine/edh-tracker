@@ -108,9 +108,9 @@ export const getUsers = /* GraphQL */ `query GetUsers($id: ID!) {
   getUsers(id: $id) {
     id
     displayName
-    themeColor
-    lastLoggedIn
-    profilePicture
+    lightThemeColor
+    darkThemeColor
+    profilePictureURL
     role
     Decks {
       nextToken
@@ -120,6 +120,7 @@ export const getUsers = /* GraphQL */ `query GetUsers($id: ID!) {
       nextToken
       __typename
     }
+    lastLoggedIn
     createdAt
     updatedAt
     __typename
@@ -135,10 +136,11 @@ export const listUsers = /* GraphQL */ `query ListUsers(
     items {
       id
       displayName
-      themeColor
-      lastLoggedIn
-      profilePicture
+      lightThemeColor
+      darkThemeColor
+      profilePictureURL
       role
+      lastLoggedIn
       createdAt
       updatedAt
       __typename
