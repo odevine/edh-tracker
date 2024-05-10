@@ -1,5 +1,5 @@
 export * from "./GradientChip";
-export * from "./NewDeckModal";
+export * from "./DeckModal";
 export * from "./ThemeToggle";
 export * from "./Toolbar";
 export * from "./UserDecksCard";

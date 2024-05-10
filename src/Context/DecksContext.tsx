@@ -65,12 +65,20 @@ export const DecksProvider = ({ children }: PropsWithChildren<{}>) => {
 
   const updateExistingDeck = async (updatedDeck: UpdateDecksInput) => {
     setDecksLoading(true);
-    const deck = await updateDeck(updatedDeck);
-    if (deck) {
+    const updateDeckResponse = await updateDeck(updatedDeck);
+    if (updateDeckResponse) {
       // Add the updated deck to the state
-      setAllDecks((prevDecks) => [...prevDecks, deck]);
-      if (deck.deckOwnerID === user?.userId) {
-        setUserDecks((prevDecks) => [...prevDecks, deck]);
+      setAllDecks((prevDecks) =>
+        prevDecks.map((d) =>
+          d.id === updatedDeck.id ? updateDeckResponse : d,
+        ),
+      );
+      if (updatedDeck.deckOwnerID === user?.userId) {
+        setUserDecks((prevDecks) =>
+          prevDecks.map((d) =>
+            d.id === updatedDeck.id ? updateDeckResponse : d,
+          ),
+        );
       }
     }
     setDecksLoading(false);

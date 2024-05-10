@@ -19,15 +19,20 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 
-import { GradientChip, NewDeckModal } from "@/Components";
+import { DeckModal, GradientChip } from "@/Components";
 import { useDecks } from "@/Context";
 
-export const UserDecksCard = (props: { ownUser: boolean, profileId: string }) => {
+export const UserDecksCard = (props: {
+  ownUser: boolean;
+  profileId: string;
+}) => {
   const { ownUser, profileId } = props;
   const { allDecks, decksLoading, deleteDeckById } = useDecks();
-  const [modalOpen, setModalOpen] = useState(false);
 
-  const userDecks = allDecks.filter(deck => deck.deckOwnerID === profileId);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingDeckId, setEditingDeckId] = useState("");
+
+  const userDecks = allDecks.filter((deck) => deck.deckOwnerID === profileId);
 
   return (
     <>
@@ -82,7 +87,13 @@ export const UserDecksCard = (props: { ownUser: boolean, profileId: string }) =>
                       <TableCell align="right">
                         <Stack direction="row">
                           <Tooltip arrow title="edit deck">
-                            <IconButton size="small">
+                            <IconButton
+                              size="small"
+                              onClick={() => {
+                                setEditingDeckId(deck.id);
+                                setModalOpen(true);
+                              }}
+                            >
                               <Edit fontSize="small" />
                             </IconButton>
                           </Tooltip>
@@ -112,7 +123,14 @@ export const UserDecksCard = (props: { ownUser: boolean, profileId: string }) =>
           </CardActions>
         )}
       </Card>
-      <NewDeckModal open={modalOpen} onClose={() => setModalOpen(false)} />
+      <DeckModal
+        editingDeckId={editingDeckId}
+        open={modalOpen}
+        onClose={() => {
+          setEditingDeckId("");
+          setModalOpen(false);
+        }}
+      />
     </>
   );
 };
