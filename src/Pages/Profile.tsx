@@ -71,7 +71,7 @@ export const Profile = (props: { profileId: string }): JSX.Element => {
               </Grid>
             )}
             <Grid item xs={12}>
-              <UserDecksCard ownUser={ownUser} />
+              <UserDecksCard ownUser={ownUser} profileId={profileId} />
             </Grid>
             {ownUser && (
               <Grid item xs={12}>

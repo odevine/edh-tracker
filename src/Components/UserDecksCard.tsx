@@ -22,10 +22,12 @@ import { useState } from "react";
 import { GradientChip, NewDeckModal } from "@/Components";
 import { useDecks } from "@/Context";
 
-export const UserDecksCard = (props: { ownUser: boolean }) => {
-  const { ownUser } = props;
-  const { userDecks, decksLoading, deleteDeckById } = useDecks();
+export const UserDecksCard = (props: { ownUser: boolean, profileId: string }) => {
+  const { ownUser, profileId } = props;
+  const { allDecks, decksLoading, deleteDeckById } = useDecks();
   const [modalOpen, setModalOpen] = useState(false);
+
+  const userDecks = allDecks.filter(deck => deck.deckOwnerID === profileId);
 
   return (
     <>

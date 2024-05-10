@@ -8,14 +8,15 @@ import {
   useState,
 } from "react";
 
-import { CreateDecksInput, Decks } from "@/API";
-import { createDeck, deleteDeck, getAllDecks } from "@/Logic";
+import { CreateDecksInput, Decks, UpdateDecksInput } from "@/API";
+import { createDeck, deleteDeck, getAllDecks, updateDeck } from "@/Logic";
 
 interface DecksContextType {
   allDecks: Decks[];
   userDecks: Decks[];
   decksLoading: boolean;
   createNewDeck: (newDeck: CreateDecksInput) => Promise<void>;
+  updateExistingDeck: (updatedDeck: UpdateDecksInput) => Promise<void>;
   deleteDeckById: (deckId: string) => Promise<void>;
 }
 
@@ -62,7 +63,21 @@ export const DecksProvider = ({ children }: PropsWithChildren<{}>) => {
     }
   };
 
+  const updateExistingDeck = async (updatedDeck: UpdateDecksInput) => {
+    setDecksLoading(true);
+    const deck = await updateDeck(updatedDeck);
+    if (deck) {
+      // Add the updated deck to the state
+      setAllDecks((prevDecks) => [...prevDecks, deck]);
+      if (deck.deckOwnerID === user?.userId) {
+        setUserDecks((prevDecks) => [...prevDecks, deck]);
+      }
+    }
+    setDecksLoading(false);
+  };
+
   const deleteDeckById = async (deckId: string) => {
+    setDecksLoading(true);
     const success = await deleteDeck(deckId);
     if (success) {
       // Filter out the deleted deck from allDecks and userDecks
@@ -73,6 +88,7 @@ export const DecksProvider = ({ children }: PropsWithChildren<{}>) => {
         prevDecks.filter((deck) => deck.id !== deckId),
       );
     }
+    setDecksLoading(false);
   };
 
   const value = useMemo(
@@ -81,6 +97,7 @@ export const DecksProvider = ({ children }: PropsWithChildren<{}>) => {
       userDecks,
       decksLoading,
       createNewDeck,
+      updateExistingDeck,
       deleteDeckById,
     }),
     [allDecks, userDecks, decksLoading],
