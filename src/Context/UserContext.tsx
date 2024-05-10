@@ -8,25 +8,24 @@ import {
   useState,
 } from "react";
 
-import { Users } from "@/API";
-import { getAllUsers } from "@/Logic";
+import { Users, UpdateUsersInput } from "@/API";
+import { getAllUsers, updateUser } from "@/Logic";
 
 // Define the type for the user profile context
-interface UserProfileContextType {
+interface UserContextType {
+  authenticatedUser: AuthUser | null;
   allUserProfiles: Users[];
   currentUserProfile: Users | null;
-  setCurrentUserProfile: React.Dispatch<React.SetStateAction<Users | null>>;
+  updateUserProfile: (updatedUser: UpdateUsersInput) => Promise<void>;
   usersLoading: boolean;
-  authenticatedUser: AuthUser | null;
 }
 
+
 // Create the context
-const UserContext = createContext<UserProfileContextType | undefined>(
-  undefined,
-);
+const UserContext = createContext<UserContextType | undefined>(undefined);
 
 // UserProvider component
-export const UserProvider = (props: PropsWithChildren) => {
+export const UserProvider = ({ children }: PropsWithChildren<{}>) => {
   const { user } = useAuthenticator((context) => [context.user]);
   const [allUserProfiles, setAllUserProfiles] = useState<Users[]>([]);
   const [currentUserProfile, setCurrentUserProfile] = useState<Users | null>(
@@ -37,34 +36,48 @@ export const UserProvider = (props: PropsWithChildren) => {
   useEffect(() => {
     if (user) {
       setUsersLoading(true);
-      getAllUsers()
-        .then((userProfiles) => {
-          const allUsers = userProfiles ?? [];
-          setAllUserProfiles(allUsers);
-          const currentUser = allUsers.filter(
-            (profile) => profile.id === user.userId,
-          )[0];
-          setCurrentUserProfile(currentUser ?? null);
-          setUsersLoading(false);
-        })
-        .catch((error) => {
-          console.error("Failed to fetch user profiles", error);
-          setUsersLoading(false);
-        });
+      fetchUsers();
     }
   }, [user]);
+
+  const fetchUsers = async () => {
+    try {
+      const users = await getAllUsers();
+      const allUsersResponse = users ?? [];
+      setAllUserProfiles(allUsersResponse);
+      setCurrentUserProfile(
+        allUsersResponse.filter((u) => u.id === user.userId)[0] ?? null,
+      );
+    } catch (error) {
+      console.error("Failed to fetch decks:", error);
+      setAllUserProfiles([]);
+      setCurrentUserProfile(null);
+    } finally {
+      setUsersLoading(false);
+    }
+  };
+
+  const updateUserProfile = async (updatedUser: UpdateUsersInput) => {
+    const userResponse = await updateUser(updatedUser);
+    if (userResponse) {
+      setAllUserProfiles((prevState) => prevState.map(u => u.id === updatedUser.id ? userResponse : u))
+      if (updatedUser.id === user.userId) {
+        setCurrentUserProfile(userResponse)
+      }
+    } 
+  }
 
   return (
     <UserContext.Provider
       value={{
+        authenticatedUser: user,
         allUserProfiles,
         currentUserProfile,
-        setCurrentUserProfile,
+        updateUserProfile,
         usersLoading,
-        authenticatedUser: user,
       }}
     >
-      {props.children}
+      {children}
     </UserContext.Provider>
   );
 };

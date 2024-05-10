@@ -13,7 +13,6 @@ import {
 import { useState } from "react";
 
 import { useUser } from "@/Context";
-import { updateUserProfile } from "@/Logic";
 
 const convertToColor = (input: string) => {
   const validHexColor = /^#?([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/;
@@ -35,22 +34,19 @@ const convertToColor = (input: string) => {
 };
 
 export const UserProfileForm: React.FC = () => {
-  const {
-    authenticatedUser,
-    currentUserProfile: userProfile,
-    setCurrentUserProfile: setUserProfile,
-  } = useUser();
+  const { authenticatedUser, currentUserProfile, updateUserProfile } =
+    useUser();
   const [displayName, setDisplayName] = useState(
-    userProfile?.displayName ?? "",
+    currentUserProfile?.displayName ?? "",
   );
   const [lightThemeColor, setLightThemeColor] = useState(
-    userProfile?.lightThemeColor ?? "",
+    currentUserProfile?.lightThemeColor ?? "",
   );
   const [darkThemeColor, setDarkThemeColor] = useState(
-    userProfile?.darkThemeColor ?? "",
+    currentUserProfile?.darkThemeColor ?? "",
   );
   const [profilePictureURL, setProfilePictureURL] = useState(
-    userProfile?.profilePictureURL ?? "",
+    currentUserProfile?.profilePictureURL ?? "",
   );
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
@@ -78,7 +74,7 @@ export const UserProfileForm: React.FC = () => {
     setErrors(localErrors);
     return localErrors.length === 0;
   };
-
+  1;
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!authenticatedUser) {
@@ -97,8 +93,7 @@ export const UserProfileForm: React.FC = () => {
 
       setLoading(true);
       try {
-        const updatedUser = await updateUserProfile(updateData.id, updateData);
-        // setUserProfile(updatedUser);
+        const updatedUser = await updateUserProfile(updateData);
         console.log("Profile updated successfully:", updatedUser);
       } catch (error) {
         console.error("Failed to update profile:", error);
