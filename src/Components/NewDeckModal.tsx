@@ -114,7 +114,7 @@ export const NewDeckModal = (props: { open: boolean; onClose: () => void }) => {
         }}
       >
         <Typography variant="h4" sx={{ mb: 2 }}>
-          New Deck
+          new deck
         </Typography>
         <Stack height={"100%"} justifyContent="space-between" spacing={3}>
           <Stack spacing={2}>

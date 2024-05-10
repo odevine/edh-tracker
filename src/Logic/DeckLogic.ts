@@ -1,7 +1,7 @@
 import { AuthUser } from "aws-amplify/auth";
 import { generateClient } from "aws-amplify/data";
 import axios from "axios";
-import { debounce } from "radash";
+import { debounce } from "lodash";
 import { useEffect, useRef, useState } from "react";
 
 import {
@@ -115,8 +115,9 @@ export const useCommanderSearch = () => {
   const [commanderSearchTerm, setCommanderSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
 
+  // Initialize debouncedSearch with Lodash's debounce
   const debouncedSearch = useRef(
-    debounce({ delay: 300 }, async (searchTerm: string) => {
+    debounce(async (searchTerm: string) => {
       if (searchTerm.length >= 3) {
         try {
           const response = await axios.get(
@@ -127,19 +128,19 @@ export const useCommanderSearch = () => {
           console.error("Scryfall search failed", err);
         }
       }
-    }), // Debouncing period in milliseconds
-  );
+    }, 300),
+  ).current;
 
   useEffect(() => {
-    // Cleanup function to cancel the debounce on component unmount
+    // This will make sure the effect cleanup only runs once when the component unmounts.
     return () => {
-      debouncedSearch.current.cancel();
+      debouncedSearch.cancel();
     };
-  }, []);
+  }, [debouncedSearch]);
 
   const commanderSearch = (searchTerm: string) => {
     setCommanderSearchTerm(searchTerm);
-    debouncedSearch.current(searchTerm);
+    debouncedSearch(searchTerm);
   };
 
   return {
