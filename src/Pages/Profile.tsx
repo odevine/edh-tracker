@@ -1,12 +1,10 @@
 import {
   Avatar,
-  Backdrop,
   Button,
   Card,
   CardActions,
   CardContent,
   CardHeader,
-  CircularProgress,
   Container,
   Divider,
   Grid,
@@ -15,12 +13,17 @@ import {
   Typography,
 } from "@mui/material";
 
-import { UserDecksCard, UserProfileForm } from "@/Components";
+import { LoadingBackdrop, UserDecksCard, UserProfileForm } from "@/Components";
 import { useUser } from "@/Context";
 
 export const Profile = (props: { profileId: string }): JSX.Element => {
   const { profileId } = props;
-  const { allUserProfiles, usersLoading, authenticatedUser } = useUser();
+  const {
+    allUserProfiles,
+    usersLoading,
+    authenticatedUser,
+    currentUserProfile,
+  } = useUser();
 
   const currentProfile = allUserProfiles.filter(
     (profile) => profile.id === profileId,
@@ -28,18 +31,11 @@ export const Profile = (props: { profileId: string }): JSX.Element => {
   const ownUser = profileId === authenticatedUser?.userId;
 
   if (!currentProfile) {
-    return <Typography>User not found</Typography>;
+    return <LoadingBackdrop />;
   } else {
     return (
       <>
-        {usersLoading && (
-          <Backdrop
-            sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-            open
-          >
-            <CircularProgress color="inherit" />
-          </Backdrop>
-        )}
+        {usersLoading && <LoadingBackdrop />}
         <Container sx={{ p: 3 }}>
           <Grid container spacing={3}>
             <Grid item xs={12} sm={ownUser ? 4 : 12}>
@@ -51,9 +47,19 @@ export const Profile = (props: { profileId: string }): JSX.Element => {
                     justifyContent="center"
                     sx={{ height: "100%" }}
                   >
-                    <Avatar sx={{ height: 120, width: 120 }} />
+                    <Avatar
+                      sx={{
+                        height: 120,
+                        width: 120,
+                        backgroundColor: "primary",
+                      }}
+                      src={currentUserProfile?.profilePictureURL ?? ""}
+                    />
                     <Stack direction="row" alignItems="center" spacing={1}>
-                      <Typography>{currentProfile.displayName}</Typography>
+                      <Typography>
+                        {currentUserProfile?.displayName ??
+                          authenticatedUser?.username}
+                      </Typography>
                     </Stack>
                   </Stack>
                 </CardContent>
@@ -61,9 +67,7 @@ export const Profile = (props: { profileId: string }): JSX.Element => {
             </Grid>
             {ownUser && (
               <Grid item xs={12} sm={8}>
-                <Card sx={{ flexGrow: 3 }}>
-                  <UserProfileForm />
-                </Card>
+                <UserProfileForm />
               </Grid>
             )}
             <Grid item xs={12}>

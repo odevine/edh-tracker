@@ -21,12 +21,16 @@ import {
   useState,
 } from "react";
 
+import { useUser } from "@/Context";
+
 export const ThemeContext = createContext({
   toggleTheme: () => {},
   mode: "dark",
 });
 
 export const ThemeProvider = (props: PropsWithChildren) => {
+  const { currentUserProfile } = useUser();
+
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
   const previousThemeMode = localStorage.getItem("theme");
   let defaultTheme = "dark";
@@ -70,10 +74,10 @@ export const ThemeProvider = (props: PropsWithChildren) => {
           ...(mode === "light"
             ? ({
                 primary: {
-                  main: "#fc8d57",
+                  main: currentUserProfile?.lightThemeColor ?? "#fc8d57",
                 },
                 secondary: {
-                  main: "#ff6188",
+                  main: currentUserProfile?.lightThemeColor ?? "#fc8d57",
                 },
                 background: {
                   default: "#fdf9f3",
@@ -86,10 +90,10 @@ export const ThemeProvider = (props: PropsWithChildren) => {
               } as PaletteColorOptions)
             : ({
                 primary: {
-                  main: "#ab9df2",
+                  main: currentUserProfile?.darkThemeColor ?? "#ab9df2",
                 },
                 secondary: {
-                  main: "#78dce8",
+                  main: currentUserProfile?.darkThemeColor ?? "#ab9df2",
                 },
                 background: {
                   default: "#221f22",
@@ -131,7 +135,7 @@ export const ThemeProvider = (props: PropsWithChildren) => {
           },
         },
       }),
-    [mode],
+    [mode, currentUserProfile],
   );
 
   const ampTheme = useMemo(
@@ -191,7 +195,7 @@ export const ThemeProvider = (props: PropsWithChildren) => {
         },
       },
     }),
-    [mode],
+    [mode, currentUserProfile],
   );
 
   return (

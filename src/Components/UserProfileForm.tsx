@@ -1,5 +1,6 @@
 import {
   Button,
+  Card,
   CardActions,
   CardContent,
   CardHeader,
@@ -7,11 +8,31 @@ import {
   Divider,
   Stack,
   TextField,
+  Typography,
 } from "@mui/material";
 import { useState } from "react";
 
 import { useUser } from "@/Context";
 import { updateUserProfile } from "@/Logic";
+
+const convertToColor = (input: string) => {
+  const validHexColor = /^#?([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/;
+
+  if (validHexColor.test(input)) {
+    if (input[0] !== "#") {
+      input = "#" + input;
+    }
+
+    if (input.length === 4) {
+      input =
+        "#" + input[1] + input[1] + input[2] + input[2] + input[3] + input[3];
+    }
+
+    return input;
+  } else {
+    return null;
+  }
+};
 
 export const UserProfileForm: React.FC = () => {
   const {
@@ -22,8 +43,41 @@ export const UserProfileForm: React.FC = () => {
   const [displayName, setDisplayName] = useState(
     userProfile?.displayName ?? "",
   );
-  const [themeColor, setThemeColor] = useState(userProfile?.themeColor ?? "");
+  const [lightThemeColor, setLightThemeColor] = useState(
+    userProfile?.lightThemeColor ?? "",
+  );
+  const [darkThemeColor, setDarkThemeColor] = useState(
+    userProfile?.darkThemeColor ?? "",
+  );
+  const [profilePictureURL, setProfilePictureURL] = useState(
+    userProfile?.profilePictureURL ?? "",
+  );
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<string[]>([]);
+
+  const validateForm = (): boolean => {
+    const localErrors: string[] = [];
+
+    if (displayName.length > 16) {
+      localErrors.push("16 character limit on display names");
+    }
+
+    const validatedLightThemeColor = convertToColor(lightThemeColor);
+    const validatedDarkThemeColor = convertToColor(darkThemeColor);
+    if (lightThemeColor !== "" && !validatedLightThemeColor) {
+      localErrors.push(
+        "Invalid format for light theme color, please use '#xxx' or '#xxxxxx'",
+      );
+    }
+    if (darkThemeColor !== "" && !validatedDarkThemeColor) {
+      localErrors.push(
+        "Invalid format for dark theme color, please use '#xxx' or '#xxxxxx'",
+      );
+    }
+
+    setErrors(localErrors);
+    return localErrors.length === 0;
+  };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -31,24 +85,31 @@ export const UserProfileForm: React.FC = () => {
       console.error("User is not authenticated");
       return;
     }
-    const updateData = {
-      id: authenticatedUser.userId,
-      displayName,
-      themeColor,
-    };
-    setLoading(true);
-    const updatedUser = await updateUserProfile(updateData.id, updateData);
-    setUserProfile(updatedUser);
-    setLoading(false);
-    if (updatedUser) {
-      console.log("Profile updated successfully:", updatedUser);
-    } else {
-      console.log("Failed to update profile.");
+
+    if (validateForm()) {
+      const updateData = {
+        id: authenticatedUser.userId,
+        displayName: displayName || null,
+        lightThemeColor: convertToColor(lightThemeColor) || null,
+        darkThemeColor: convertToColor(darkThemeColor) || null,
+        profilePictureURL: profilePictureURL !== "" ? profilePictureURL : null,
+      };
+
+      setLoading(true);
+      try {
+        const updatedUser = await updateUserProfile(updateData.id, updateData);
+        // setUserProfile(updatedUser);
+        console.log("Profile updated successfully:", updatedUser);
+      } catch (error) {
+        console.error("Failed to update profile:", error);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <Card>
       <CardHeader title="profile" />
       <Divider />
       <CardContent>
@@ -59,10 +120,28 @@ export const UserProfileForm: React.FC = () => {
             onChange={(event) => setDisplayName(event.target.value)}
           />
           <TextField
-            label="theme color"
-            value={themeColor}
-            onChange={(event) => setThemeColor(event.target.value)}
+            label="light theme color"
+            value={lightThemeColor}
+            onChange={(event) => setLightThemeColor(event.target.value)}
           />
+          <TextField
+            label="dark theme color"
+            value={darkThemeColor}
+            onChange={(event) => setDarkThemeColor(event.target.value)}
+          />
+          <TextField
+            label="profile picture url"
+            value={profilePictureURL}
+            onChange={(event) => setProfilePictureURL(event.target.value)}
+          />
+          <Stack spacing={0}>
+            {errors.length > 0 &&
+              errors.map((err) => (
+                <Typography key={err} color="error" variant="caption">
+                  {err}
+                </Typography>
+              ))}
+          </Stack>
         </Stack>
       </CardContent>
       <CardActions sx={{ justifyContent: "flex-end" }}>
@@ -70,6 +149,7 @@ export const UserProfileForm: React.FC = () => {
           type="submit"
           variant="contained"
           disabled={loading}
+          onClick={handleSubmit}
           sx={{ width: 150, height: 40 }}
         >
           {loading ? (
@@ -79,6 +159,6 @@ export const UserProfileForm: React.FC = () => {
           )}
         </Button>
       </CardActions>
-    </form>
+    </Card>
   );
 };
