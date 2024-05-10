@@ -20,9 +20,17 @@ interface ICommander {
   [key: string]: any;
 }
 
+const colorOrder = ["W", "B", "U", "R", "G"];
+const sortColors = (arr: string[]) => {
+  return arr.sort((a, b) => {
+    return colorOrder.indexOf(a) - colorOrder.indexOf(b);
+  });
+};
+
 export const NewDeckModal = (props: { open: boolean; onClose: () => void }) => {
   const { authenticatedUser } = useUser();
-  const { allDecks } = useDecks();
+  const { allDecks, createNewDeck } = useDecks();
+
   const [deckName, setDeckName] = useState("");
   const [commander, setCommander] = useState<null | ICommander>(null);
   const [commanderSearchTerm, setCommanderSearchTerm] = useState("");
@@ -57,11 +65,11 @@ export const NewDeckModal = (props: { open: boolean; onClose: () => void }) => {
 
   const handleSubmit = () => {
     if (authenticatedUser && validateDeckDetails()) {
-      createDeck({
+      createNewDeck({
         deckOwnerID: authenticatedUser.userId,
         deckName,
         commanderName: commander?.label ?? "",
-        commanderColors: commander?.colors,
+        commanderColors: sortColors(commander?.colors ?? []),
         deckType: deckFormat,
         cost: deckCost !== "" ? Number(deckCost) : undefined,
         link: deckLink !== "" ? deckLink : undefined,

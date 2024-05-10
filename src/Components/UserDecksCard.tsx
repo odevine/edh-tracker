@@ -25,7 +25,7 @@ import { deleteDeck } from "@/Logic";
 
 export const UserDecksCard = (props: { ownUser: boolean }) => {
   const { ownUser } = props;
-  const { userDecks, decksLoading } = useDecks();
+  const { userDecks, decksLoading, deleteDeckById } = useDecks();
   const [modalOpen, setModalOpen] = useState(false);
 
   return (
@@ -88,7 +88,7 @@ export const UserDecksCard = (props: { ownUser: boolean }) => {
                         <Tooltip arrow title="delete deck">
                           <IconButton
                             size="small"
-                            onClick={() => deleteDeck(deck.id)}
+                            onClick={() => deleteDeckById(deck.id)}
                           >
                             <Delete fontSize="small" />
                           </IconButton>
