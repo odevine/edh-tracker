@@ -107,6 +107,7 @@ export const ThemeProvider = (props: PropsWithChildren) => {
               html: {
                 "*::-webkit-scrollbar": {
                   width: 8,
+                  height: 8,
                 },
                 "*::-webkit-scrollbar-track": {
                   backgroundColor: mode === "light" ? "#ccc9c3" : "#2d2a2e",
@@ -114,6 +115,7 @@ export const ThemeProvider = (props: PropsWithChildren) => {
                 "*::-webkit-scrollbar-thumb": {
                   backgroundColor: mode === "light" ? "#999692" : "#524c54",
                   minHeight: 24,
+                  minWidth: 24,
                 },
                 "*::-webkit-scrollbar-thumb:focus": {
                   backgroundColor: mode === "light" ? "#656461" : "#776e7a",

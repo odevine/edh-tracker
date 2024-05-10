@@ -9,6 +9,7 @@ import {
   CircularProgress,
   Container,
   Divider,
+  Grid,
   Stack,
   TextField,
   Typography,
@@ -40,9 +41,9 @@ export const Profile = (props: { profileId: string }): JSX.Element => {
           </Backdrop>
         )}
         <Container sx={{ p: 3 }}>
-          <Stack spacing={3}>
-            <Stack direction="row" spacing={3}>
-              <Card sx={{ flexGrow: 1 }}>
+          <Grid container spacing={3}>
+            <Grid item xs={12} sm={ownUser ? 4 : 12}>
+              <Card sx={{ height: "100%" }}>
                 <CardContent sx={{ height: "100%" }}>
                   <Stack
                     spacing={2}
@@ -57,29 +58,35 @@ export const Profile = (props: { profileId: string }): JSX.Element => {
                   </Stack>
                 </CardContent>
               </Card>
-              {ownUser && (
+            </Grid>
+            {ownUser && (
+              <Grid item xs={12} sm={8}>
                 <Card sx={{ flexGrow: 3 }}>
                   <UserProfileForm />
                 </Card>
-              )}
-            </Stack>
-            <UserDecksCard ownUser={ownUser} />
-            {ownUser && (
-              <Card>
-                <CardHeader title="change password" />
-                <Divider />
-                <CardContent>
-                  <Stack spacing={3}>
-                    <TextField label="password" />
-                    <TextField label="confirm password" />
-                  </Stack>
-                </CardContent>
-                <CardActions sx={{ justifyContent: "flex-end" }}>
-                  <Button variant="contained">update password</Button>
-                </CardActions>
-              </Card>
+              </Grid>
             )}
-          </Stack>
+            <Grid item xs={12}>
+              <UserDecksCard ownUser={ownUser} />
+            </Grid>
+            {ownUser && (
+              <Grid item xs={12}>
+                <Card>
+                  <CardHeader title="change password" />
+                  <Divider />
+                  <CardContent>
+                    <Stack spacing={3}>
+                      <TextField label="password" />
+                      <TextField label="confirm password" />
+                    </Stack>
+                  </CardContent>
+                  <CardActions sx={{ justifyContent: "flex-end" }}>
+                    <Button variant="contained">update password</Button>
+                  </CardActions>
+                </Card>
+              </Grid>
+            )}
+          </Grid>
         </Container>
       </>
     );

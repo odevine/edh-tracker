@@ -21,7 +21,6 @@ import { useState } from "react";
 
 import { GradientChip, NewDeckModal } from "@/Components";
 import { useDecks } from "@/Context";
-import { deleteDeck } from "@/Logic";
 
 export const UserDecksCard = (props: { ownUser: boolean }) => {
   const { ownUser } = props;
@@ -33,7 +32,7 @@ export const UserDecksCard = (props: { ownUser: boolean }) => {
       <Card>
         <CardHeader title={`${ownUser ? "your" : ""} decks`} />
         <Divider />
-        <CardContent sx={{ minHeight: 154 }}>
+        <CardContent sx={{ minHeight: 154, overflowX: "auto" }}>
           {decksLoading ? (
             <Stack justifyContent="center" alignItems="center" sx={{ pt: 3 }}>
               <Typography variant="h5">no decks found</Typography>
@@ -79,20 +78,22 @@ export const UserDecksCard = (props: { ownUser: boolean }) => {
                     </TableCell>
                     {ownUser && (
                       <TableCell align="right">
-                        <Tooltip arrow title="edit deck">
-                          <IconButton size="small">
-                            <Edit fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                        {/* TODO: deleting decks should not be an option if it appears as any match participant */}
-                        <Tooltip arrow title="delete deck">
-                          <IconButton
-                            size="small"
-                            onClick={() => deleteDeckById(deck.id)}
-                          >
-                            <Delete fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
+                        <Stack direction="row">
+                          <Tooltip arrow title="edit deck">
+                            <IconButton size="small">
+                              <Edit fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          {/* TODO: deleting decks should not be an option if it appears as any match participant */}
+                          <Tooltip arrow title="delete deck">
+                            <IconButton
+                              size="small"
+                              onClick={() => deleteDeckById(deck.id)}
+                            >
+                              <Delete fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </Stack>
                       </TableCell>
                     )}
                   </TableRow>
