@@ -1,8 +1,9 @@
 import {
+  Button,
+  Grid,
   Link,
   MenuItem,
   Paper,
-  Stack,
   Table,
   TableBody,
   TableCell,
@@ -78,6 +79,7 @@ const PlayerSelector = (props: {
 
   return (
     <TextField
+      fullWidth
       select
       size="small"
       value={filterUser}
@@ -108,6 +110,7 @@ const TypeSelector = (props: {
 
   return (
     <TextField
+      fullWidth
       select
       size="small"
       value={filterType}
@@ -168,7 +171,7 @@ export const DecksPage = (): JSX.Element => {
         (deck.deckName.toLowerCase().includes(lowercasedQuery) ||
           deck.commanderName.toLowerCase().includes(lowercasedQuery)),
     );
-  }, [allDecks, searchQuery, filterType]);
+  }, [allDecks, searchQuery, filterType, filterUser]);
 
   const visibleRows = useMemo(() => {
     // First, create a shallow copy of the rows array and then sort it
@@ -193,26 +196,39 @@ export const DecksPage = (): JSX.Element => {
   return (
     <Paper sx={{ m: 3 }}>
       <Toolbar sx={{ p: 2, justifyContent: "space-between" }}>
-        <Stack direction="row" spacing={2}>
-          <TypeSelector
-            allDecks={allDecks}
-            filterType={filterType}
-            setFilterType={setFilterType}
-          />
-          <PlayerSelector
-            allDecks={allDecks}
-            allUserProfiles={allUserProfiles}
-            filterUser={filterUser}
-            setFilterUser={setFilterUser}
-          />
-        </Stack>
-        <TextField
-          size="small"
-          label="search decks"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          sx={{ minWidth: 140 }}
-        />
+        <Grid container spacing={2}>
+          <Grid item xs={false} sm={false} md={false} lg={4} />
+          <Grid item xs={12} sm={6} md={3} lg={2}>
+            <TypeSelector
+              allDecks={allDecks}
+              filterType={filterType}
+              setFilterType={setFilterType}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} md={3} lg={2}>
+            <PlayerSelector
+              allDecks={allDecks}
+              allUserProfiles={allUserProfiles}
+              filterUser={filterUser}
+              setFilterUser={setFilterUser}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} md={3} lg={2}>
+            <TextField
+              fullWidth
+              size="small"
+              label="search decks"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              // sx={{ minWidth: 140 }}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} md={3} lg={2}>
+            <Button fullWidth variant="contained">
+              add deck
+            </Button>
+          </Grid>
+        </Grid>
       </Toolbar>
       <TableContainer>
         <Table size="small">
