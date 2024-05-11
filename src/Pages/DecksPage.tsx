@@ -11,12 +11,13 @@ import {
   TableRow,
   TextField,
   Toolbar,
+  Typography,
 } from "@mui/material";
 import { useMemo, useState } from "react";
 
 import { Decks } from "@/API";
 import { EnhancedTableHead, GradientChip, HeadCell } from "@/Components";
-import { useDecks, useUser } from "@/Context";
+import { useDecks, useTheme, useUser } from "@/Context";
 import { ColumnSortOrder, getComparator } from "@/Logic";
 
 const headCells: HeadCell<Decks>[] = [
@@ -51,6 +52,7 @@ const headCells: HeadCell<Decks>[] = [
 export const DecksPage = (): JSX.Element => {
   const { allDecks } = useDecks();
   const { allUserProfiles } = useUser();
+  const { mode } = useTheme();
 
   const [filterType, setFilterType] = useState("all");
   const [filterUser, setFilterUser] = useState("all");
@@ -98,51 +100,47 @@ export const DecksPage = (): JSX.Element => {
   return (
     <Paper sx={{ m: 3 }}>
       <Toolbar sx={{ p: 2, justifyContent: "space-between" }}>
-          <Stack direction="row" spacing={2}>
-            <TextField
-              select
-              size="small"
-              value={filterType}
-              label="type"
-              onChange={(e) => setFilterType(e.target.value)}
-              sx={{ minWidth: 140 }}
-            >
-              <MenuItem value="all">all types</MenuItem>
-              {[...new Set(allDecks.map((deck) => deck.deckType))].map(
-                (type) => (
-                  <MenuItem key={type} value={type}>
-                    {type}
-                  </MenuItem>
-                ),
-              )}
-            </TextField>
-            <TextField
-              select
-              size="small"
-              value={filterUser}
-              label="player"
-              onChange={(e) => setFilterUser(e.target.value)}
-              sx={{ minWidth: 140 }}
-            >
-              <MenuItem value="all">all users</MenuItem>
-              {[
-                ...new Set(
-                  allUserProfiles.map((profile) => profile.displayName),
-                ),
-              ].map((name) => (
-                <MenuItem key={name} value={name}>
-                  {name}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Stack>
+        <Stack direction="row" spacing={2}>
           <TextField
+            select
             size="small"
-            label="search decks"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={filterType}
+            label="type"
+            onChange={(e) => setFilterType(e.target.value)}
             sx={{ minWidth: 140 }}
-          />
+          >
+            <MenuItem value="all">all types</MenuItem>
+            {[...new Set(allDecks.map((deck) => deck.deckType))].map((type) => (
+              <MenuItem key={type} value={type}>
+                {type}
+              </MenuItem>
+            ))}
+          </TextField>
+          <TextField
+            select
+            size="small"
+            value={filterUser}
+            label="player"
+            onChange={(e) => setFilterUser(e.target.value)}
+            sx={{ minWidth: 140 }}
+          >
+            <MenuItem value="all">all users</MenuItem>
+            {[
+              ...new Set(allUserProfiles.map((profile) => profile.displayName)),
+            ].map((name) => (
+              <MenuItem key={name} value={name}>
+                {name}
+              </MenuItem>
+            ))}
+          </TextField>
+        </Stack>
+        <TextField
+          size="small"
+          label="search decks"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          sx={{ minWidth: 140 }}
+        />
       </Toolbar>
       <TableContainer>
         <Table size="small">
@@ -169,11 +167,20 @@ export const DecksPage = (): JSX.Element => {
                   )}
                 </TableCell>
                 <TableCell>
-                  {
-                    allUserProfiles.find(
+                  {(() => {
+                    const deckUser = allUserProfiles.find(
                       (profile) => profile.id === deck.deckOwnerID,
-                    )?.displayName
-                  }
+                    );
+                    const userColor =
+                      mode === "light"
+                        ? deckUser?.lightThemeColor
+                        : deckUser?.darkThemeColor ?? "inherit";
+                    return (
+                      <Typography sx={{ color: userColor }}>
+                        {deckUser?.displayName}
+                      </Typography>
+                    );
+                  })()}
                 </TableCell>
                 <TableCell>{deck.deckType}</TableCell>
                 <TableCell>
