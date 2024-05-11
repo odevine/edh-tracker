@@ -24,11 +24,13 @@ export const Profile = (props: { profileId: string }): JSX.Element => {
     authenticatedUser,
     currentUserProfile,
   } = useUser();
+    console.log("  ~ Profile ~ usersLoading:", usersLoading);
 
   const currentProfile = allUserProfiles.filter(
     (profile) => profile.id === profileId,
   )[0];
   const ownUser = profileId === authenticatedUser?.userId;
+  console.log("  ~ Profile ~ currentProfile:", currentProfile);
 
   if (!currentProfile) {
     return <LoadingBackdrop />;
