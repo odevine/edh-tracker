@@ -72,7 +72,7 @@ export const DeckModal = (props: {
       setDeckCost("");
       setErrors([]);
     }
-  }, [editingDeck]);
+  }, [editingDeck, open]);
 
   const { commanderSearch, searchResults } = useCommanderSearch();
   useEffect(() => {
