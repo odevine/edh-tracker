@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import { useMemo, useState } from "react";
 
-import { Decks } from "@/API";
+import { Decks, Users } from "@/API";
 import { EnhancedTableHead, GradientChip, HeadCell } from "@/Components";
 import { useDecks, useTheme, useUser } from "@/Context";
 import { ColumnSortOrder, getComparator } from "@/Logic";
@@ -48,6 +48,86 @@ const headCells: HeadCell<Decks>[] = [
     alignment: "right",
   },
 ];
+
+const PlayerSelector = (props: {
+  allDecks: Decks[];
+  allUserProfiles: Users[];
+  filterUser: string;
+  setFilterUser: (newUser: string) => void;
+}) => {
+  const { allDecks, allUserProfiles, filterUser, setFilterUser } = props;
+
+  // Generate the unique list of user options
+  const userOptions = useMemo(() => {
+    // Get unique ownerIDs from allDecks
+    const uniqueOwnerIDs = [
+      ...new Set(allDecks.map((deck) => deck.deckOwnerID)),
+    ];
+
+    // Map ownerIDs to user profiles, filter out undefined, and assert the remaining profiles are defined
+    return uniqueOwnerIDs
+      .map((ownerID) =>
+        allUserProfiles.find((profile) => profile.id === ownerID),
+      )
+      .filter((profile): profile is Users => profile !== undefined)
+      .map((profile) => ({
+        id: profile.id,
+        displayName: profile.displayName,
+      }));
+  }, [allDecks, allUserProfiles]);
+
+  return (
+    <TextField
+      select
+      size="small"
+      value={filterUser}
+      label="player"
+      onChange={(e) => setFilterUser(e.target.value)}
+      sx={{ minWidth: 140 }}
+    >
+      <MenuItem value="all">all users</MenuItem>
+      {userOptions.map((option) => (
+        <MenuItem key={option.id} value={option.displayName}>
+          {option.displayName}
+        </MenuItem>
+      ))}
+    </TextField>
+  );
+};
+
+const TypeSelector = (props: {
+  allDecks: Decks[];
+  filterType: string;
+  setFilterType: (newType: string) => void;
+}) => {
+  const { allDecks, filterType, setFilterType } = props;
+  const deckTypes = useMemo(() => {
+    // Extract unique deck types from all decks
+    return [...new Set(allDecks.map((deck) => deck.deckType))];
+  }, [allDecks]);
+
+  return (
+    <TextField
+      select
+      size="small"
+      value={filterType}
+      label="type"
+      onChange={(e) => setFilterType(e.target.value)}
+      sx={{ minWidth: 140 }}
+    >
+      <MenuItem value="all">all types</MenuItem>
+      {deckTypes.map((type) => (
+        <MenuItem key={type} value={type}>
+          {type}
+        </MenuItem>
+      ))}
+    </TextField>
+  );
+};
+
+const dateFormatter = new Intl.DateTimeFormat("en-us", {
+  dateStyle: "medium",
+});
 
 export const DecksPage = (): JSX.Element => {
   const { allDecks } = useDecks();
@@ -97,42 +177,34 @@ export const DecksPage = (): JSX.Element => {
       .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
   }, [order, orderBy, page, rowsPerPage, filteredDecks]);
 
+  const userProfileMap = useMemo(() => {
+    return new Map(
+      allUserProfiles.map((profile) => [
+        profile.id,
+        {
+          displayName: profile.displayName,
+          lightThemeColor: profile.lightThemeColor,
+          darkThemeColor: profile.darkThemeColor,
+        },
+      ]),
+    );
+  }, [allUserProfiles, mode]);
+
   return (
     <Paper sx={{ m: 3 }}>
       <Toolbar sx={{ p: 2, justifyContent: "space-between" }}>
         <Stack direction="row" spacing={2}>
-          <TextField
-            select
-            size="small"
-            value={filterType}
-            label="type"
-            onChange={(e) => setFilterType(e.target.value)}
-            sx={{ minWidth: 140 }}
-          >
-            <MenuItem value="all">all types</MenuItem>
-            {[...new Set(allDecks.map((deck) => deck.deckType))].map((type) => (
-              <MenuItem key={type} value={type}>
-                {type}
-              </MenuItem>
-            ))}
-          </TextField>
-          <TextField
-            select
-            size="small"
-            value={filterUser}
-            label="player"
-            onChange={(e) => setFilterUser(e.target.value)}
-            sx={{ minWidth: 140 }}
-          >
-            <MenuItem value="all">all users</MenuItem>
-            {[
-              ...new Set(allUserProfiles.map((profile) => profile.displayName)),
-            ].map((name) => (
-              <MenuItem key={name} value={name}>
-                {name}
-              </MenuItem>
-            ))}
-          </TextField>
+          <TypeSelector
+            allDecks={allDecks}
+            filterType={filterType}
+            setFilterType={setFilterType}
+          />
+          <PlayerSelector
+            allDecks={allDecks}
+            allUserProfiles={allUserProfiles}
+            filterUser={filterUser}
+            setFilterUser={setFilterUser}
+          />
         </Stack>
         <TextField
           size="small"
@@ -167,20 +239,20 @@ export const DecksPage = (): JSX.Element => {
                   )}
                 </TableCell>
                 <TableCell>
-                  {(() => {
-                    const deckUser = allUserProfiles.find(
-                      (profile) => profile.id === deck.deckOwnerID,
-                    );
-                    const userColor =
-                      mode === "light"
-                        ? deckUser?.lightThemeColor
-                        : deckUser?.darkThemeColor ?? "inherit";
-                    return (
-                      <Typography sx={{ color: userColor }}>
-                        {deckUser?.displayName}
-                      </Typography>
-                    );
-                  })()}
+                  {userProfileMap.has(deck.deckOwnerID) && (
+                    <Typography
+                      sx={{
+                        color:
+                          mode === "light"
+                            ? (userProfileMap.get(deck.deckOwnerID) as Users)
+                                .lightThemeColor
+                            : (userProfileMap.get(deck.deckOwnerID) as Users)
+                                .darkThemeColor,
+                      }}
+                    >
+                      {userProfileMap.get(deck.deckOwnerID)?.displayName}
+                    </Typography>
+                  )}
                 </TableCell>
                 <TableCell>{deck.deckType}</TableCell>
                 <TableCell>
@@ -198,9 +270,7 @@ export const DecksPage = (): JSX.Element => {
                     : ""}
                 </TableCell>
                 <TableCell align="right">
-                  {new Date(deck.updatedAt).toLocaleString("en-us", {
-                    dateStyle: "medium",
-                  })}
+                  {dateFormatter.format(new Date(deck.updatedAt))}
                 </TableCell>
               </TableRow>
             ))}
