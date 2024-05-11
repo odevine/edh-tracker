@@ -8,8 +8,8 @@ import {
   useState,
 } from "react";
 
-import { Users, UpdateUsersInput } from "@/API";
-import { getAllUsers, updateUser } from "@/Logic";
+import { UpdateUsersInput, Users } from "@/API";
+import { createUser, getAllUsers, updateUser } from "@/Logic";
 
 // Define the type for the user profile context
 interface UserContextType {
@@ -19,7 +19,6 @@ interface UserContextType {
   updateUserProfile: (updatedUser: UpdateUsersInput) => Promise<void>;
   usersLoading: boolean;
 }
-
 
 // Create the context
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -45,9 +44,14 @@ export const UserProvider = ({ children }: PropsWithChildren<{}>) => {
       const users = await getAllUsers();
       const allUsersResponse = users ?? [];
       setAllUserProfiles(allUsersResponse);
-      setCurrentUserProfile(
-        allUsersResponse.filter((u) => u.id === user.userId)[0] ?? null,
-      );
+      let currentUserProfile =
+        allUsersResponse.filter((u) => u.id === user.userId)[0] ?? null;
+      if (!currentUserProfile) {
+        console.log("No profile found, generating new profile");
+        currentUserProfile = await createUser(user);
+        setAllUserProfiles((prevState) => [...prevState, currentUserProfile]);
+      }
+      setCurrentUserProfile(currentUserProfile);
     } catch (error) {
       console.error("Failed to fetch decks:", error);
       setAllUserProfiles([]);
@@ -60,12 +64,14 @@ export const UserProvider = ({ children }: PropsWithChildren<{}>) => {
   const updateUserProfile = async (updatedUser: UpdateUsersInput) => {
     const userResponse = await updateUser(updatedUser);
     if (userResponse) {
-      setAllUserProfiles((prevState) => prevState.map(u => u.id === updatedUser.id ? userResponse : u))
+      setAllUserProfiles((prevState) =>
+        prevState.map((u) => (u.id === updatedUser.id ? userResponse : u)),
+      );
       if (updatedUser.id === user.userId) {
-        setCurrentUserProfile(userResponse)
+        setCurrentUserProfile(userResponse);
       }
-    } 
-  }
+    }
+  };
 
   return (
     <UserContext.Provider
