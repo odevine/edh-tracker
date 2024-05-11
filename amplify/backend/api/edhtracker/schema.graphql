@@ -4,7 +4,7 @@ type MatchParticipants @model @auth(rules: [{allow: private}]) {
   matchesID: ID! @index(name: "byMatches")
 }
 
-type Users @model @auth(rules: [{allow: private}]) {
+type Users @model @auth(rules: [{allow: private}, {allow: public}]) {
   id: ID!
   displayName: String!
   lightThemeColor: String
