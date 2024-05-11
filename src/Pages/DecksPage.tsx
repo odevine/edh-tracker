@@ -1,5 +1,4 @@
 import {
-  Button,
   Grid,
   Link,
   MenuItem,
@@ -13,6 +12,8 @@ import {
   TextField,
   Toolbar,
   Typography,
+  useMediaQuery,
+  useTheme as useMuiTheme,
 } from "@mui/material";
 import { useMemo, useState } from "react";
 
@@ -136,6 +137,7 @@ export const DecksPage = (): JSX.Element => {
   const { allDecks } = useDecks();
   const { allUserProfiles } = useUser();
   const { mode } = useTheme();
+  const theme = useMuiTheme();
 
   const [filterType, setFilterType] = useState("all");
   const [filterUser, setFilterUser] = useState("all");
@@ -197,15 +199,15 @@ export const DecksPage = (): JSX.Element => {
     <Paper sx={{ m: 3 }}>
       <Toolbar sx={{ p: 2, justifyContent: "space-between" }}>
         <Grid container spacing={2}>
-          <Grid item xs={false} sm={false} md={false} lg={4} />
-          <Grid item xs={12} sm={6} md={3} lg={2}>
+          {useMediaQuery(theme.breakpoints.up("lg")) && <Grid item lg={5} />}
+          <Grid item xs={12} sm={6} md={4} lg={2}>
             <TypeSelector
               allDecks={allDecks}
               filterType={filterType}
               setFilterType={setFilterType}
             />
           </Grid>
-          <Grid item xs={12} sm={6} md={3} lg={2}>
+          <Grid item xs={12} sm={6} md={4} lg={2}>
             <PlayerSelector
               allDecks={allDecks}
               allUserProfiles={allUserProfiles}
@@ -213,7 +215,7 @@ export const DecksPage = (): JSX.Element => {
               setFilterUser={setFilterUser}
             />
           </Grid>
-          <Grid item xs={12} sm={6} md={3} lg={2}>
+          <Grid item xs={12} sm={12} md={4} lg={3}>
             <TextField
               fullWidth
               size="small"
@@ -222,11 +224,6 @@ export const DecksPage = (): JSX.Element => {
               onChange={(e) => setSearchQuery(e.target.value)}
               // sx={{ minWidth: 140 }}
             />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3} lg={2}>
-            <Button fullWidth variant="contained">
-              add deck
-            </Button>
           </Grid>
         </Grid>
       </Toolbar>
