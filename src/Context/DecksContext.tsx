@@ -9,6 +9,7 @@ import {
 } from "react";
 
 import { CreateDecksInput, Decks, UpdateDecksInput } from "@/API";
+import { useApp } from "@/Context";
 import { createDeck, deleteDeck, getAllDecks, updateDeck } from "@/Logic";
 
 interface DecksContextType {
@@ -23,6 +24,7 @@ interface DecksContextType {
 const DecksContext = createContext<DecksContextType | undefined>(undefined);
 
 export const DecksProvider = ({ children }: PropsWithChildren<{}>) => {
+  const { addAppMessage } = useApp();
   const { user } = useAuthenticator((context) => [context.user]);
   const [allDecks, setAllDecks] = useState<Decks[]>([]);
   const [userDecks, setUserDecks] = useState<Decks[]>([]);
@@ -44,7 +46,11 @@ export const DecksProvider = ({ children }: PropsWithChildren<{}>) => {
         allDecksResponse.filter((deck) => deck.deckOwnerID === user.userId),
       );
     } catch (error) {
-      console.error("Failed to fetch decks:", error);
+      addAppMessage({
+        title: "failed to fetch deck list",
+        content: "check console for more details",
+        severity: "error",
+      });
       setAllDecks([]);
       setUserDecks([]);
     } finally {
@@ -55,11 +61,21 @@ export const DecksProvider = ({ children }: PropsWithChildren<{}>) => {
   const createNewDeck = async (newDeck: CreateDecksInput) => {
     const deck = await createDeck(newDeck);
     if (deck) {
+      addAppMessage({
+        content: `${deck.deckName} added to deck list`,
+        severity: "success",
+      });
       // Add the new deck to the state
       setAllDecks((prevDecks) => [...prevDecks, deck]);
       if (deck.deckOwnerID === user?.userId) {
         setUserDecks((prevDecks) => [...prevDecks, deck]);
       }
+    } else {
+      addAppMessage({
+        title: "failed to add deck to deck list",
+        content: "check console for more details",
+        severity: "error",
+      });
     }
   };
 
@@ -67,6 +83,10 @@ export const DecksProvider = ({ children }: PropsWithChildren<{}>) => {
     setDecksLoading(true);
     const updateDeckResponse = await updateDeck(updatedDeck);
     if (updateDeckResponse) {
+      addAppMessage({
+        content: `${updatedDeck.deckName} has been updated`,
+        severity: "success",
+      });
       // Add the updated deck to the state
       setAllDecks((prevDecks) =>
         prevDecks.map((d) =>
@@ -80,6 +100,12 @@ export const DecksProvider = ({ children }: PropsWithChildren<{}>) => {
           ),
         );
       }
+    } else {
+      addAppMessage({
+        title: `failed to update ${updatedDeck.deckName}`,
+        content: "check console for more details",
+        severity: "error",
+      });
     }
     setDecksLoading(false);
   };
@@ -88,6 +114,10 @@ export const DecksProvider = ({ children }: PropsWithChildren<{}>) => {
     setDecksLoading(true);
     const success = await deleteDeck(deckId);
     if (success) {
+      addAppMessage({
+        content: "deck has been removed",
+        severity: "info",
+      });
       // Filter out the deleted deck from allDecks and userDecks
       setAllDecks((prevDecks) =>
         prevDecks.filter((deck) => deck.id !== deckId),
@@ -95,6 +125,12 @@ export const DecksProvider = ({ children }: PropsWithChildren<{}>) => {
       setUserDecks((prevDecks) =>
         prevDecks.filter((deck) => deck.id !== deckId),
       );
+    } else {
+      addAppMessage({
+        title: "failed to remove deck",
+        content: "check console for more details",
+        severity: "error",
+      });
     }
     setDecksLoading(false);
   };

@@ -1,4 +1,3 @@
-import { useAuthenticator } from "@aws-amplify/ui-react";
 import { Login } from "@mui/icons-material";
 import {
   AppBar,
@@ -17,8 +16,7 @@ import { ThemeToggle } from "@/Components";
 import { useUser } from "@/Context";
 
 export const Toolbar = () => {
-  const { signOut } = useAuthenticator((context) => [context.user]);
-  const { authenticatedUser, currentUserProfile } = useUser();
+  const { authenticatedUser, currentUserProfile, signOutUser } = useUser();
 
   const [userMenuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
 
@@ -38,9 +36,8 @@ export const Toolbar = () => {
   };
 
   const handleSignOut = async () => {
-    navigate("/");
-    signOut();
     handleUserMenuClose();
+    signOutUser();
   };
 
   const loggedInOptions = [
@@ -116,9 +113,13 @@ export const Toolbar = () => {
               cursor: "pointer",
             }}
           >
-            {!authenticatedUser && <Login sx={{
-              color: (theme) => theme.palette.text.primary,
-            }} />}
+            {!authenticatedUser && (
+              <Login
+                sx={{
+                  color: (theme) => theme.palette.text.primary,
+                }}
+              />
+            )}
           </Avatar>
         </Stack>
       </MuiToolbar>

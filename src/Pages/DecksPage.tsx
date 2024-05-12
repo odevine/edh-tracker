@@ -11,14 +11,14 @@ import {
   TableRow,
   TextField,
   Toolbar,
-  Typography,
   useMediaQuery,
   useTheme as useMuiTheme,
 } from "@mui/material";
+import { navigate } from "raviger";
 import { useMemo, useState } from "react";
 
 import { Decks, Users } from "@/API";
-import { EnhancedTableHead, GradientChip, HeadCell } from "@/Components";
+import { CommanderColors, EnhancedTableHead, HeadCell } from "@/Components";
 import { useDecks, useTheme, useUser } from "@/Context";
 import { ColumnSortOrder, getComparator } from "@/Logic";
 
@@ -26,28 +26,38 @@ const headCells: HeadCell<Decks>[] = [
   {
     id: "deckName",
     label: "name",
+    sortable: true,
   },
   {
     id: "deckOwnerID",
     label: "player",
+    sortable: true,
   },
   {
     id: "deckType",
     label: "type",
+    sortable: true,
   },
   {
     id: "commanderName",
     label: "commander",
+    sortable: true,
+  },
+  {
+    id: "commanderColors",
+    label: "colors",
   },
   {
     id: "cost",
     label: "cost",
     alignment: "right",
+    sortable: true,
   },
   {
     id: "updatedAt",
     label: "last updated",
     alignment: "right",
+    sortable: true,
   },
 ];
 
@@ -58,6 +68,7 @@ const PlayerSelector = (props: {
   setFilterUser: (newUser: string) => void;
 }) => {
   const { allDecks, allUserProfiles, filterUser, setFilterUser } = props;
+  const { mode } = useTheme();
 
   // Generate the unique list of user options
   const userOptions = useMemo(() => {
@@ -75,6 +86,8 @@ const PlayerSelector = (props: {
       .map((profile) => ({
         id: profile.id,
         displayName: profile.displayName,
+        color:
+          mode === "light" ? profile.lightThemeColor : profile.darkThemeColor,
       }));
   }, [allDecks, allUserProfiles]);
 
@@ -90,7 +103,11 @@ const PlayerSelector = (props: {
     >
       <MenuItem value="all">all users</MenuItem>
       {userOptions.map((option) => (
-        <MenuItem key={option.id} value={option.displayName}>
+        <MenuItem
+          key={option.id}
+          value={option.displayName}
+          sx={{ color: option.color }}
+        >
           {option.displayName}
         </MenuItem>
       ))}
@@ -145,7 +162,7 @@ export const DecksPage = (): JSX.Element => {
   const [order, setOrder] = useState<ColumnSortOrder>("desc");
   const [orderBy, setOrderBy] = useState<keyof Decks>("updatedAt");
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(15);
 
   const handleRequestSort = (property: keyof Decks) => {
     const isAsc = orderBy === property && order === "asc";
@@ -175,13 +192,6 @@ export const DecksPage = (): JSX.Element => {
     );
   }, [allDecks, searchQuery, filterType, filterUser]);
 
-  const visibleRows = useMemo(() => {
-    // First, create a shallow copy of the rows array and then sort it
-    return [...filteredDecks]
-      .sort(getComparator<Decks>(order, orderBy))
-      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
-  }, [order, orderBy, page, rowsPerPage, filteredDecks]);
-
   const userProfileMap = useMemo(() => {
     return new Map(
       allUserProfiles.map((profile) => [
@@ -194,6 +204,13 @@ export const DecksPage = (): JSX.Element => {
       ]),
     );
   }, [allUserProfiles, mode]);
+
+  const visibleRows = useMemo(() => {
+    // First, create a shallow copy of the rows array and then sort it
+    return [...filteredDecks]
+      .sort(getComparator<Decks>(order, orderBy, userProfileMap))
+      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  }, [order, orderBy, page, rowsPerPage, filteredDecks, userProfileMap]);
 
   return (
     <Paper sx={{ m: 3 }}>
@@ -236,62 +253,84 @@ export const DecksPage = (): JSX.Element => {
             onRequestSort={(_event, property) => handleRequestSort(property)}
           />
           <TableBody>
-            {visibleRows.map((deck) => (
-              <TableRow key={deck.id}>
-                <TableCell>
-                  {deck.link ? (
-                    <Link
-                      href={deck.link ?? undefined}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {deck.deckName}
-                    </Link>
-                  ) : (
-                    deck.deckName
-                  )}
-                </TableCell>
-                <TableCell>
-                  {userProfileMap.has(deck.deckOwnerID) && (
-                    <Typography
-                      sx={{
-                        color:
-                          mode === "light"
-                            ? (userProfileMap.get(deck.deckOwnerID) as Users)
-                                .lightThemeColor
-                            : (userProfileMap.get(deck.deckOwnerID) as Users)
-                                .darkThemeColor,
-                      }}
-                    >
-                      {userProfileMap.get(deck.deckOwnerID)?.displayName}
-                    </Typography>
-                  )}
-                </TableCell>
-                <TableCell>{deck.deckType}</TableCell>
-                <TableCell>
-                  <GradientChip
-                    label={deck.commanderName}
-                    colors={deck.commanderColors ?? []}
-                  />
-                </TableCell>
-                <TableCell align="right">
-                  {deck.cost
-                    ? deck.cost?.toLocaleString("en-US", {
-                        style: "currency",
-                        currency: "USD",
-                      })
-                    : ""}
-                </TableCell>
-                <TableCell align="right">
-                  {dateFormatter.format(new Date(deck.updatedAt))}
-                </TableCell>
-              </TableRow>
-            ))}
+            {visibleRows.map((deck) => {
+              const ownerProfile = userProfileMap.get(deck.deckOwnerID);
+              let ownerProfileColor;
+              if (ownerProfile) {
+                ownerProfileColor =
+                  mode === "light"
+                    ? ownerProfile.lightThemeColor
+                    : ownerProfile.darkThemeColor;
+              }
+              return (
+                <TableRow
+                  key={deck.id}
+                  sx={{
+                    backgroundColor: ownerProfileColor
+                      ? `${ownerProfileColor}26`
+                      : "none",
+                  }}
+                >
+                  <TableCell>
+                    {deck.link ? (
+                      <Link
+                        href={deck.link ?? undefined}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        sx={{
+                          color: (theme) => theme.palette.text.primary,
+                          fontWeight: "bold",
+                          textDecoration: "none",
+                          "&:hover": { textDecoration: "underline" },
+                        }}
+                      >
+                        {deck.deckName}
+                      </Link>
+                    ) : (
+                      deck.deckName
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {ownerProfile && (
+                      <Link
+                        sx={{
+                          color: ownerProfileColor ?? "inherit",
+                          textDecoration: "none",
+                          cursor: "pointer",
+                          "&:hover": {
+                            textDecoration: "underline",
+                          },
+                        }}
+                        onClick={() => navigate(`/profile/${deck.deckOwnerID}`)}
+                      >
+                        {userProfileMap.get(deck.deckOwnerID)?.displayName}
+                      </Link>
+                    )}
+                  </TableCell>
+                  <TableCell>{deck.deckType}</TableCell>
+                  <TableCell>{deck.commanderName}</TableCell>
+                  <TableCell>
+                    <CommanderColors colors={deck.commanderColors ?? []} />
+                  </TableCell>
+                  <TableCell align="right">
+                    {deck.cost
+                      ? deck.cost?.toLocaleString("en-US", {
+                          style: "currency",
+                          currency: "USD",
+                        })
+                      : "-"}
+                  </TableCell>
+                  <TableCell align="right">
+                    {dateFormatter.format(new Date(deck.updatedAt))}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </TableContainer>
       <TablePagination
-        rowsPerPageOptions={[10, 25, 50]}
+        rowsPerPageOptions={[15, 25, 50]}
         component="div"
         count={filteredDecks.length}
         page={page}

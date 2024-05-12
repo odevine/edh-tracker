@@ -22,15 +22,12 @@ export const Profile = (props: { profileId: string }): JSX.Element => {
     allUserProfiles,
     usersLoading,
     authenticatedUser,
-    currentUserProfile,
   } = useUser();
-    console.log("  ~ Profile ~ usersLoading:", usersLoading);
 
   const currentProfile = allUserProfiles.filter(
     (profile) => profile.id === profileId,
   )[0];
   const ownUser = profileId === authenticatedUser?.userId;
-  console.log("  ~ Profile ~ currentProfile:", currentProfile);
 
   if (!currentProfile) {
     return <LoadingBackdrop />;
@@ -55,13 +52,10 @@ export const Profile = (props: { profileId: string }): JSX.Element => {
                         width: 120,
                         backgroundColor: "primary",
                       }}
-                      src={currentUserProfile?.profilePictureURL ?? ""}
+                      src={currentProfile?.profilePictureURL ?? ""}
                     />
                     <Stack direction="row" alignItems="center" spacing={1}>
-                      <Typography>
-                        {currentUserProfile?.displayName ??
-                          authenticatedUser?.username}
-                      </Typography>
+                      <Typography>{currentProfile.displayName}</Typography>
                     </Stack>
                   </Stack>
                 </CardContent>
@@ -73,25 +67,8 @@ export const Profile = (props: { profileId: string }): JSX.Element => {
               </Grid>
             )}
             <Grid item xs={12}>
-              <UserDecksCard ownUser={ownUser} profileId={profileId} />
+              <UserDecksCard ownUser={ownUser} userProfile={currentProfile} />
             </Grid>
-            {ownUser && (
-              <Grid item xs={12}>
-                <Card>
-                  <CardHeader title="change password" />
-                  <Divider />
-                  <CardContent>
-                    <Stack spacing={3}>
-                      <TextField label="password" />
-                      <TextField label="confirm password" />
-                    </Stack>
-                  </CardContent>
-                  <CardActions sx={{ justifyContent: "flex-end" }}>
-                    <Button variant="contained">update password</Button>
-                  </CardActions>
-                </Card>
-              </Grid>
-            )}
           </Grid>
         </Container>
       </>

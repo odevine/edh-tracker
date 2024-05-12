@@ -1,4 +1,4 @@
 export * from "./DecksPage";
-export * from "./Home";
-export * from "./Matches";
-export * from "./Profile";
+export * from "./HomePage";
+export * from "./MatchesPage";
+export * from "./ProfilePage";

@@ -4,6 +4,7 @@ import {
   TableHead,
   TableRow,
   TableSortLabel,
+  Typography,
 } from "@mui/material";
 import { visuallyHidden } from "@mui/utils";
 
@@ -13,6 +14,7 @@ export interface HeadCell<T> {
   id: keyof T;
   label: string;
   alignment?: "right" | "left";
+  sortable?: boolean;
 }
 
 export interface EnhancedTableProps<T> {
@@ -38,18 +40,29 @@ export const EnhancedTableHead = <T,>(props: EnhancedTableProps<T>) => {
             align={headCell.alignment ?? "left"}
             sortDirection={orderBy === headCell.id ? order : false}
           >
-            <TableSortLabel
-              active={orderBy === headCell.id}
-              direction={orderBy === headCell.id ? order : "asc"}
-              onClick={createSortHandler(headCell.id)}
-            >
-              {headCell.label}
-              {orderBy === headCell.id ? (
-                <Box component="span" sx={visuallyHidden}>
-                  {order === "desc" ? "sorted descending" : "sorted ascending"}
-                </Box>
-              ) : null}
-            </TableSortLabel>
+            {headCell.sortable && (
+              <TableSortLabel
+                active={orderBy === headCell.id}
+                direction={orderBy === headCell.id ? order : "asc"}
+                onClick={createSortHandler(headCell.id)}
+              >
+                <Typography sx={{ fontWeight: "bold" }}>
+                  {headCell.label}
+                </Typography>
+                {orderBy === headCell.id ? (
+                  <Box component="span" sx={visuallyHidden}>
+                    {order === "desc"
+                      ? "sorted descending"
+                      : "sorted ascending"}
+                  </Box>
+                ) : null}
+              </TableSortLabel>
+            )}
+            {!headCell.sortable && (
+              <Typography sx={{ fontWeight: "bold" }}>
+                {headCell.label}
+              </Typography>
+            )}
           </TableCell>
         ))}
       </TableRow>

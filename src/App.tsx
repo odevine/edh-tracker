@@ -4,7 +4,8 @@ import { Box, Stack, Typography } from "@mui/material";
 import { Amplify } from "aws-amplify";
 import { Redirect, useRoutes } from "raviger";
 
-import { Toolbar } from "@/Components";
+import { AppAlertList, Toolbar } from "@/Components";
+import { useApp } from "@/Context";
 import { DecksPage, HomePage, MatchesPage, Profile } from "@/Pages";
 import config from "./aws-exports";
 
@@ -38,6 +39,7 @@ const ProtectedRoutes = () => (
 );
 
 export const App = () => {
+  const { appMessages, deleteAppMessage } = useApp();
   const routeResult = useRoutes(baseRoutes);
 
   return (
@@ -52,6 +54,7 @@ export const App = () => {
       >
         {routeResult || <h1>404 Not Found</h1>}
       </Box>
+      <AppAlertList messages={appMessages} onDelete={deleteAppMessage} />
     </>
   );
 };

@@ -1,5 +1,6 @@
 import { useAuthenticator } from "@aws-amplify/ui-react";
 import { AuthUser } from "aws-amplify/auth";
+import { navigate } from "raviger";
 import {
   PropsWithChildren,
   createContext,
@@ -10,6 +11,7 @@ import {
 
 import { UpdateUsersInput, Users } from "@/API";
 import { createUser, getAllUsers, updateUser } from "@/Logic";
+import { useApp } from "@/Context";
 
 // Define the type for the user profile context
 interface UserContextType {
@@ -18,6 +20,7 @@ interface UserContextType {
   currentUserProfile: Users | null;
   updateUserProfile: (updatedUser: UpdateUsersInput) => Promise<void>;
   usersLoading: boolean;
+  signOutUser: () => void;
 }
 
 // Create the context
@@ -25,7 +28,8 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 // UserProvider component
 export const UserProvider = ({ children }: PropsWithChildren<{}>) => {
-  const { user } = useAuthenticator((context) => [context.user]);
+  const { addAppMessage } = useApp();
+  const { user, signOut } = useAuthenticator((context) => [context.user]);
   const [allUserProfiles, setAllUserProfiles] = useState<Users[]>([]);
   const [currentUserProfile, setCurrentUserProfile] = useState<Users | null>(
     null,
@@ -39,6 +43,12 @@ export const UserProvider = ({ children }: PropsWithChildren<{}>) => {
     }
   }, [user]);
 
+  const signOutUser = () => {
+    signOut();
+    setCurrentUserProfile(null);
+    navigate("/");
+  };
+
   const fetchUsers = async () => {
     try {
       const users = await getAllUsers();
@@ -47,13 +57,17 @@ export const UserProvider = ({ children }: PropsWithChildren<{}>) => {
       let currentUserProfile =
         allUsersResponse.filter((u) => u.id === user.userId)[0] ?? null;
       if (!currentUserProfile) {
-        console.log("No profile found, generating new profile");
+        console.log("no profile found, generating new profile");
         currentUserProfile = await createUser(user);
         setAllUserProfiles((prevState) => [...prevState, currentUserProfile]);
       }
       setCurrentUserProfile(currentUserProfile);
     } catch (error) {
-      console.error("Failed to fetch decks:", error);
+      addAppMessage({
+        title: "failed to fetch user profiles",
+        content: "check console for more details",
+        severity: "error"
+      })
       setAllUserProfiles([]);
       setCurrentUserProfile(null);
     } finally {
@@ -64,12 +78,22 @@ export const UserProvider = ({ children }: PropsWithChildren<{}>) => {
   const updateUserProfile = async (updatedUser: UpdateUsersInput) => {
     const userResponse = await updateUser(updatedUser);
     if (userResponse) {
+      addAppMessage({
+        content: "user profile has been updated",
+        severity: "success"
+      })
       setAllUserProfiles((prevState) =>
         prevState.map((u) => (u.id === updatedUser.id ? userResponse : u)),
       );
       if (updatedUser.id === user.userId) {
         setCurrentUserProfile(userResponse);
       }
+    } else {
+      addAppMessage({
+        title: "failed to update user profile",
+        content: "check console for more details",
+        severity: "error"
+      })
     }
   };
 
@@ -81,6 +105,7 @@ export const UserProvider = ({ children }: PropsWithChildren<{}>) => {
         currentUserProfile,
         updateUserProfile,
         usersLoading,
+        signOutUser,
       }}
     >
       {children}
