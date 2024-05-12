@@ -1,13 +1,21 @@
-import { Login } from "@mui/icons-material";
+import { Login, Menu as MenuIcon } from "@mui/icons-material";
 import {
   AppBar,
   Avatar,
   Box,
+  Divider,
+  Drawer,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
   Menu,
   MenuItem,
   MenuItemProps,
   Toolbar as MuiToolbar,
   Stack,
+  Typography,
 } from "@mui/material";
 import { navigate } from "raviger";
 import { useState } from "react";
@@ -19,6 +27,21 @@ export const Toolbar = () => {
   const { authenticatedUser, currentUserProfile, signOutUser } = useUser();
 
   const [userMenuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const navItems = [
+    { label: "overview", action: () => navigate("/"), disabled: false },
+    {
+      label: "decks",
+      action: () => navigate("/decks"),
+      disabled: !authenticatedUser,
+    },
+    {
+      label: "matches",
+      action: () => navigate("/matches"),
+      disabled: !authenticatedUser,
+    },
+  ];
 
   const isUserMenuOpen = Boolean(userMenuAnchor);
 
@@ -82,48 +105,92 @@ export const Toolbar = () => {
   );
 
   return (
-    <AppBar position="static">
-      <MuiToolbar>
-        <Stack direction="row" spacing={1}>
-          <CustomMenuItem onClick={() => navigate("/")}>
-            overview
-          </CustomMenuItem>
-          <CustomMenuItem
-            onClick={() => navigate("/decks")}
-            disabled={!authenticatedUser}
+    <>
+      <AppBar position="static" component="nav">
+        <MuiToolbar>
+          <IconButton
+            edge="start"
+            sx={{ mr: 2, display: { sm: "none" } }}
+            onClick={() => setDrawerOpen(true)}
           >
-            decks
-          </CustomMenuItem>
-          <CustomMenuItem
-            onClick={() => navigate("/matches")}
-            disabled={!authenticatedUser}
+            <MenuIcon />
+          </IconButton>
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{ display: { xs: "none", sm: "flex" } }}
           >
-            matches
-          </CustomMenuItem>
-        </Stack>
-
-        <Box flexGrow={1} />
-        <Stack direction="row" spacing={1}>
-          <ThemeToggle />
-          <Avatar
-            onClick={handleUserMenuOpen}
-            src={currentUserProfile?.profilePictureURL ?? ""}
-            sx={{
-              backgroundColor: (theme) => theme.palette.primary.main,
-              cursor: "pointer",
-            }}
-          >
-            {!authenticatedUser && (
-              <Login
-                sx={{
-                  color: (theme) => theme.palette.text.primary,
+            {navItems.map((item) => (
+              <CustomMenuItem
+                onClick={item.action}
+                disabled={item.disabled}
+                key={item.label}
+              >
+                {item.label}
+              </CustomMenuItem>
+            ))}
+          </Stack>
+          <Box flexGrow={1} />
+          <Stack direction="row" spacing={1}>
+            <ThemeToggle />
+            <Avatar
+              onClick={handleUserMenuOpen}
+              src={currentUserProfile?.profilePictureURL ?? ""}
+              sx={{
+                backgroundColor: (theme) => theme.palette.primary.main,
+                cursor: "pointer",
+              }}
+            >
+              {!authenticatedUser && (
+                <Login
+                  sx={{
+                    color: (theme) => theme.palette.text.primary,
+                  }}
+                />
+              )}
+            </Avatar>
+          </Stack>
+        </MuiToolbar>
+        {renderUserMenu}
+      </AppBar>
+      <nav>
+        <Drawer
+          variant="temporary"
+          open={drawerOpen}
+          onClose={() => setDrawerOpen(false)}
+          ModalProps={{
+            keepMounted: true, // Better open performance on mobile.
+          }}
+          sx={{
+            display: { xs: "block", sm: "none" },
+            "& .MuiDrawer-paper": {
+              boxSizing: "border-box",
+              width: 240,
+            },
+          }}
+        >
+          <Typography variant="h6" sx={{ mx: "auto", my: 2 }}>
+            hehEDH
+          </Typography>
+          <Divider />
+          <List>
+            {navItems.map((item) => (
+              <ListItem
+                key={item.label}
+                disablePadding
+                onClick={() => {
+                  item.action();
+                  setDrawerOpen(false);
                 }}
-              />
-            )}
-          </Avatar>
-        </Stack>
-      </MuiToolbar>
-      {renderUserMenu}
-    </AppBar>
+              >
+                <ListItemButton sx={{ textAlign: "center" }}>
+                  <ListItemText primary={item.label} />
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+        </Drawer>
+      </nav>
+    </>
   );
 };
