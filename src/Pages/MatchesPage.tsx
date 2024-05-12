@@ -3,7 +3,7 @@ import { Stack, Typography } from "@mui/material";
 export const MatchesPage = (): JSX.Element => {
   return (
     <Stack
-      sx={{ height: "100%", width: "100%" }}
+      sx={{ height: "100%", width: "100%", textAlign: "center" }}
       justifyContent="center"
       alignItems="center"
       spacing={2}
