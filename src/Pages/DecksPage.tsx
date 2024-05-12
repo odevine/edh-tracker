@@ -18,7 +18,7 @@ import { navigate } from "raviger";
 import { useMemo, useState } from "react";
 
 import { Decks, Users } from "@/API";
-import { EnhancedTableHead, GradientChip, HeadCell } from "@/Components";
+import { EnhancedTableHead, HeadCell } from "@/Components";
 import { useDecks, useTheme, useUser } from "@/Context";
 import { ColumnSortOrder, getComparator } from "@/Logic";
 
@@ -298,9 +298,7 @@ export const DecksPage = (): JSX.Element => {
                     )}
                   </TableCell>
                   <TableCell>{deck.deckType}</TableCell>
-                  <TableCell>
-                    {deck.commanderName}
-                  </TableCell>
+                  <TableCell>{deck.commanderName}</TableCell>
                   <TableCell align="right">
                     {deck.cost
                       ? deck.cost?.toLocaleString("en-US", {

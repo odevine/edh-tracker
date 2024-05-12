@@ -69,23 +69,6 @@ export const Profile = (props: { profileId: string }): JSX.Element => {
             <Grid item xs={12}>
               <UserDecksCard ownUser={ownUser} userProfile={currentProfile} />
             </Grid>
-            {ownUser && (
-              <Grid item xs={12}>
-                <Card>
-                  <CardHeader title="change password" />
-                  <Divider />
-                  <CardContent>
-                    <Stack spacing={3}>
-                      <TextField label="password" />
-                      <TextField label="confirm password" />
-                    </Stack>
-                  </CardContent>
-                  <CardActions sx={{ justifyContent: "flex-end" }}>
-                    <Button variant="contained">update password</Button>
-                  </CardActions>
-                </Card>
-              </Grid>
-            )}
           </Grid>
         </Container>
       </>
