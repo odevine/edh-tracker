@@ -182,13 +182,6 @@ export const DecksPage = (): JSX.Element => {
     );
   }, [allDecks, searchQuery, filterType, filterUser]);
 
-  const visibleRows = useMemo(() => {
-    // First, create a shallow copy of the rows array and then sort it
-    return [...filteredDecks]
-      .sort(getComparator<Decks>(order, orderBy))
-      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
-  }, [order, orderBy, page, rowsPerPage, filteredDecks]);
-
   const userProfileMap = useMemo(() => {
     return new Map(
       allUserProfiles.map((profile) => [
@@ -201,6 +194,13 @@ export const DecksPage = (): JSX.Element => {
       ]),
     );
   }, [allUserProfiles, mode]);
+
+  const visibleRows = useMemo(() => {
+    // First, create a shallow copy of the rows array and then sort it
+    return [...filteredDecks]
+      .sort(getComparator<Decks>(order, orderBy, userProfileMap))
+      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  }, [order, orderBy, page, rowsPerPage, filteredDecks, userProfileMap]);
 
   return (
     <Paper sx={{ m: 3 }}>
