@@ -18,7 +18,7 @@ import { navigate } from "raviger";
 import { useMemo, useState } from "react";
 
 import { Decks, Users } from "@/API";
-import { EnhancedTableHead, HeadCell } from "@/Components";
+import { CommanderColors, EnhancedTableHead, HeadCell } from "@/Components";
 import { useDecks, useTheme, useUser } from "@/Context";
 import { ColumnSortOrder, getComparator } from "@/Logic";
 
@@ -26,28 +26,38 @@ const headCells: HeadCell<Decks>[] = [
   {
     id: "deckName",
     label: "name",
+    sortable: true,
   },
   {
     id: "deckOwnerID",
     label: "player",
+    sortable: true,
   },
   {
     id: "deckType",
     label: "type",
+    sortable: true,
   },
   {
     id: "commanderName",
     label: "commander",
+    sortable: true,
+  },
+  {
+    id: "commanderColors",
+    label: "colors",
   },
   {
     id: "cost",
     label: "cost",
     alignment: "right",
+    sortable: true,
   },
   {
     id: "updatedAt",
     label: "last updated",
     alignment: "right",
+    sortable: true,
   },
 ];
 
@@ -299,6 +309,9 @@ export const DecksPage = (): JSX.Element => {
                   </TableCell>
                   <TableCell>{deck.deckType}</TableCell>
                   <TableCell>{deck.commanderName}</TableCell>
+                  <TableCell>
+                    <CommanderColors colors={deck.commanderColors ?? []} />
+                  </TableCell>
                   <TableCell align="right">
                     {deck.cost
                       ? deck.cost?.toLocaleString("en-US", {
