@@ -1,15 +1,10 @@
 import {
   Avatar,
-  Button,
   Card,
-  CardActions,
   CardContent,
-  CardHeader,
   Container,
-  Divider,
   Grid,
   Stack,
-  TextField,
   Typography,
 } from "@mui/material";
 
@@ -18,11 +13,7 @@ import { useUser } from "@/Context";
 
 export const Profile = (props: { profileId: string }): JSX.Element => {
   const { profileId } = props;
-  const {
-    allUserProfiles,
-    usersLoading,
-    authenticatedUser,
-  } = useUser();
+  const { allUserProfiles, usersLoading, authenticatedUser } = useUser();
 
   const currentProfile = allUserProfiles.filter(
     (profile) => profile.id === profileId,
