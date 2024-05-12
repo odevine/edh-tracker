@@ -1,5 +1,6 @@
 import { useAuthenticator } from "@aws-amplify/ui-react";
 import { AuthUser } from "aws-amplify/auth";
+import { navigate } from "raviger";
 import {
   PropsWithChildren,
   createContext,
@@ -18,6 +19,7 @@ interface UserContextType {
   currentUserProfile: Users | null;
   updateUserProfile: (updatedUser: UpdateUsersInput) => Promise<void>;
   usersLoading: boolean;
+  signOutUser: () => void;
 }
 
 // Create the context
@@ -25,7 +27,7 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 // UserProvider component
 export const UserProvider = ({ children }: PropsWithChildren<{}>) => {
-  const { user } = useAuthenticator((context) => [context.user]);
+  const { user, signOut } = useAuthenticator((context) => [context.user]);
   const [allUserProfiles, setAllUserProfiles] = useState<Users[]>([]);
   const [currentUserProfile, setCurrentUserProfile] = useState<Users | null>(
     null,
@@ -38,6 +40,12 @@ export const UserProvider = ({ children }: PropsWithChildren<{}>) => {
       fetchUsers();
     }
   }, [user]);
+
+  const signOutUser = () => {
+    signOut();
+    setCurrentUserProfile(null);
+    navigate("/");
+  };
 
   const fetchUsers = async () => {
     try {
@@ -81,6 +89,7 @@ export const UserProvider = ({ children }: PropsWithChildren<{}>) => {
         currentUserProfile,
         updateUserProfile,
         usersLoading,
+        signOutUser,
       }}
     >
       {children}
