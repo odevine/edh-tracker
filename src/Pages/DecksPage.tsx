@@ -152,7 +152,7 @@ export const DecksPage = (): JSX.Element => {
   const [order, setOrder] = useState<ColumnSortOrder>("desc");
   const [orderBy, setOrderBy] = useState<keyof Decks>("updatedAt");
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(15);
 
   const handleRequestSort = (property: keyof Decks) => {
     const isAsc = orderBy === property && order === "asc";
@@ -319,7 +319,7 @@ export const DecksPage = (): JSX.Element => {
         </Table>
       </TableContainer>
       <TablePagination
-        rowsPerPageOptions={[10, 25, 50]}
+        rowsPerPageOptions={[15, 25, 50]}
         component="div"
         count={filteredDecks.length}
         page={page}
