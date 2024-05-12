@@ -11,10 +11,10 @@ import {
   TableRow,
   TextField,
   Toolbar,
-  Typography,
   useMediaQuery,
   useTheme as useMuiTheme,
 } from "@mui/material";
+import { navigate } from "raviger";
 import { useMemo, useState } from "react";
 
 import { Decks, Users } from "@/API";
@@ -58,6 +58,7 @@ const PlayerSelector = (props: {
   setFilterUser: (newUser: string) => void;
 }) => {
   const { allDecks, allUserProfiles, filterUser, setFilterUser } = props;
+  const { mode } = useTheme();
 
   // Generate the unique list of user options
   const userOptions = useMemo(() => {
@@ -75,6 +76,8 @@ const PlayerSelector = (props: {
       .map((profile) => ({
         id: profile.id,
         displayName: profile.displayName,
+        color:
+          mode === "light" ? profile.lightThemeColor : profile.darkThemeColor,
       }));
   }, [allDecks, allUserProfiles]);
 
@@ -90,7 +93,11 @@ const PlayerSelector = (props: {
     >
       <MenuItem value="all">all users</MenuItem>
       {userOptions.map((option) => (
-        <MenuItem key={option.id} value={option.displayName}>
+        <MenuItem
+          key={option.id}
+          value={option.displayName}
+          sx={{ color: option.color }}
+        >
           {option.displayName}
         </MenuItem>
       ))}
@@ -236,57 +243,78 @@ export const DecksPage = (): JSX.Element => {
             onRequestSort={(_event, property) => handleRequestSort(property)}
           />
           <TableBody>
-            {visibleRows.map((deck) => (
-              <TableRow key={deck.id}>
-                <TableCell>
-                  {deck.link ? (
-                    <Link
-                      href={deck.link ?? undefined}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {deck.deckName}
-                    </Link>
-                  ) : (
-                    deck.deckName
-                  )}
-                </TableCell>
-                <TableCell>
-                  {userProfileMap.has(deck.deckOwnerID) && (
-                    <Typography
-                      sx={{
-                        color:
-                          mode === "light"
-                            ? (userProfileMap.get(deck.deckOwnerID) as Users)
-                                .lightThemeColor
-                            : (userProfileMap.get(deck.deckOwnerID) as Users)
-                                .darkThemeColor,
-                      }}
-                    >
-                      {userProfileMap.get(deck.deckOwnerID)?.displayName}
-                    </Typography>
-                  )}
-                </TableCell>
-                <TableCell>{deck.deckType}</TableCell>
-                <TableCell>
-                  <GradientChip
-                    label={deck.commanderName}
-                    colors={deck.commanderColors ?? []}
-                  />
-                </TableCell>
-                <TableCell align="right">
-                  {deck.cost
-                    ? deck.cost?.toLocaleString("en-US", {
-                        style: "currency",
-                        currency: "USD",
-                      })
-                    : ""}
-                </TableCell>
-                <TableCell align="right">
-                  {dateFormatter.format(new Date(deck.updatedAt))}
-                </TableCell>
-              </TableRow>
-            ))}
+            {visibleRows.map((deck) => {
+              const ownerProfile = userProfileMap.get(deck.deckOwnerID);
+              let ownerProfileColor;
+              if (ownerProfile) {
+                ownerProfileColor =
+                  mode === "light"
+                    ? ownerProfile.lightThemeColor
+                    : ownerProfile.darkThemeColor;
+              }
+              return (
+                <TableRow
+                  key={deck.id}
+                  sx={{
+                    backgroundColor: ownerProfileColor
+                      ? `${ownerProfileColor}26`
+                      : "none",
+                  }}
+                >
+                  <TableCell>
+                    {deck.link ? (
+                      <Link
+                        href={deck.link ?? undefined}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        sx={{
+                          color: (theme) => theme.palette.text.primary,
+                          fontWeight: "bold",
+                          textDecoration: "none",
+                          "&:hover": { textDecoration: "underline" },
+                        }}
+                      >
+                        {deck.deckName}
+                      </Link>
+                    ) : (
+                      deck.deckName
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {ownerProfile && (
+                      <Link
+                        sx={{
+                          color: ownerProfileColor ?? "inherit",
+                          textDecoration: "none",
+                          cursor: "pointer",
+                          "&:hover": {
+                            textDecoration: "underline",
+                          },
+                        }}
+                        onClick={() => navigate(`/profile/${deck.deckOwnerID}`)}
+                      >
+                        {userProfileMap.get(deck.deckOwnerID)?.displayName}
+                      </Link>
+                    )}
+                  </TableCell>
+                  <TableCell>{deck.deckType}</TableCell>
+                  <TableCell>
+                    {deck.commanderName}
+                  </TableCell>
+                  <TableCell align="right">
+                    {deck.cost
+                      ? deck.cost?.toLocaleString("en-US", {
+                          style: "currency",
+                          currency: "USD",
+                        })
+                      : "-"}
+                  </TableCell>
+                  <TableCell align="right">
+                    {dateFormatter.format(new Date(deck.updatedAt))}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </TableContainer>

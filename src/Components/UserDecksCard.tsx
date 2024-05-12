@@ -21,23 +21,24 @@ import { useState } from "react";
 
 import { DeckModal, GradientChip } from "@/Components";
 import { useDecks } from "@/Context";
+import { Users } from "@/API";
 
 export const UserDecksCard = (props: {
   ownUser: boolean;
-  profileId: string;
+  userProfile: Users;
 }) => {
-  const { ownUser, profileId } = props;
+  const { ownUser, userProfile } = props;
   const { allDecks, deleteDeckById } = useDecks();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingDeckId, setEditingDeckId] = useState("");
 
-  const userDecks = allDecks.filter((deck) => deck.deckOwnerID === profileId);
+  const userDecks = allDecks.filter((deck) => deck.deckOwnerID === userProfile.id);
 
   return (
     <>
       <Card>
-        <CardHeader title={`${ownUser ? "your" : ""} decks`} />
+        <CardHeader title={`${ownUser ? "your" : `${userProfile.displayName}'${userProfile.displayName.slice(-1) !== "s" ? "s" : ""}`} decks`} />
         <Divider />
         <CardContent sx={{ minHeight: 154, overflowX: "auto" }}>
           {userDecks.length === 0 ? (
@@ -63,7 +64,7 @@ export const UserDecksCard = (props: {
                   <TableRow key={deck.id}>
                     <TableCell>
                       {deck.link ? (
-                        <Link href={deck.link} target="_blank">
+                        <Link href={deck.link} target="_blank" sx={{ color: (theme) => theme.palette.text.primary }}>
                           {deck.deckName}
                         </Link>
                       ) : (

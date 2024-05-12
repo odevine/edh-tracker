@@ -4,6 +4,7 @@ import {
   TableHead,
   TableRow,
   TableSortLabel,
+  Typography,
 } from "@mui/material";
 import { visuallyHidden } from "@mui/utils";
 
@@ -43,7 +44,7 @@ export const EnhancedTableHead = <T,>(props: EnhancedTableProps<T>) => {
               direction={orderBy === headCell.id ? order : "asc"}
               onClick={createSortHandler(headCell.id)}
             >
-              {headCell.label}
+              <Typography sx={{ fontWeight: "bold" }}>{headCell.label}</Typography>
               {orderBy === headCell.id ? (
                 <Box component="span" sx={visuallyHidden}>
                   {order === "desc" ? "sorted descending" : "sorted ascending"}
