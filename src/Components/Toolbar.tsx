@@ -144,7 +144,7 @@ export const Toolbar = () => {
               {!authenticatedUser && (
                 <Login
                   sx={{
-                    color: (theme) => theme.palette.text.primary,
+                    color: (theme) => theme.palette.background.paper,
                   }}
                 />
               )}

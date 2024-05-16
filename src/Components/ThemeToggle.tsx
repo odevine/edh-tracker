@@ -7,7 +7,15 @@ import { useTheme } from "@/Context";
 export const ThemeToggle = () => {
   const { toggleTheme, mode } = useTheme();
   return (
-    <IconButton onClick={toggleTheme}>
+    <IconButton
+      onClick={toggleTheme}
+      sx={{
+        color: (theme) =>
+          theme.palette.mode === "light"
+            ? theme.palette.background.paper
+            : theme.palette.text.primary,
+      }}
+    >
       {mode === "light" ? <Brightness7Icon /> : <Brightness4Icon />}
     </IconButton>
   );
