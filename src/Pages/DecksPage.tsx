@@ -1,4 +1,5 @@
 import {
+  Box,
   Grid,
   Link,
   MenuItem,
@@ -14,11 +15,17 @@ import {
   useMediaQuery,
   useTheme as useMuiTheme,
 } from "@mui/material";
-import { navigate } from "raviger";
+import PopupState, { bindHover, bindPopover } from "material-ui-popup-state";
+import HoverPopover from "material-ui-popup-state/HoverPopover";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Decks, Users } from "@/API";
-import { CommanderColors, EnhancedTableHead, HeadCell } from "@/Components";
+import {
+  CommanderColors,
+  EnhancedTableHead,
+  HeadCell,
+  ProfileMiniCard,
+} from "@/Components";
 import { useDecks, useTheme, useUser } from "@/Context";
 import { ColumnSortOrder, getComparator } from "@/Logic";
 
@@ -226,16 +233,7 @@ export const DecksPage = (): JSX.Element => {
   }, [allDecks, searchQuery, filterType, filterUser]);
 
   const userProfileMap = useMemo(() => {
-    return new Map(
-      allUserProfiles.map((profile) => [
-        profile.id,
-        {
-          displayName: profile.displayName,
-          lightThemeColor: profile.lightThemeColor,
-          darkThemeColor: profile.darkThemeColor,
-        },
-      ]),
-    );
+    return new Map(allUserProfiles.map((profile) => [profile.id, profile]));
   }, [allUserProfiles, mode]);
 
   const visibleRows = useMemo(() => {
@@ -272,7 +270,6 @@ export const DecksPage = (): JSX.Element => {
               label="search decks"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              // sx={{ minWidth: 140 }}
             />
           </Grid>
         </Grid>
@@ -325,19 +322,26 @@ export const DecksPage = (): JSX.Element => {
                   </TableCell>
                   <TableCell>
                     {ownerProfile && (
-                      <Link
-                        sx={{
-                          color: ownerProfileColor ?? "inherit",
-                          textDecoration: "none",
-                          cursor: "pointer",
-                          "&:hover": {
-                            textDecoration: "underline",
-                          },
-                        }}
-                        onClick={() => navigate(`/profile/${deck.deckOwnerID}`)}
-                      >
-                        {userProfileMap.get(deck.deckOwnerID)?.displayName}
-                      </Link>
+                      <PopupState variant="popover">
+                        {(popupState) => (
+                          <Box {...bindHover(popupState)}>
+                            {ownerProfile.displayName}
+                            <HoverPopover
+                              {...bindPopover(popupState)}
+                              anchorOrigin={{
+                                vertical: "top",
+                                horizontal: "right",
+                              }}
+                              transformOrigin={{
+                                vertical: "center",
+                                horizontal: "left",
+                              }}
+                            >
+                              <ProfileMiniCard profile={ownerProfile} />
+                            </HoverPopover>
+                          </Box>
+                        )}
+                      </PopupState>
                     )}
                   </TableCell>
                   <TableCell>{deck.deckType}</TableCell>

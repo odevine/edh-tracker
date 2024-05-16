@@ -19,6 +19,7 @@
     "aws-amplify": "^6.1.4",
     "axios": "^1.6.8",
     "lodash": "^4.17.21",
+    "material-ui-popup-state": "^5.1.0",
     "raviger": "^4.1.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
