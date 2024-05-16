@@ -15,7 +15,7 @@ import {
   useTheme as useMuiTheme,
 } from "@mui/material";
 import { navigate } from "raviger";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Decks, Users } from "@/API";
 import { CommanderColors, EnhancedTableHead, HeadCell } from "@/Components";
@@ -150,19 +150,52 @@ const dateFormatter = new Intl.DateTimeFormat("en-us", {
   dateStyle: "medium",
 });
 
+const localStorageKey = "decksPageState";
+const loadStateFromLocalStorage = () => {
+  const savedState = localStorage.getItem(localStorageKey);
+  if (savedState) {
+    return JSON.parse(savedState);
+  }
+  return {
+    filterType: "all",
+    filterUser: "all",
+    searchQuery: "",
+    order: "desc" as ColumnSortOrder,
+    orderBy: "updatedAt" as keyof Decks,
+    page: 0,
+    rowsPerPage: 15,
+  };
+};
+
 export const DecksPage = (): JSX.Element => {
   const { allDecks } = useDecks();
   const { allUserProfiles } = useUser();
   const { mode } = useTheme();
   const theme = useMuiTheme();
 
-  const [filterType, setFilterType] = useState("all");
-  const [filterUser, setFilterUser] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [order, setOrder] = useState<ColumnSortOrder>("desc");
-  const [orderBy, setOrderBy] = useState<keyof Decks>("updatedAt");
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(15);
+  const initialState = loadStateFromLocalStorage();
+
+  const [filterType, setFilterType] = useState(initialState.filterType);
+  const [filterUser, setFilterUser] = useState(initialState.filterUser);
+  const [searchQuery, setSearchQuery] = useState(initialState.searchQuery);
+  const [order, setOrder] = useState<ColumnSortOrder>(initialState.order);
+  const [orderBy, setOrderBy] = useState<keyof Decks>(initialState.orderBy);
+  const [page, setPage] = useState(initialState.page);
+  const [rowsPerPage, setRowsPerPage] = useState(initialState.rowsPerPage);
+
+  // Save state to local storage whenever it changes
+  useEffect(() => {
+    const newSettings = JSON.stringify({
+      filterType,
+      filterUser,
+      searchQuery,
+      order,
+      orderBy,
+      page,
+      rowsPerPage,
+    });
+    localStorage.setItem(localStorageKey, newSettings);
+  }, [filterType, filterUser, searchQuery, order, orderBy, page, rowsPerPage]);
 
   const handleRequestSort = (property: keyof Decks) => {
     const isAsc = orderBy === property && order === "asc";
@@ -170,14 +203,14 @@ export const DecksPage = (): JSX.Element => {
     setOrderBy(property);
   };
 
-  const handleChangePage = (newPage: number) => {
+  const handleChangePage = useCallback((newPage: number) => {
     setPage(newPage);
-  };
+  }, []);
 
-  const handleChangeRowsPerPage = (newRowsPerPage: string) => {
+  const handleChangeRowsPerPage = useCallback((newRowsPerPage: string) => {
     setRowsPerPage(parseInt(newRowsPerPage, 10));
     setPage(0);
-  };
+  }, []);
 
   const filteredDecks = useMemo(() => {
     const lowercasedQuery = searchQuery.toLowerCase();
