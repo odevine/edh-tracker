@@ -194,7 +194,6 @@ export const DecksPage = (): JSX.Element => {
       page,
       rowsPerPage,
     });
-    console.log("new settings", newSettings);
     localStorage.setItem(localStorageKey, newSettings);
   }, [filterType, filterUser, searchQuery, order, orderBy, page, rowsPerPage]);
 

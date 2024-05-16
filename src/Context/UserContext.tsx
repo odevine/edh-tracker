@@ -47,6 +47,10 @@ export const UserProvider = ({ children }: PropsWithChildren<{}>) => {
     signOut();
     setCurrentUserProfile(null);
     navigate("/");
+    addAppMessage({
+      content: "user signed out",
+      severity: "info"
+    })
   };
 
   const fetchUsers = async () => {
