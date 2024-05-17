@@ -11,6 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
+import { MuiColorInput } from "mui-color-input";
 
 import { useUser } from "@/Context";
 
@@ -114,15 +115,19 @@ export const UserProfileForm: React.FC = () => {
             value={displayName}
             onChange={(event) => setDisplayName(event.target.value)}
           />
-          <TextField
+          <MuiColorInput
+            isAlphaHidden
             label="light theme color"
+            format="hex"
             value={lightThemeColor}
-            onChange={(event) => setLightThemeColor(event.target.value)}
+            onChange={(value: string) => setLightThemeColor(value)}
           />
-          <TextField
+          <MuiColorInput
+            isAlphaHidden
             label="dark theme color"
+            format="hex"
             value={darkThemeColor}
-            onChange={(event) => setDarkThemeColor(event.target.value)}
+            onChange={(value: string) => setDarkThemeColor(value)}
           />
           <TextField
             label="profile picture url"
