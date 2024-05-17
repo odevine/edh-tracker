@@ -13,7 +13,6 @@ import {
   TableRow,
   TextField,
   Toolbar,
-  useTheme as useMuiTheme,
 } from "@mui/material";
 import PopupState, { bindHover, bindPopover } from "material-ui-popup-state";
 import HoverPopover from "material-ui-popup-state/HoverPopover";
@@ -179,7 +178,6 @@ export const DecksPage = (): JSX.Element => {
   const { allDecks } = useDecks();
   const { allUserProfiles } = useUser();
   const { mode } = useTheme();
-  const theme = useMuiTheme();
 
   const initialState = loadStateFromLocalStorage();
 
