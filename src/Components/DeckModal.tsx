@@ -112,7 +112,7 @@ export const DeckModal = (props: {
   const handleSubmit = () => {
     if (authenticatedUser && validateDeckDetails()) {
       const deckInput = {
-        deckOwnerID: authenticatedUser.userId,
+        deckOwnerId: authenticatedUser.userId,
         deckName,
         commanderName: commander?.label ?? "",
         commanderColors: sortColors(commander?.colors ?? []),

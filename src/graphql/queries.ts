@@ -8,127 +8,28 @@ type GeneratedQuery<InputType, OutputType> = string & {
   __generatedQueryOutput: OutputType;
 };
 
-export const getMatchParticipants = /* GraphQL */ `query GetMatchParticipants($id: ID!) {
-  getMatchParticipants(id: $id) {
-    id
-    decksID
-    matchesID
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedQuery<
-  APITypes.GetMatchParticipantsQueryVariables,
-  APITypes.GetMatchParticipantsQuery
->;
-export const listMatchParticipants = /* GraphQL */ `query ListMatchParticipants(
-  $filter: ModelMatchParticipantsFilterInput
-  $limit: Int
-  $nextToken: String
-) {
-  listMatchParticipants(filter: $filter, limit: $limit, nextToken: $nextToken) {
-    items {
-      id
-      decksID
-      matchesID
-      createdAt
-      updatedAt
-      __typename
-    }
-    nextToken
-    __typename
-  }
-}
-` as GeneratedQuery<
-  APITypes.ListMatchParticipantsQueryVariables,
-  APITypes.ListMatchParticipantsQuery
->;
-export const matchParticipantsByDecksID = /* GraphQL */ `query MatchParticipantsByDecksID(
-  $decksID: ID!
-  $sortDirection: ModelSortDirection
-  $filter: ModelMatchParticipantsFilterInput
-  $limit: Int
-  $nextToken: String
-) {
-  matchParticipantsByDecksID(
-    decksID: $decksID
-    sortDirection: $sortDirection
-    filter: $filter
-    limit: $limit
-    nextToken: $nextToken
-  ) {
-    items {
-      id
-      decksID
-      matchesID
-      createdAt
-      updatedAt
-      __typename
-    }
-    nextToken
-    __typename
-  }
-}
-` as GeneratedQuery<
-  APITypes.MatchParticipantsByDecksIDQueryVariables,
-  APITypes.MatchParticipantsByDecksIDQuery
->;
-export const matchParticipantsByMatchesID = /* GraphQL */ `query MatchParticipantsByMatchesID(
-  $matchesID: ID!
-  $sortDirection: ModelSortDirection
-  $filter: ModelMatchParticipantsFilterInput
-  $limit: Int
-  $nextToken: String
-) {
-  matchParticipantsByMatchesID(
-    matchesID: $matchesID
-    sortDirection: $sortDirection
-    filter: $filter
-    limit: $limit
-    nextToken: $nextToken
-  ) {
-    items {
-      id
-      decksID
-      matchesID
-      createdAt
-      updatedAt
-      __typename
-    }
-    nextToken
-    __typename
-  }
-}
-` as GeneratedQuery<
-  APITypes.MatchParticipantsByMatchesIDQueryVariables,
-  APITypes.MatchParticipantsByMatchesIDQuery
->;
-export const getUsers = /* GraphQL */ `query GetUsers($id: ID!) {
-  getUsers(id: $id) {
+export const getUser = /* GraphQL */ `query GetUser($id: ID!) {
+  getUser(id: $id) {
     id
     displayName
+    description
     lightThemeColor
     darkThemeColor
     profilePictureURL
     role
-    Decks {
+    lastOnline
+    decks {
       nextToken
       __typename
     }
-    WinningUser {
-      nextToken
-      __typename
-    }
-    lastLoggedIn
     createdAt
     updatedAt
     __typename
   }
 }
-` as GeneratedQuery<APITypes.GetUsersQueryVariables, APITypes.GetUsersQuery>;
+` as GeneratedQuery<APITypes.GetUserQueryVariables, APITypes.GetUserQuery>;
 export const listUsers = /* GraphQL */ `query ListUsers(
-  $filter: ModelUsersFilterInput
+  $filter: ModelUserFilterInput
   $limit: Int
   $nextToken: String
 ) {
@@ -136,11 +37,12 @@ export const listUsers = /* GraphQL */ `query ListUsers(
     items {
       id
       displayName
+      description
       lightThemeColor
       darkThemeColor
       profilePictureURL
       role
-      lastLoggedIn
+      lastOnline
       createdAt
       updatedAt
       __typename
@@ -150,35 +52,39 @@ export const listUsers = /* GraphQL */ `query ListUsers(
   }
 }
 ` as GeneratedQuery<APITypes.ListUsersQueryVariables, APITypes.ListUsersQuery>;
-export const getDecks = /* GraphQL */ `query GetDecks($id: ID!) {
-  getDecks(id: $id) {
+export const getDeck = /* GraphQL */ `query GetDeck($id: ID!) {
+  getDeck(id: $id) {
     id
-    deckOwnerID
+    deckOwnerId
     deckName
     commanderName
     commanderColors
     deckType
-    MatchParticipants {
+    link
+    cost
+    winningMatches {
       nextToken
       __typename
     }
-    link
-    cost
+    matchParticipants {
+      nextToken
+      __typename
+    }
     createdAt
     updatedAt
     __typename
   }
 }
-` as GeneratedQuery<APITypes.GetDecksQueryVariables, APITypes.GetDecksQuery>;
+` as GeneratedQuery<APITypes.GetDeckQueryVariables, APITypes.GetDeckQuery>;
 export const listDecks = /* GraphQL */ `query ListDecks(
-  $filter: ModelDecksFilterInput
+  $filter: ModelDeckFilterInput
   $limit: Int
   $nextToken: String
 ) {
   listDecks(filter: $filter, limit: $limit, nextToken: $nextToken) {
     items {
       id
-      deckOwnerID
+      deckOwnerId
       deckName
       commanderName
       commanderColors
@@ -194,15 +100,15 @@ export const listDecks = /* GraphQL */ `query ListDecks(
   }
 }
 ` as GeneratedQuery<APITypes.ListDecksQueryVariables, APITypes.ListDecksQuery>;
-export const decksByDeckOwnerID = /* GraphQL */ `query DecksByDeckOwnerID(
-  $deckOwnerID: ID!
+export const decksByDeckOwnerId = /* GraphQL */ `query DecksByDeckOwnerId(
+  $deckOwnerId: ID!
   $sortDirection: ModelSortDirection
-  $filter: ModelDecksFilterInput
+  $filter: ModelDeckFilterInput
   $limit: Int
   $nextToken: String
 ) {
-  decksByDeckOwnerID(
-    deckOwnerID: $deckOwnerID
+  decksByDeckOwnerId(
+    deckOwnerId: $deckOwnerId
     sortDirection: $sortDirection
     filter: $filter
     limit: $limit
@@ -210,7 +116,7 @@ export const decksByDeckOwnerID = /* GraphQL */ `query DecksByDeckOwnerID(
   ) {
     items {
       id
-      deckOwnerID
+      deckOwnerId
       deckName
       commanderName
       commanderColors
@@ -226,38 +132,35 @@ export const decksByDeckOwnerID = /* GraphQL */ `query DecksByDeckOwnerID(
   }
 }
 ` as GeneratedQuery<
-  APITypes.DecksByDeckOwnerIDQueryVariables,
-  APITypes.DecksByDeckOwnerIDQuery
+  APITypes.DecksByDeckOwnerIdQueryVariables,
+  APITypes.DecksByDeckOwnerIdQuery
 >;
-export const getMatches = /* GraphQL */ `query GetMatches($id: ID!) {
-  getMatches(id: $id) {
+export const getMatch = /* GraphQL */ `query GetMatch($id: ID!) {
+  getMatch(id: $id) {
     id
-    winningUserID
+    winningDeckId
     matchType
     isArchived
-    MatchParticipants {
+    datePlayed
+    matchParticipants {
       nextToken
       __typename
     }
-    datePlayed
     createdAt
     updatedAt
     __typename
   }
 }
-` as GeneratedQuery<
-  APITypes.GetMatchesQueryVariables,
-  APITypes.GetMatchesQuery
->;
+` as GeneratedQuery<APITypes.GetMatchQueryVariables, APITypes.GetMatchQuery>;
 export const listMatches = /* GraphQL */ `query ListMatches(
-  $filter: ModelMatchesFilterInput
+  $filter: ModelMatchFilterInput
   $limit: Int
   $nextToken: String
 ) {
   listMatches(filter: $filter, limit: $limit, nextToken: $nextToken) {
     items {
       id
-      winningUserID
+      winningDeckId
       matchType
       isArchived
       datePlayed
@@ -273,15 +176,15 @@ export const listMatches = /* GraphQL */ `query ListMatches(
   APITypes.ListMatchesQueryVariables,
   APITypes.ListMatchesQuery
 >;
-export const matchesByWinningUserID = /* GraphQL */ `query MatchesByWinningUserID(
-  $winningUserID: ID!
+export const matchesByWinningDeckId = /* GraphQL */ `query MatchesByWinningDeckId(
+  $winningDeckId: ID!
   $sortDirection: ModelSortDirection
-  $filter: ModelMatchesFilterInput
+  $filter: ModelMatchFilterInput
   $limit: Int
   $nextToken: String
 ) {
-  matchesByWinningUserID(
-    winningUserID: $winningUserID
+  matchesByWinningDeckId(
+    winningDeckId: $winningDeckId
     sortDirection: $sortDirection
     filter: $filter
     limit: $limit
@@ -289,7 +192,7 @@ export const matchesByWinningUserID = /* GraphQL */ `query MatchesByWinningUserI
   ) {
     items {
       id
-      winningUserID
+      winningDeckId
       matchType
       isArchived
       datePlayed
@@ -302,6 +205,102 @@ export const matchesByWinningUserID = /* GraphQL */ `query MatchesByWinningUserI
   }
 }
 ` as GeneratedQuery<
-  APITypes.MatchesByWinningUserIDQueryVariables,
-  APITypes.MatchesByWinningUserIDQuery
+  APITypes.MatchesByWinningDeckIdQueryVariables,
+  APITypes.MatchesByWinningDeckIdQuery
+>;
+export const getMatchParticipant = /* GraphQL */ `query GetMatchParticipant($id: ID!) {
+  getMatchParticipant(id: $id) {
+    id
+    deckId
+    matchId
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetMatchParticipantQueryVariables,
+  APITypes.GetMatchParticipantQuery
+>;
+export const listMatchParticipants = /* GraphQL */ `query ListMatchParticipants(
+  $filter: ModelMatchParticipantFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listMatchParticipants(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      deckId
+      matchId
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListMatchParticipantsQueryVariables,
+  APITypes.ListMatchParticipantsQuery
+>;
+export const matchParticipantsByDeckId = /* GraphQL */ `query MatchParticipantsByDeckId(
+  $deckId: ID!
+  $sortDirection: ModelSortDirection
+  $filter: ModelMatchParticipantFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  matchParticipantsByDeckId(
+    deckId: $deckId
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      deckId
+      matchId
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.MatchParticipantsByDeckIdQueryVariables,
+  APITypes.MatchParticipantsByDeckIdQuery
+>;
+export const matchParticipantsByMatchId = /* GraphQL */ `query MatchParticipantsByMatchId(
+  $matchId: ID!
+  $sortDirection: ModelSortDirection
+  $filter: ModelMatchParticipantFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  matchParticipantsByMatchId(
+    matchId: $matchId
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      deckId
+      matchId
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.MatchParticipantsByMatchIdQueryVariables,
+  APITypes.MatchParticipantsByMatchIdQuery
 >;

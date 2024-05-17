@@ -12,10 +12,10 @@ import {
 } from "@mui/material";
 import { navigate } from "raviger";
 
-import { Users } from "@/API";
+import { User } from "@/API";
 
 interface ProfileMiniCardProps {
-  profile?: Users;
+  profile?: User;
 }
 
 export const ProfileMiniCard: React.FC<ProfileMiniCardProps> = ({

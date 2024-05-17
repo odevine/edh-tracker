@@ -18,8 +18,9 @@
             },
             {
               "apiKeyConfig": {
-                "apiKeyExpirationDays": 30,
-                "description": "api key description"
+                "apiKeyExpirationDate": "2025-05-17T13:35:55.822Z",
+                "apiKeyExpirationDays": 365,
+                "description": "external access"
               },
               "authenticationType": "API_KEY"
             }

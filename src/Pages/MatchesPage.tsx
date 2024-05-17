@@ -15,12 +15,12 @@ import {
 } from "@mui/material";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { Matches, Users } from "@/API";
+import { Match, User } from "@/API";
 import { EnhancedTableHead, HeadCell, MatchModal } from "@/Components";
 import { useDecks, useMatches, useUser } from "@/Context";
 import { ColumnSortOrder, getComparator } from "@/Logic";
 
-const headCells: HeadCell<Matches>[] = [
+const headCells: HeadCell<Match>[] = [
   {
     id: "datePlayed",
     label: "Date Played",
@@ -33,7 +33,7 @@ const headCells: HeadCell<Matches>[] = [
     sortable: true,
   },
   {
-    id: "winningUserID",
+    id: "winningDeckId",
     label: "winner",
     sortable: true,
   },
@@ -55,7 +55,7 @@ const loadStateFromLocalStorage = () => {
   }
   return {
     order: "desc" as ColumnSortOrder,
-    orderBy: "datePlayed" as keyof Matches,
+    orderBy: "datePlayed" as keyof Match,
     page: 0,
     rowsPerPage: 15,
   };
@@ -70,7 +70,7 @@ export const MatchesPage = (): JSX.Element => {
   const initialState = loadStateFromLocalStorage();
 
   const [order, setOrder] = useState<ColumnSortOrder>(initialState.order);
-  const [orderBy, setOrderBy] = useState<keyof Matches>(initialState.orderBy);
+  const [orderBy, setOrderBy] = useState<keyof Match>(initialState.orderBy);
   const [page, setPage] = useState(initialState.page);
   const [rowsPerPage, setRowsPerPage] = useState(initialState.rowsPerPage);
   const [modalOpen, setModalOpen] = useState(true);
@@ -86,7 +86,7 @@ export const MatchesPage = (): JSX.Element => {
     localStorage.setItem(localStorageKey, newSettings);
   }, [order, orderBy, page, rowsPerPage]);
 
-  const handleRequestSort = (property: keyof Matches) => {
+  const handleRequestSort = (property: keyof Match) => {
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
@@ -103,9 +103,9 @@ export const MatchesPage = (): JSX.Element => {
 
   // Create a map of deck IDs to user profiles
   const deckToUserMap = useMemo(() => {
-    const map = new Map<string, Users>();
+    const map = new Map<string, User>();
     allDecks.forEach((deck) => {
-      const user = allUserProfiles.find((user) => user.id === deck.deckOwnerID);
+      const user = allUserProfiles.find((user) => user.id === deck.deckOwnerId);
       if (user) {
         map.set(deck.id, user);
       }
@@ -115,16 +115,16 @@ export const MatchesPage = (): JSX.Element => {
 
   const getParticipantsDisplayNames = (matchId: string) => {
     return allMatchParticipants
-      .filter((participant) => participant.matchesID === matchId)
+      .filter((participant) => participant.matchId === matchId)
       .map(
         (participant) =>
-          deckToUserMap.get(participant.decksID)?.displayName ?? "Unknown",
+          deckToUserMap.get(participant.deckId)?.displayName ?? "Unknown",
       )
       .join(", ");
   };
 
   const sortedMatches = useMemo(() => {
-    return [...allMatches].sort(getComparator<Matches>(order, orderBy));
+    return [...allMatches].sort(getComparator<Match>(order, orderBy));
   }, [allMatches, order, orderBy]);
 
   const visibleRows = useMemo(() => {
@@ -167,7 +167,7 @@ export const MatchesPage = (): JSX.Element => {
                     </TableCell>
                     <TableCell>{match.matchType}</TableCell>
                     <TableCell>
-                      {deckToUserMap.get(match.winningUserID)?.displayName}
+                      {deckToUserMap.get(match.winningDeckId)?.displayName}
                     </TableCell>
                     <TableCell>
                       {getParticipantsDisplayNames(match.id)}

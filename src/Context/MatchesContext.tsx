@@ -8,31 +8,31 @@ import {
 } from "react";
 
 import {
-  CreateMatchesInput,
-  MatchParticipants,
-  Matches,
-  UpdateMatchesInput,
+  CreateMatchInput,
+  Match,
+  MatchParticipant,
+  UpdateMatchInput,
 } from "@/API";
 import { useApp } from "@/Context";
 import {
-  createMatch,
-  createNewMatchParticipants,
-  deleteMatchWithParticipants,
-  getAllMatches,
-  updateMatch,
-  getAllMatchParticipants,
+  createMatchFn,
+  createNewMatchParticipantsFn,
+  deleteMatchWithParticipantsFn,
+  getAllMatchParticipantsFn,
+  getAllMatchesFn,
+  updateMatchFn,
 } from "@/Logic";
 
 // Define the type for the user profile context
 interface MatchesContextType {
-  allMatches: Matches[];
-  allMatchParticipants: MatchParticipants[]
+  allMatches: Match[];
+  allMatchParticipants: MatchParticipant[];
   matchesLoading: boolean;
   createNewMatch: (
-    newMatch: CreateMatchesInput,
+    newMatch: CreateMatchInput,
     deckIds: string[],
   ) => Promise<void>;
-  updateExistingMatch: (updatedMatch: UpdateMatchesInput) => Promise<void>;
+  updateExistingMatch: (updatedMatch: UpdateMatchInput) => Promise<void>;
 }
 
 // Create the context
@@ -42,8 +42,10 @@ const MatchesContext = createContext<MatchesContextType | undefined>(undefined);
 export const MatchesProvider = ({ children }: PropsWithChildren<{}>) => {
   const { addAppMessage } = useApp();
   const { user } = useAuthenticator((context) => [context.user]);
-  const [allMatches, setAllMatches] = useState<Matches[]>([]);
-  const [allMatchParticipants, setAllMatchParticipants] = useState<MatchParticipants[]>([]);
+  const [allMatches, setAllMatches] = useState<Match[]>([]);
+  const [allMatchParticipants, setAllMatchParticipants] = useState<
+    MatchParticipant[]
+  >([]);
   const [matchesLoading, setMatchesLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -56,8 +58,8 @@ export const MatchesProvider = ({ children }: PropsWithChildren<{}>) => {
   const fetchMatches = async () => {
     try {
       const [matches, matchParticipants] = await Promise.all([
-        getAllMatches(),
-        getAllMatchParticipants()
+        getAllMatchesFn(),
+        getAllMatchParticipantsFn(),
       ]);
 
       setAllMatches(matches ?? []);
@@ -70,24 +72,27 @@ export const MatchesProvider = ({ children }: PropsWithChildren<{}>) => {
   };
 
   const createNewMatch = async (
-    newMatch: CreateMatchesInput,
+    newMatch: CreateMatchInput,
     deckIds: string[],
   ) => {
-    let match: Matches | null = null;
-    let createdParticipants: MatchParticipants[] | null = [];
+    let match: Match | null = null;
+    let createdParticipants: MatchParticipant[] | null = [];
 
     try {
-      match = await createMatch(newMatch);
+      match = await createMatchFn(newMatch);
       if (!match) {
         throw new Error("failed to create match");
       }
 
-      createdParticipants = await createNewMatchParticipants(match.id, deckIds);
+      createdParticipants = await createNewMatchParticipantsFn(
+        match.id,
+        deckIds,
+      );
       if (!createdParticipants) {
         throw new Error("failed to create match participants");
       }
 
-      setAllMatches((prevState) => [...prevState, match as Matches]);
+      setAllMatches((prevState) => [...prevState, match as Match]);
       addAppMessage({
         content: "match has been added",
         severity: "success",
@@ -97,7 +102,7 @@ export const MatchesProvider = ({ children }: PropsWithChildren<{}>) => {
 
       // Rollback: delete any created participants and the match
       if (match && createdParticipants) {
-        await deleteMatchWithParticipants(match.id, createdParticipants);
+        await deleteMatchWithParticipantsFn(match.id, createdParticipants);
       }
 
       addAppMessage({
@@ -108,9 +113,9 @@ export const MatchesProvider = ({ children }: PropsWithChildren<{}>) => {
     }
   };
 
-  const updateExistingMatch = async (updatedMatch: UpdateMatchesInput) => {
+  const updateExistingMatch = async (updatedMatch: UpdateMatchInput) => {
     setMatchesLoading(true);
-    const updateMatchResponse = await updateMatch(updatedMatch);
+    const updateMatchResponse = await updateMatchFn(updatedMatch);
     if (updateMatchResponse) {
       addAppMessage({
         content: "Match has been updated",

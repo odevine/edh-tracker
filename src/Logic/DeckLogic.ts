@@ -5,23 +5,23 @@ import { debounce } from "lodash";
 import { useEffect, useRef, useState } from "react";
 
 import {
-  CreateDecksInput,
-  Decks,
-  DecksByDeckOwnerIDQueryVariables,
-  DeleteDecksInput,
-  UpdateDecksInput,
+  CreateDeckInput,
+  Deck,
+  DecksByDeckOwnerIdQueryVariables,
+  DeleteDeckInput,
+  UpdateDeckInput,
 } from "@/API";
-import { createDecks, deleteDecks, updateDecks } from "@/graphql/mutations";
-import { decksByDeckOwnerID, listDecks } from "@/graphql/queries";
+import { createDeck, deleteDeck, updateDeck } from "@/graphql/mutations";
+import { decksByDeckOwnerId, listDecks } from "@/graphql/queries";
 
 const client = generateClient();
 
-export const getAllDecks = async (): Promise<Decks[] | null> => {
+export const getAllDecksFn = async (): Promise<Deck[] | null> => {
   try {
     const allDecksResponse = await client.graphql({ query: listDecks });
 
     if (allDecksResponse.data && allDecksResponse.data.listDecks) {
-      return allDecksResponse.data.listDecks.items as Decks[];
+      return allDecksResponse.data.listDecks.items as Deck[];
     }
     return null;
   } catch (error) {
@@ -30,27 +30,27 @@ export const getAllDecks = async (): Promise<Decks[] | null> => {
   }
 };
 
-export const getDecksByOwner = async (
+export const getDecksByOwnerFn = async (
   user: AuthUser,
-): Promise<Decks[] | null> => {
+): Promise<Deck[] | null> => {
   // Return early if user object is not valid
   if (!user || !user.userId) {
     console.error("Invalid or missing user object");
     return null;
   }
 
-  const queryVariables: DecksByDeckOwnerIDQueryVariables = {
-    deckOwnerID: user.userId,
+  const queryVariables: DecksByDeckOwnerIdQueryVariables = {
+    deckOwnerId: user.userId,
   };
 
   try {
     const userDecksResponse = await client.graphql({
-      query: decksByDeckOwnerID,
+      query: decksByDeckOwnerId,
       variables: queryVariables,
     });
 
-    if (userDecksResponse.data && userDecksResponse.data.decksByDeckOwnerID) {
-      return userDecksResponse.data.decksByDeckOwnerID.items as Decks[];
+    if (userDecksResponse.data && userDecksResponse.data.decksByDeckOwnerId) {
+      return userDecksResponse.data.decksByDeckOwnerId.items as Deck[];
     }
     return null;
   } catch (error) {
@@ -59,17 +59,17 @@ export const getDecksByOwner = async (
   }
 };
 
-export const createDeck = async (
-  newDeck: CreateDecksInput,
-): Promise<Decks | null> => {
+export const createDeckFn = async (
+  newDeck: CreateDeckInput,
+): Promise<Deck | null> => {
   try {
     const newDeckResponse = await client.graphql({
-      query: createDecks,
+      query: createDeck,
       variables: { input: newDeck },
     });
 
-    if (newDeckResponse.data && newDeckResponse.data.createDecks) {
-      return newDeckResponse.data.createDecks as Decks;
+    if (newDeckResponse.data && newDeckResponse.data.createDeck) {
+      return newDeckResponse.data.createDeck as Deck;
     } else {
       console.error("Failed to create new deck:");
       return null;
@@ -80,16 +80,16 @@ export const createDeck = async (
   }
 };
 
-export const updateDeck = async (
-  updatedDeck: UpdateDecksInput,
-): Promise<Decks | null> => {
+export const updateDeckFn = async (
+  updatedDeck: UpdateDeckInput,
+): Promise<Deck | null> => {
   try {
     const updatedDeckResponse = await client.graphql({
-      query: updateDecks,
+      query: updateDeck,
       variables: { input: updatedDeck },
     });
-    if (updatedDeckResponse.data && updatedDeckResponse.data.updateDecks) {
-      return updatedDeckResponse.data.updateDecks as Decks;
+    if (updatedDeckResponse.data && updatedDeckResponse.data.updateDeck) {
+      return updatedDeckResponse.data.updateDeck as Deck;
     } else {
       console.log(`No deck found for ${updatedDeck.id}, or update failed`);
       return null;
@@ -100,28 +100,23 @@ export const updateDeck = async (
   }
 };
 
-/**
- * Deletes a deck by its ID.
- * @param {string} deckId - The ID of the deck to delete.
- * @returns {Promise<boolean>} - True if the operation was successful, false otherwise.
- */
-export const deleteDeck = async (deckId: string): Promise<boolean> => {
-  const input: DeleteDecksInput = {
+export const deleteDeckFn = async (deckId: string): Promise<boolean> => {
+  const input: DeleteDeckInput = {
     id: deckId,
   };
 
   try {
     const deleteDeckResponse = await client.graphql({
-      query: deleteDecks,
+      query: deleteDeck,
       variables: { input },
     });
     if (
-      deleteDeckResponse.data.deleteDecks &&
-      deleteDeckResponse.data.deleteDecks.id
+      deleteDeckResponse.data.deleteDeck &&
+      deleteDeckResponse.data.deleteDeck.id
     ) {
       console.log(
         "Deck deleted successfully:",
-        deleteDeckResponse.data.deleteDecks,
+        deleteDeckResponse.data.deleteDeck,
       );
       return true;
     } else {

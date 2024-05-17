@@ -9,16 +9,16 @@ import {
   useState,
 } from "react";
 
-import { UpdateUsersInput, Users } from "@/API";
-import { createUser, getAllUsers, updateUser } from "@/Logic";
+import { UpdateUserInput, User } from "@/API";
 import { useApp } from "@/Context";
+import { createUserFn, getAllUsersFn, updateUserFn } from "@/Logic";
 
 // Define the type for the user profile context
 interface UserContextType {
   authenticatedUser: AuthUser | null;
-  allUserProfiles: Users[];
-  currentUserProfile: Users | null;
-  updateUserProfile: (updatedUser: UpdateUsersInput) => Promise<void>;
+  allUserProfiles: User[];
+  currentUserProfile: User | null;
+  updateUserProfile: (updatedUser: UpdateUserInput) => Promise<void>;
   usersLoading: boolean;
   signOutUser: () => void;
 }
@@ -30,8 +30,8 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider = ({ children }: PropsWithChildren<{}>) => {
   const { addAppMessage } = useApp();
   const { user, signOut } = useAuthenticator((context) => [context.user]);
-  const [allUserProfiles, setAllUserProfiles] = useState<Users[]>([]);
-  const [currentUserProfile, setCurrentUserProfile] = useState<Users | null>(
+  const [allUserProfiles, setAllUserProfiles] = useState<User[]>([]);
+  const [currentUserProfile, setCurrentUserProfile] = useState<User | null>(
     null,
   );
   const [usersLoading, setUsersLoading] = useState<boolean>(true);
@@ -49,20 +49,20 @@ export const UserProvider = ({ children }: PropsWithChildren<{}>) => {
     navigate("/");
     addAppMessage({
       content: "user signed out",
-      severity: "info"
-    })
+      severity: "info",
+    });
   };
 
   const fetchUsers = async () => {
     try {
-      const users = await getAllUsers();
+      const users = await getAllUsersFn();
       const allUsersResponse = users ?? [];
       setAllUserProfiles(allUsersResponse);
       let currentUserProfile =
         allUsersResponse.filter((u) => u.id === user.userId)[0] ?? null;
       if (!currentUserProfile) {
         console.log("no profile found, generating new profile");
-        currentUserProfile = await createUser(user);
+        currentUserProfile = await createUserFn(user);
         setAllUserProfiles((prevState) => [...prevState, currentUserProfile]);
       }
       setCurrentUserProfile(currentUserProfile);
@@ -70,8 +70,8 @@ export const UserProvider = ({ children }: PropsWithChildren<{}>) => {
       addAppMessage({
         title: "failed to fetch user profiles",
         content: "check console for more details",
-        severity: "error"
-      })
+        severity: "error",
+      });
       setAllUserProfiles([]);
       setCurrentUserProfile(null);
     } finally {
@@ -79,13 +79,13 @@ export const UserProvider = ({ children }: PropsWithChildren<{}>) => {
     }
   };
 
-  const updateUserProfile = async (updatedUser: UpdateUsersInput) => {
-    const userResponse = await updateUser(updatedUser);
+  const updateUserProfile = async (updatedUser: UpdateUserInput) => {
+    const userResponse = await updateUserFn(updatedUser);
     if (userResponse) {
       addAppMessage({
         content: "user profile has been updated",
-        severity: "success"
-      })
+        severity: "success",
+      });
       setAllUserProfiles((prevState) =>
         prevState.map((u) => (u.id === updatedUser.id ? userResponse : u)),
       );
@@ -96,8 +96,8 @@ export const UserProvider = ({ children }: PropsWithChildren<{}>) => {
       addAppMessage({
         title: "failed to update user profile",
         content: "check console for more details",
-        severity: "error"
-      })
+        severity: "error",
+      });
     }
   };
 

@@ -8,258 +8,261 @@ type GeneratedSubscription<InputType, OutputType> = string & {
   __generatedSubscriptionOutput: OutputType;
 };
 
-export const onCreateMatchParticipants = /* GraphQL */ `subscription OnCreateMatchParticipants(
-  $filter: ModelSubscriptionMatchParticipantsFilterInput
-) {
-  onCreateMatchParticipants(filter: $filter) {
-    id
-    decksID
-    matchesID
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedSubscription<
-  APITypes.OnCreateMatchParticipantsSubscriptionVariables,
-  APITypes.OnCreateMatchParticipantsSubscription
->;
-export const onUpdateMatchParticipants = /* GraphQL */ `subscription OnUpdateMatchParticipants(
-  $filter: ModelSubscriptionMatchParticipantsFilterInput
-) {
-  onUpdateMatchParticipants(filter: $filter) {
-    id
-    decksID
-    matchesID
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedSubscription<
-  APITypes.OnUpdateMatchParticipantsSubscriptionVariables,
-  APITypes.OnUpdateMatchParticipantsSubscription
->;
-export const onDeleteMatchParticipants = /* GraphQL */ `subscription OnDeleteMatchParticipants(
-  $filter: ModelSubscriptionMatchParticipantsFilterInput
-) {
-  onDeleteMatchParticipants(filter: $filter) {
-    id
-    decksID
-    matchesID
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedSubscription<
-  APITypes.OnDeleteMatchParticipantsSubscriptionVariables,
-  APITypes.OnDeleteMatchParticipantsSubscription
->;
-export const onCreateUsers = /* GraphQL */ `subscription OnCreateUsers($filter: ModelSubscriptionUsersFilterInput) {
-  onCreateUsers(filter: $filter) {
+export const onCreateUser = /* GraphQL */ `subscription OnCreateUser($filter: ModelSubscriptionUserFilterInput) {
+  onCreateUser(filter: $filter) {
     id
     displayName
+    description
     lightThemeColor
     darkThemeColor
     profilePictureURL
     role
-    Decks {
+    lastOnline
+    decks {
       nextToken
       __typename
     }
-    WinningUser {
-      nextToken
-      __typename
-    }
-    lastLoggedIn
     createdAt
     updatedAt
     __typename
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnCreateUsersSubscriptionVariables,
-  APITypes.OnCreateUsersSubscription
+  APITypes.OnCreateUserSubscriptionVariables,
+  APITypes.OnCreateUserSubscription
 >;
-export const onUpdateUsers = /* GraphQL */ `subscription OnUpdateUsers($filter: ModelSubscriptionUsersFilterInput) {
-  onUpdateUsers(filter: $filter) {
+export const onUpdateUser = /* GraphQL */ `subscription OnUpdateUser($filter: ModelSubscriptionUserFilterInput) {
+  onUpdateUser(filter: $filter) {
     id
     displayName
+    description
     lightThemeColor
     darkThemeColor
     profilePictureURL
     role
-    Decks {
+    lastOnline
+    decks {
       nextToken
       __typename
     }
-    WinningUser {
-      nextToken
-      __typename
-    }
-    lastLoggedIn
     createdAt
     updatedAt
     __typename
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnUpdateUsersSubscriptionVariables,
-  APITypes.OnUpdateUsersSubscription
+  APITypes.OnUpdateUserSubscriptionVariables,
+  APITypes.OnUpdateUserSubscription
 >;
-export const onDeleteUsers = /* GraphQL */ `subscription OnDeleteUsers($filter: ModelSubscriptionUsersFilterInput) {
-  onDeleteUsers(filter: $filter) {
+export const onDeleteUser = /* GraphQL */ `subscription OnDeleteUser($filter: ModelSubscriptionUserFilterInput) {
+  onDeleteUser(filter: $filter) {
     id
     displayName
+    description
     lightThemeColor
     darkThemeColor
     profilePictureURL
     role
-    Decks {
+    lastOnline
+    decks {
       nextToken
       __typename
     }
-    WinningUser {
-      nextToken
-      __typename
-    }
-    lastLoggedIn
     createdAt
     updatedAt
     __typename
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnDeleteUsersSubscriptionVariables,
-  APITypes.OnDeleteUsersSubscription
+  APITypes.OnDeleteUserSubscriptionVariables,
+  APITypes.OnDeleteUserSubscription
 >;
-export const onCreateDecks = /* GraphQL */ `subscription OnCreateDecks($filter: ModelSubscriptionDecksFilterInput) {
-  onCreateDecks(filter: $filter) {
+export const onCreateDeck = /* GraphQL */ `subscription OnCreateDeck($filter: ModelSubscriptionDeckFilterInput) {
+  onCreateDeck(filter: $filter) {
     id
-    deckOwnerID
+    deckOwnerId
     deckName
     commanderName
     commanderColors
     deckType
-    MatchParticipants {
+    link
+    cost
+    winningMatches {
       nextToken
       __typename
     }
-    link
-    cost
+    matchParticipants {
+      nextToken
+      __typename
+    }
     createdAt
     updatedAt
     __typename
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnCreateDecksSubscriptionVariables,
-  APITypes.OnCreateDecksSubscription
+  APITypes.OnCreateDeckSubscriptionVariables,
+  APITypes.OnCreateDeckSubscription
 >;
-export const onUpdateDecks = /* GraphQL */ `subscription OnUpdateDecks($filter: ModelSubscriptionDecksFilterInput) {
-  onUpdateDecks(filter: $filter) {
+export const onUpdateDeck = /* GraphQL */ `subscription OnUpdateDeck($filter: ModelSubscriptionDeckFilterInput) {
+  onUpdateDeck(filter: $filter) {
     id
-    deckOwnerID
+    deckOwnerId
     deckName
     commanderName
     commanderColors
     deckType
-    MatchParticipants {
+    link
+    cost
+    winningMatches {
       nextToken
       __typename
     }
-    link
-    cost
+    matchParticipants {
+      nextToken
+      __typename
+    }
     createdAt
     updatedAt
     __typename
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnUpdateDecksSubscriptionVariables,
-  APITypes.OnUpdateDecksSubscription
+  APITypes.OnUpdateDeckSubscriptionVariables,
+  APITypes.OnUpdateDeckSubscription
 >;
-export const onDeleteDecks = /* GraphQL */ `subscription OnDeleteDecks($filter: ModelSubscriptionDecksFilterInput) {
-  onDeleteDecks(filter: $filter) {
+export const onDeleteDeck = /* GraphQL */ `subscription OnDeleteDeck($filter: ModelSubscriptionDeckFilterInput) {
+  onDeleteDeck(filter: $filter) {
     id
-    deckOwnerID
+    deckOwnerId
     deckName
     commanderName
     commanderColors
     deckType
-    MatchParticipants {
-      nextToken
-      __typename
-    }
     link
     cost
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedSubscription<
-  APITypes.OnDeleteDecksSubscriptionVariables,
-  APITypes.OnDeleteDecksSubscription
->;
-export const onCreateMatches = /* GraphQL */ `subscription OnCreateMatches($filter: ModelSubscriptionMatchesFilterInput) {
-  onCreateMatches(filter: $filter) {
-    id
-    winningUserID
-    matchType
-    isArchived
-    MatchParticipants {
+    winningMatches {
       nextToken
       __typename
     }
-    datePlayed
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedSubscription<
-  APITypes.OnCreateMatchesSubscriptionVariables,
-  APITypes.OnCreateMatchesSubscription
->;
-export const onUpdateMatches = /* GraphQL */ `subscription OnUpdateMatches($filter: ModelSubscriptionMatchesFilterInput) {
-  onUpdateMatches(filter: $filter) {
-    id
-    winningUserID
-    matchType
-    isArchived
-    MatchParticipants {
+    matchParticipants {
       nextToken
       __typename
     }
-    datePlayed
     createdAt
     updatedAt
     __typename
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnUpdateMatchesSubscriptionVariables,
-  APITypes.OnUpdateMatchesSubscription
+  APITypes.OnDeleteDeckSubscriptionVariables,
+  APITypes.OnDeleteDeckSubscription
 >;
-export const onDeleteMatches = /* GraphQL */ `subscription OnDeleteMatches($filter: ModelSubscriptionMatchesFilterInput) {
-  onDeleteMatches(filter: $filter) {
+export const onCreateMatch = /* GraphQL */ `subscription OnCreateMatch($filter: ModelSubscriptionMatchFilterInput) {
+  onCreateMatch(filter: $filter) {
     id
-    winningUserID
+    winningDeckId
     matchType
     isArchived
-    MatchParticipants {
+    datePlayed
+    matchParticipants {
       nextToken
       __typename
     }
-    datePlayed
     createdAt
     updatedAt
     __typename
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnDeleteMatchesSubscriptionVariables,
-  APITypes.OnDeleteMatchesSubscription
+  APITypes.OnCreateMatchSubscriptionVariables,
+  APITypes.OnCreateMatchSubscription
+>;
+export const onUpdateMatch = /* GraphQL */ `subscription OnUpdateMatch($filter: ModelSubscriptionMatchFilterInput) {
+  onUpdateMatch(filter: $filter) {
+    id
+    winningDeckId
+    matchType
+    isArchived
+    datePlayed
+    matchParticipants {
+      nextToken
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateMatchSubscriptionVariables,
+  APITypes.OnUpdateMatchSubscription
+>;
+export const onDeleteMatch = /* GraphQL */ `subscription OnDeleteMatch($filter: ModelSubscriptionMatchFilterInput) {
+  onDeleteMatch(filter: $filter) {
+    id
+    winningDeckId
+    matchType
+    isArchived
+    datePlayed
+    matchParticipants {
+      nextToken
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteMatchSubscriptionVariables,
+  APITypes.OnDeleteMatchSubscription
+>;
+export const onCreateMatchParticipant = /* GraphQL */ `subscription OnCreateMatchParticipant(
+  $filter: ModelSubscriptionMatchParticipantFilterInput
+) {
+  onCreateMatchParticipant(filter: $filter) {
+    id
+    deckId
+    matchId
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateMatchParticipantSubscriptionVariables,
+  APITypes.OnCreateMatchParticipantSubscription
+>;
+export const onUpdateMatchParticipant = /* GraphQL */ `subscription OnUpdateMatchParticipant(
+  $filter: ModelSubscriptionMatchParticipantFilterInput
+) {
+  onUpdateMatchParticipant(filter: $filter) {
+    id
+    deckId
+    matchId
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateMatchParticipantSubscriptionVariables,
+  APITypes.OnUpdateMatchParticipantSubscription
+>;
+export const onDeleteMatchParticipant = /* GraphQL */ `subscription OnDeleteMatchParticipant(
+  $filter: ModelSubscriptionMatchParticipantFilterInput
+) {
+  onDeleteMatchParticipant(filter: $filter) {
+    id
+    deckId
+    matchId
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteMatchParticipantSubscriptionVariables,
+  APITypes.OnDeleteMatchParticipantSubscription
 >;

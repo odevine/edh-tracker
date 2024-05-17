@@ -15,13 +15,13 @@ import { DatePicker } from "@mui/x-date-pickers";
 import { DateTime } from "luxon";
 import { useMemo, useState } from "react";
 
-import { CreateMatchesInput, Decks, Users } from "@/API";
+import { CreateMatchInput, Deck, User } from "@/API";
 import { useDecks, useMatches, useUser } from "@/Context";
 
 interface NewMatchModalProps {
   open: boolean;
   onClose: () => void;
-  deckToUserMap: Map<string, Users>;
+  deckToUserMap: Map<string, User>;
 }
 
 const deckTypes = [
@@ -39,8 +39,8 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
   const { authenticatedUser } = useUser();
   const [matchType, setMatchType] = useState(deckTypes[0].value);
   const [datePlayed, setDatePlayed] = useState(DateTime.now());
-  const [winningDeck, setWinningDeck] = useState("");
-  const [participantDecks, setParticipantDecks] = useState<Decks[]>([]);
+  const [winningDeckId, setWinningDeckId] = useState("");
+  const [participantDecks, setParticipantDecks] = useState<Deck[]>([]);
 
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
@@ -50,7 +50,7 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
     if (!participantDecks.length) {
       localErrors.push("please select at least two decks as participants");
     }
-    if (!winningDeck) {
+    if (!winningDeckId) {
       localErrors.push("please select a winning deck.");
     }
     setErrors(localErrors);
@@ -65,8 +65,8 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
     }
 
     if (validateForm()) {
-      const matchData: CreateMatchesInput = {
-        winningUserID: "",
+      const matchData: CreateMatchInput = {
+        winningDeckId: winningDeckId,
         datePlayed: datePlayed.toISO(),
         matchType,
         isArchived: false,
@@ -82,14 +82,14 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
 
   const handleDeckClear = async (reason: string) => {
     if (reason === "clear") {
-      setWinningDeck("");
+      setWinningDeckId("");
     }
   };
 
   const filteredDecks = useMemo(() => {
     return allDecks
       .filter((deck) => deck.deckType === matchType)
-      .sort((a, b) => a.deckOwnerID.localeCompare(b.deckOwnerID));
+      .sort((a, b) => a.deckOwnerId.localeCompare(b.deckOwnerId));
   }, [allDecks, matchType]);
 
   return (
@@ -157,8 +157,8 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
               onChange={(_event, newValue) => {
                 console.log(newValue);
                 setParticipantDecks(newValue);
-                if (!newValue.map((deck) => deck.id).includes(winningDeck)) {
-                  setWinningDeck("");
+                if (!newValue.map((deck) => deck.id).includes(winningDeckId)) {
+                  setWinningDeckId("");
                 }
               }}
               renderInput={(params) => (
@@ -201,8 +201,8 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
               required
               fullWidth
               label="winner"
-              value={winningDeck}
-              onChange={(event) => setWinningDeck(event.target.value)}
+              value={winningDeckId}
+              onChange={(event) => setWinningDeckId(event.target.value)}
             >
               {participantDecks.length === 0 && (
                 <MenuItem value="" disabled>

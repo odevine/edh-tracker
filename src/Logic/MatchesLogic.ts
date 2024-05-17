@@ -1,30 +1,30 @@
 import {
-  CreateMatchParticipantsInput,
-  CreateMatchesInput,
-  DeleteMatchParticipantsInput,
-  DeleteMatchesInput,
-  MatchParticipants,
-  Matches,
-  UpdateMatchesInput,
+  CreateMatchInput,
+  CreateMatchParticipantInput,
+  DeleteMatchInput,
+  DeleteMatchParticipantInput,
+  Match,
+  MatchParticipant,
+  UpdateMatchInput,
 } from "@/API";
 import {
-  createMatchParticipants,
-  createMatches,
-  deleteMatchParticipants,
-  deleteMatches,
-  updateMatches,
+  createMatch,
+  createMatchParticipant,
+  deleteMatch,
+  deleteMatchParticipant,
+  updateMatch,
 } from "@/graphql/mutations";
 import { listMatchParticipants, listMatches } from "@/graphql/queries";
 import { generateClient } from "aws-amplify/data";
 
 const client = generateClient();
 
-export const getAllMatches = async (): Promise<Matches[] | null> => {
+export const getAllMatchesFn = async (): Promise<Match[] | null> => {
   try {
     const allMatchesResponse = await client.graphql({ query: listMatches });
 
     if (allMatchesResponse.data && allMatchesResponse.data.listMatches) {
-      return allMatchesResponse.data.listMatches.items as Matches[];
+      return allMatchesResponse.data.listMatches.items as Match[];
     }
     return null;
   } catch (error) {
@@ -33,8 +33,8 @@ export const getAllMatches = async (): Promise<Matches[] | null> => {
   }
 };
 
-export const getAllMatchParticipants = async (): Promise<
-  MatchParticipants[] | null
+export const getAllMatchParticipantsFn = async (): Promise<
+  MatchParticipant[] | null
 > => {
   try {
     const allParticipantsResponse = await client.graphql({
@@ -46,7 +46,7 @@ export const getAllMatchParticipants = async (): Promise<
       allParticipantsResponse.data.listMatchParticipants
     ) {
       return allParticipantsResponse.data.listMatchParticipants
-        .items as MatchParticipants[];
+        .items as MatchParticipant[];
     }
     return null;
   } catch (error) {
@@ -55,17 +55,17 @@ export const getAllMatchParticipants = async (): Promise<
   }
 };
 
-export const createMatch = async (
-  newMatch: CreateMatchesInput,
-): Promise<Matches | null> => {
+export const createMatchFn = async (
+  newMatch: CreateMatchInput,
+): Promise<Match | null> => {
   try {
     const newMatchResponse = await client.graphql({
-      query: createMatches,
+      query: createMatch,
       variables: { input: newMatch },
     });
 
-    if (newMatchResponse.data && newMatchResponse.data.createMatches) {
-      return newMatchResponse.data.createMatches as Matches;
+    if (newMatchResponse.data && newMatchResponse.data.createMatch) {
+      return newMatchResponse.data.createMatch as Match;
     } else {
       console.error("failed to create new match:");
       return null;
@@ -76,16 +76,16 @@ export const createMatch = async (
   }
 };
 
-export const updateMatch = async (
-  updatedMatch: UpdateMatchesInput,
-): Promise<Matches | null> => {
+export const updateMatchFn = async (
+  updatedMatch: UpdateMatchInput,
+): Promise<Match | null> => {
   try {
     const updatedMatchResponse = await client.graphql({
-      query: updateMatches,
+      query: updateMatch,
       variables: { input: updatedMatch },
     });
-    if (updatedMatchResponse.data && updatedMatchResponse.data.updateMatches) {
-      return updatedMatchResponse.data.updateMatches as Matches;
+    if (updatedMatchResponse.data && updatedMatchResponse.data.updateMatch) {
+      return updatedMatchResponse.data.updateMatch as Match;
     } else {
       console.log(`no match found for ${updatedMatch.id}, or update failed`);
       return null;
@@ -96,26 +96,26 @@ export const updateMatch = async (
   }
 };
 
-export const createNewMatchParticipants = async (
+export const createNewMatchParticipantsFn = async (
   matchId: string,
   deckIds: string[],
-): Promise<MatchParticipants[] | null> => {
-  const createdParticipants: MatchParticipants[] = [];
+): Promise<MatchParticipant[] | null> => {
+  const createdParticipants: MatchParticipant[] = [];
   try {
     for (const deckId of deckIds) {
-      const input: CreateMatchParticipantsInput = {
-        decksID: deckId,
-        matchesID: matchId,
+      const input: CreateMatchParticipantInput = {
+        deckId,
+        matchId,
       };
       const participantResponse = await client.graphql({
-        query: createMatchParticipants,
+        query: createMatchParticipant,
         variables: { input },
       });
-      if (!participantResponse.data.createMatchParticipants) {
+      if (!participantResponse.data.createMatchParticipant) {
         throw new Error("failed to create match participant");
       }
       createdParticipants.push(
-        participantResponse.data.createMatchParticipants as MatchParticipants,
+        participantResponse.data.createMatchParticipant as MatchParticipant,
       );
     }
     return createdParticipants;
@@ -128,28 +128,28 @@ export const createNewMatchParticipants = async (
 };
 
 export const deleteMatchParticipantsBatch = async (
-  participants: MatchParticipants[],
+  participants: MatchParticipant[],
 ) => {
   await Promise.all(
     participants.map(async (participant) => {
-      const input: DeleteMatchParticipantsInput = { id: participant.id };
+      const input: DeleteMatchParticipantInput = { id: participant.id };
       await client.graphql({
-        query: deleteMatchParticipants,
+        query: deleteMatchParticipant,
         variables: { input },
       });
     }),
   );
 };
 
-export const deleteMatchWithParticipants = async (
+export const deleteMatchWithParticipantsFn = async (
   matchId: string,
-  participants: MatchParticipants[],
+  participants: MatchParticipant[],
 ) => {
   await deleteMatchParticipantsBatch(participants);
 
-  const input: DeleteMatchesInput = { id: matchId };
+  const input: DeleteMatchInput = { id: matchId };
   await client.graphql({
-    query: deleteMatches,
+    query: deleteMatch,
     variables: { input },
   });
 };

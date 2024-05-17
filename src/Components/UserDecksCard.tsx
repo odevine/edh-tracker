@@ -19,13 +19,13 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 
-import { Users } from "@/API";
+import { User } from "@/API";
 import { DeckModal } from "@/Components";
 import { useDecks } from "@/Context";
 
 export const UserDecksCard = (props: {
   ownUser: boolean;
-  userProfile: Users;
+  userProfile: User;
 }) => {
   const { ownUser, userProfile } = props;
   const { allDecks, deleteDeckById } = useDecks();
@@ -34,7 +34,7 @@ export const UserDecksCard = (props: {
   const [editingDeckId, setEditingDeckId] = useState("");
 
   const userDecks = allDecks.filter(
-    (deck) => deck.deckOwnerID === userProfile.id,
+    (deck) => deck.deckOwnerId === userProfile.id,
   );
 
   return (
