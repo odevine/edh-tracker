@@ -4,6 +4,7 @@ export * from "./DeckModal";
 export * from "./EnhancedTableHeader";
 export * from "./GradientChip";
 export * from "./LoadingBackdrop";
+export * from "./MatchModal";
 export * from "./ProfileMiniCard";
 export * from "./ThemeToggle";
 export * from "./Toolbar";
