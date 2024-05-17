@@ -1,5 +1,6 @@
 import { useAuthenticator } from "@aws-amplify/ui-react";
 import { AuthUser } from "aws-amplify/auth";
+import { DateTime } from "luxon";
 import { navigate } from "raviger";
 import {
   PropsWithChildren,
@@ -15,6 +16,7 @@ import { createUserFn, getAllUsersFn, updateUserFn } from "@/Logic";
 
 // Define the type for the user profile context
 interface UserContextType {
+  isAdmin: boolean;
   authenticatedUser: AuthUser | null;
   allUserProfiles: User[];
   currentUserProfile: User | null;
@@ -40,6 +42,7 @@ export const UserProvider = ({ children }: PropsWithChildren<{}>) => {
     if (user) {
       setUsersLoading(true);
       fetchUsers();
+      updateLastOnline(user.userId);
     }
   }, [user]);
 
@@ -79,6 +82,24 @@ export const UserProvider = ({ children }: PropsWithChildren<{}>) => {
     }
   };
 
+  const updateLastOnline = (userId: string) => {
+    const currentDateTime = DateTime.local().toFormat(
+      "yyyy-MM-dd'T'HH:mm:ss.SSSZZ",
+    );
+    updateUserFn({ id: userId, lastOnline: currentDateTime }).then(
+      (updatedProfile) => {
+        if (updatedProfile) {
+          setCurrentUserProfile(updatedProfile);
+          setAllUserProfiles((prevState) =>
+            prevState.map((u) =>
+              u.id === updatedProfile.id ? updatedProfile : u,
+            ),
+          );
+        }
+      },
+    );
+  };
+
   const updateUserProfile = async (updatedUser: UpdateUserInput) => {
     const userResponse = await updateUserFn(updatedUser);
     if (userResponse) {
@@ -104,6 +125,7 @@ export const UserProvider = ({ children }: PropsWithChildren<{}>) => {
   return (
     <UserContext.Provider
       value={{
+        isAdmin: currentUserProfile?.role?.includes("admin") ?? false,
         authenticatedUser: user,
         allUserProfiles,
         currentUserProfile,

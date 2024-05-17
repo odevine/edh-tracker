@@ -6,10 +6,10 @@ import {
   CardContent,
   Chip,
   Divider,
-  Grid,
   Stack,
   Typography,
 } from "@mui/material";
+import { DateTime } from "luxon";
 import { navigate } from "raviger";
 
 import { User } from "@/API";
@@ -23,39 +23,60 @@ export const ProfileMiniCard: React.FC<ProfileMiniCardProps> = ({
 }) => {
   return profile ? (
     <Card>
-      <Grid container spacing={2} alignItems="center" sx={{ p: 2 }}>
-        <Grid item>
-          <Avatar
-            src={profile?.profilePictureURL ?? ""}
-            alt={profile.displayName}
-          />
-        </Grid>
-        <Grid item>
-          <Stack direction="row" alignItems="center" spacing={1}>
-            <Typography
-              variant="h6"
-              sx={{
-                color: (theme): string =>
-                  (theme.palette.mode === "light"
-                    ? profile.lightThemeColor
-                    : profile.darkThemeColor) ?? theme.palette.text.primary,
-              }}
-            >
-              {profile.displayName}
-            </Typography>
-            {profile.role && (
-              <Chip variant="outlined" size="small" label={profile.role} />
-            )}
-          </Stack>
-          <Typography variant="body2" color="textSecondary">
-            joined: {new Date(profile.createdAt).toLocaleDateString()}
+      <Stack
+        direction="row"
+        spacing={2}
+        alignItems="center"
+        sx={{ px: 2, pt: 2 }}
+      >
+        <Avatar
+          src={profile?.profilePictureURL ?? ""}
+          alt={profile.displayName}
+        />
+        <Typography
+          variant="h6"
+          sx={{
+            color: (theme): string =>
+              (theme.palette.mode === "light"
+                ? profile.lightThemeColor
+                : profile.darkThemeColor) ?? theme.palette.text.primary,
+          }}
+        >
+          {profile.displayName}
+        </Typography>
+        {profile.role && (
+          <Chip variant="outlined" size="small" label={profile.role} />
+        )}
+      </Stack>
+      <Stack direction="row" justifyContent="space-between" sx={{ p: 2 }}>
+        <Stack sx={{ mr: 2 }}>
+          <Typography variant="caption" color="text.secondary">
+            joined:
           </Typography>
-        </Grid>
-      </Grid>
+          {profile.lastOnline && (
+            <Typography variant="caption" color="text.secondary">
+              last online:
+            </Typography>
+          )}
+        </Stack>
+        <Stack alignItems="flex-end">
+          <Typography variant="caption" color="text.secondary">
+            {DateTime.fromISO(profile.createdAt).toLocaleString(
+              DateTime.DATETIME_SHORT,
+            )}
+          </Typography>
+          {profile.lastOnline && (
+            <Typography variant="caption" color="text.secondary">
+              {DateTime.fromISO(profile.lastOnline).toLocaleString(
+                DateTime.DATETIME_SHORT,
+              )}
+            </Typography>
+          )}
+        </Stack>
+      </Stack>
       <Divider />
       <CardContent>
-        <Typography variant="body2" color="textSecondary">matches: no idea</Typography>
-        <Typography variant="body2" color="textSecondary">wins: no idea</Typography>
+        <Typography>nothing to see here (yet)</Typography>
       </CardContent>
       <Divider />
       <CardActions sx={{ justifyContent: "flex-end" }}>

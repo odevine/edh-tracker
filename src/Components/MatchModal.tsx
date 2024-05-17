@@ -3,12 +3,12 @@ import {
   Box,
   Button,
   Chip,
-  CircularProgress,
   Grid,
   MenuItem,
   Modal,
   Stack,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
@@ -16,7 +16,7 @@ import { DateTime } from "luxon";
 import { useMemo, useState } from "react";
 
 import { CreateMatchInput, Deck, User } from "@/API";
-import { useDecks, useMatches, useUser } from "@/Context";
+import { useDecks, useMatches, useTheme, useUser } from "@/Context";
 
 interface NewMatchModalProps {
   open: boolean;
@@ -36,6 +36,7 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
 }) => {
   const { createNewMatch } = useMatches();
   const { allDecks } = useDecks();
+  const { mode } = useTheme();
   const { authenticatedUser } = useUser();
   const [matchType, setMatchType] = useState(deckTypes[0].value);
   const [datePlayed, setDatePlayed] = useState(DateTime.now());
@@ -47,14 +48,28 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
 
   const validateForm = (): boolean => {
     const localErrors: string[] = [];
-    if (!participantDecks.length) {
-      localErrors.push("please select at least two decks as participants");
+    if (participantDecks.length < 2) {
+      localErrors.push("please select at least two decks");
     }
     if (!winningDeckId) {
       localErrors.push("please select a winning deck.");
     }
     setErrors(localErrors);
     return localErrors.length === 0;
+  };
+
+  const handleDeckClear = async (reason: string) => {
+    if (reason === "clear") {
+      setWinningDeckId("");
+    }
+  };
+
+  const handleClose = () => {
+    setDatePlayed(DateTime.now());
+    setMatchType(deckTypes[0].value);
+    setParticipantDecks([]);
+    setWinningDeckId("");
+    onClose();
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -67,23 +82,30 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
     if (validateForm()) {
       const matchData: CreateMatchInput = {
         winningDeckId: winningDeckId,
-        datePlayed: datePlayed.toISO(),
+        datePlayed: datePlayed.toFormat("yyyy-MM-dd"),
         matchType,
         isArchived: false,
       };
 
-      setLoading(true);
-      createNewMatch(
-        matchData,
-        participantDecks.map((deck) => deck.id),
-      ).finally(() => setLoading(false));
+      // setLoading(true);
+      // createNewMatch(
+      //   matchData,
+      //   participantDecks.map((deck) => deck.id),
+      // ).finally(() => {
+      //   setLoading(false);
+      //   handleClose();
+      // });
     }
   };
 
-  const handleDeckClear = async (reason: string) => {
-    if (reason === "clear") {
-      setWinningDeckId("");
+  const getDeckColor = (deckId: string) => {
+    const deckUser = deckToUserMap.get(deckId);
+    if (!deckUser) {
+      return "inherit";
     }
+    return mode === "light"
+      ? deckUser.lightThemeColor ?? "inherit"
+      : deckUser.darkThemeColor ?? "inherit";
   };
 
   const filteredDecks = useMemo(() => {
@@ -93,7 +115,7 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
   }, [allDecks, matchType]);
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={handleClose}>
       <Box
         sx={{
           position: "absolute",
@@ -106,8 +128,6 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
           pt: 2,
           px: 4,
           pb: 3,
-          minWidth: 480,
-
           "&:focus": {
             outline: "none",
           },
@@ -117,7 +137,7 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
           new match
         </Typography>
         <Grid container spacing={2}>
-          <Grid item xs={12}>
+          <Grid item xs={12} xl={6}>
             <DatePicker
               label="match date"
               value={datePlayed}
@@ -125,14 +145,18 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
               slotProps={{ textField: { fullWidth: true, required: true } }}
             />
           </Grid>
-          <Grid item xs={12}>
+          <Grid item xs={12} xl={6}>
             <TextField
               select
               required
               fullWidth
               label="match type"
               value={matchType}
-              onChange={(event) => setMatchType(event.target.value)}
+              onChange={(event) => {
+                setMatchType(event.target.value);
+                setParticipantDecks([]);
+                setWinningDeckId("");
+              }}
             >
               {deckTypes.map((type) => (
                 <MenuItem key={type.value} value={type.value}>
@@ -141,7 +165,7 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
               ))}
             </TextField>
           </Grid>
-          <Grid item xs={12}>
+          <Grid item xs={12} xl={6}>
             <Autocomplete
               multiple
               fullWidth
@@ -155,7 +179,6 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
               }
               filterSelectedOptions
               onChange={(_event, newValue) => {
-                console.log(newValue);
                 setParticipantDecks(newValue);
                 if (!newValue.map((deck) => deck.id).includes(winningDeckId)) {
                   setWinningDeckId("");
@@ -170,12 +193,21 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
                     {...getTagProps({ index })}
                     key={option.id}
                     variant="outlined"
-                    label={option.deckName}
-                    sx={{
-                      color:
-                        deckToUserMap.get(option.id)?.darkThemeColor ??
-                        "inherit",
-                    }}
+                    label={
+                      <Tooltip title={option.deckName} placement="top" arrow>
+                        <Box
+                          sx={{
+                            maxWidth: 120,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            color: getDeckColor(option.id),
+                          }}
+                        >
+                          {`${deckToUserMap.get(option.id)?.displayName} - ${option.deckName}`}
+                        </Box>
+                      </Tooltip>
+                    }
                   />
                 ))
               }
@@ -183,10 +215,9 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
                 <MenuItem {...props} key={option.id}>
                   <Typography
                     sx={{
-                      color:
-                        // TODO: Have this be toggled via theme mode
-                        deckToUserMap.get(option.id)?.darkThemeColor ??
-                        "inherit",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      color: getDeckColor(option.id),
                     }}
                   >
                     {`${deckToUserMap.get(option.id)?.displayName} - ${option.deckName}`}
@@ -195,7 +226,7 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
               )}
             />
           </Grid>
-          <Grid item xs={12}>
+          <Grid item xs={12} xl={6}>
             <TextField
               select
               required
@@ -203,6 +234,15 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
               label="winner"
               value={winningDeckId}
               onChange={(event) => setWinningDeckId(event.target.value)}
+              sx={{
+                maxWidth: { xs: 245, sm: "none" },
+                "& .MuiInputBase-input": {
+                  maxWidth: { xs: 245, sm: "none" },
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                },
+              }}
             >
               {participantDecks.length === 0 && (
                 <MenuItem value="" disabled>
@@ -213,8 +253,9 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
                 <MenuItem key={deck.id} value={deck.id}>
                   <Typography
                     sx={{
-                      color:
-                        deckToUserMap.get(deck.id)?.darkThemeColor ?? "inherit",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      color: getDeckColor(deck.id),
                     }}
                   >
                     {`${deckToUserMap.get(deck.id)?.displayName} - ${deck.deckName}`}
@@ -235,19 +276,18 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
           </Grid>
         </Grid>
         <Stack direction="row" justifyContent="flex-end" sx={{ mt: 2 }}>
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={loading}
-            onClick={handleSubmit}
-            sx={{ width: 150, height: 40 }}
-          >
-            {loading ? (
-              <CircularProgress size={24} sx={{ color: "inherit" }} />
-            ) : (
-              "add match"
-            )}
-          </Button>
+          <Tooltip title="coming soon" arrow placement="left">
+            <Box component="span">
+              <Button
+                disabled={true}
+                variant="contained"
+                onClick={handleSubmit}
+                sx={{ width: 150, height: 40 }}
+              >
+                add match
+              </Button>
+            </Box>
+          </Tooltip>
         </Stack>
       </Box>
     </Modal>

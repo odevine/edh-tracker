@@ -73,7 +73,7 @@ export const MatchesPage = (): JSX.Element => {
   const [orderBy, setOrderBy] = useState<keyof Match>(initialState.orderBy);
   const [page, setPage] = useState(initialState.page);
   const [rowsPerPage, setRowsPerPage] = useState(initialState.rowsPerPage);
-  const [modalOpen, setModalOpen] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
 
   // Save state to local storage whenever it changes
   useEffect(() => {
@@ -138,13 +138,13 @@ export const MatchesPage = (): JSX.Element => {
     <>
       <Paper sx={{ m: 3 }}>
         <Toolbar sx={{ p: 2, justifyContent: "space-between" }}>
-          <Grid container spacing={2}>
-            {useMediaQuery(theme.breakpoints.up("lg")) && <Grid item lg={7} />}
-            <Grid item xs={12} sm={9} md={9} lg={3}>
-              <TextField fullWidth size="small" label="search matches" />
-            </Grid>
-            <Grid item xs={12} sm={3} md={3} lg={2}>
-              <Button fullWidth variant="contained">
+          <Grid container spacing={2} justifyContent="flex-end">
+            <Grid item xs={12} sm={6} md={3} lg={2}>
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={() => setModalOpen(true)}
+              >
                 add match
               </Button>
             </Grid>
