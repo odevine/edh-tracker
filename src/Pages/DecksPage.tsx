@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   Grid,
   Link,
   MenuItem,
@@ -12,7 +13,6 @@ import {
   TableRow,
   TextField,
   Toolbar,
-  useMediaQuery,
   useTheme as useMuiTheme,
 } from "@mui/material";
 import PopupState, { bindHover, bindPopover } from "material-ui-popup-state";
@@ -22,6 +22,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Deck, User } from "@/API";
 import {
   CommanderColors,
+  DeckModal,
   EnhancedTableHead,
   HeadCell,
   ProfileMiniCard,
@@ -189,6 +190,7 @@ export const DecksPage = (): JSX.Element => {
   const [orderBy, setOrderBy] = useState<keyof Deck>(initialState.orderBy);
   const [page, setPage] = useState(initialState.page);
   const [rowsPerPage, setRowsPerPage] = useState(initialState.rowsPerPage);
+  const [modalOpen, setModalOpen] = useState(false);
 
   // Save state to local storage whenever it changes
   useEffect(() => {
@@ -247,15 +249,14 @@ export const DecksPage = (): JSX.Element => {
     <Paper sx={{ m: 3 }}>
       <Toolbar sx={{ p: 2, justifyContent: "space-between" }}>
         <Grid container spacing={2}>
-          {useMediaQuery(theme.breakpoints.up("lg")) && <Grid item lg={5} />}
-          <Grid item xs={12} sm={6} md={4} lg={2}>
+          <Grid item xs={12} sm={6} md={3}>
             <TypeSelector
               allDecks={allDecks}
               filterType={filterType}
               setFilterType={setFilterType}
             />
           </Grid>
-          <Grid item xs={12} sm={6} md={4} lg={2}>
+          <Grid item xs={12} sm={6} md={3}>
             <PlayerSelector
               allDecks={allDecks}
               allUserProfiles={allUserProfiles}
@@ -263,7 +264,7 @@ export const DecksPage = (): JSX.Element => {
               setFilterUser={setFilterUser}
             />
           </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={3}>
+          <Grid item xs={12} sm={6} md={4}>
             <TextField
               fullWidth
               size="small"
@@ -271,6 +272,15 @@ export const DecksPage = (): JSX.Element => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
+          </Grid>
+          <Grid item xs={12} sm={6} md={2}>
+            <Button
+              fullWidth
+              variant="contained"
+              onClick={() => setModalOpen(true)}
+            >
+              add deck
+            </Button>
           </Grid>
         </Grid>
       </Toolbar>
@@ -377,6 +387,7 @@ export const DecksPage = (): JSX.Element => {
           handleChangeRowsPerPage(event.target.value)
         }
       />
+      <DeckModal open={modalOpen} onClose={() => setModalOpen(false)} />
     </Paper>
   );
 };
