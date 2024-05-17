@@ -8,16 +8,21 @@ import {
   useState,
 } from "react";
 
-import { CreateDecksInput, Decks, UpdateDecksInput } from "@/API";
+import { CreateDeckInput, Deck, UpdateDeckInput } from "@/API";
 import { useApp } from "@/Context";
-import { createDeck, deleteDeck, getAllDecks, updateDeck } from "@/Logic";
+import {
+  createDeckFn,
+  deleteDeckFn,
+  getAllDecksFn,
+  updateDeckFn,
+} from "@/Logic";
 
 interface DecksContextType {
-  allDecks: Decks[];
-  userDecks: Decks[];
+  allDecks: Deck[];
+  userDecks: Deck[];
   decksLoading: boolean;
-  createNewDeck: (newDeck: CreateDecksInput) => Promise<void>;
-  updateExistingDeck: (updatedDeck: UpdateDecksInput) => Promise<void>;
+  createNewDeck: (newDeck: CreateDeckInput) => Promise<void>;
+  updateExistingDeck: (updatedDeck: UpdateDeckInput) => Promise<void>;
   deleteDeckById: (deckId: string) => Promise<void>;
 }
 
@@ -26,8 +31,8 @@ const DecksContext = createContext<DecksContextType | undefined>(undefined);
 export const DecksProvider = ({ children }: PropsWithChildren<{}>) => {
   const { addAppMessage } = useApp();
   const { user } = useAuthenticator((context) => [context.user]);
-  const [allDecks, setAllDecks] = useState<Decks[]>([]);
-  const [userDecks, setUserDecks] = useState<Decks[]>([]);
+  const [allDecks, setAllDecks] = useState<Deck[]>([]);
+  const [userDecks, setUserDecks] = useState<Deck[]>([]);
   const [decksLoading, setDecksLoading] = useState(true);
 
   useEffect(() => {
@@ -39,11 +44,11 @@ export const DecksProvider = ({ children }: PropsWithChildren<{}>) => {
 
   const fetchDecks = async () => {
     try {
-      const decks = await getAllDecks();
+      const decks = await getAllDecksFn();
       const allDecksResponse = decks ?? [];
       setAllDecks(allDecksResponse);
       setUserDecks(
-        allDecksResponse.filter((deck) => deck.deckOwnerID === user.userId),
+        allDecksResponse.filter((deck) => deck.deckOwnerId === user.userId),
       );
     } catch (error) {
       addAppMessage({
@@ -58,8 +63,8 @@ export const DecksProvider = ({ children }: PropsWithChildren<{}>) => {
     }
   };
 
-  const createNewDeck = async (newDeck: CreateDecksInput) => {
-    const deck = await createDeck(newDeck);
+  const createNewDeck = async (newDeck: CreateDeckInput) => {
+    const deck = await createDeckFn(newDeck);
     if (deck) {
       addAppMessage({
         content: `${deck.deckName} added to deck list`,
@@ -67,7 +72,7 @@ export const DecksProvider = ({ children }: PropsWithChildren<{}>) => {
       });
       // Add the new deck to the state
       setAllDecks((prevDecks) => [...prevDecks, deck]);
-      if (deck.deckOwnerID === user?.userId) {
+      if (deck.deckOwnerId === user?.userId) {
         setUserDecks((prevDecks) => [...prevDecks, deck]);
       }
     } else {
@@ -79,9 +84,9 @@ export const DecksProvider = ({ children }: PropsWithChildren<{}>) => {
     }
   };
 
-  const updateExistingDeck = async (updatedDeck: UpdateDecksInput) => {
+  const updateExistingDeck = async (updatedDeck: UpdateDeckInput) => {
     setDecksLoading(true);
-    const updateDeckResponse = await updateDeck(updatedDeck);
+    const updateDeckResponse = await updateDeckFn(updatedDeck);
     if (updateDeckResponse) {
       addAppMessage({
         content: `${updatedDeck.deckName} has been updated`,
@@ -93,7 +98,7 @@ export const DecksProvider = ({ children }: PropsWithChildren<{}>) => {
           d.id === updatedDeck.id ? updateDeckResponse : d,
         ),
       );
-      if (updatedDeck.deckOwnerID === user?.userId) {
+      if (updatedDeck.deckOwnerId === user?.userId) {
         setUserDecks((prevDecks) =>
           prevDecks.map((d) =>
             d.id === updatedDeck.id ? updateDeckResponse : d,
@@ -112,7 +117,7 @@ export const DecksProvider = ({ children }: PropsWithChildren<{}>) => {
 
   const deleteDeckById = async (deckId: string) => {
     setDecksLoading(true);
-    const success = await deleteDeck(deckId);
+    const success = await deleteDeckFn(deckId);
     if (success) {
       addAppMessage({
         content: "deck has been removed",

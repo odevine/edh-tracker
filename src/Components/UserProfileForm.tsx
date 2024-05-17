@@ -74,7 +74,7 @@ export const UserProfileForm: React.FC = () => {
     setErrors(localErrors);
     return localErrors.length === 0;
   };
-  1;
+  
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!authenticatedUser) {

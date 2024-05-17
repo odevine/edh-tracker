@@ -15,7 +15,7 @@ export function getComparator<T>(
   orderBy: keyof T,
   userProfileMap?: Map<string, { displayName: string }>,
 ): (a: T, b: T) => number {
-  if (orderBy === "deckOwnerID" && userProfileMap) {
+  if (orderBy === "deckOwnerId" && userProfileMap) {
     return order === "desc"
       ? (a, b) => {
           const nameA =

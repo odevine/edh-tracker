@@ -8,288 +8,291 @@ type GeneratedMutation<InputType, OutputType> = string & {
   __generatedMutationOutput: OutputType;
 };
 
-export const createMatchParticipants = /* GraphQL */ `mutation CreateMatchParticipants(
-  $input: CreateMatchParticipantsInput!
-  $condition: ModelMatchParticipantsConditionInput
+export const createUser = /* GraphQL */ `mutation CreateUser(
+  $input: CreateUserInput!
+  $condition: ModelUserConditionInput
 ) {
-  createMatchParticipants(input: $input, condition: $condition) {
-    id
-    decksID
-    matchesID
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.CreateMatchParticipantsMutationVariables,
-  APITypes.CreateMatchParticipantsMutation
->;
-export const updateMatchParticipants = /* GraphQL */ `mutation UpdateMatchParticipants(
-  $input: UpdateMatchParticipantsInput!
-  $condition: ModelMatchParticipantsConditionInput
-) {
-  updateMatchParticipants(input: $input, condition: $condition) {
-    id
-    decksID
-    matchesID
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.UpdateMatchParticipantsMutationVariables,
-  APITypes.UpdateMatchParticipantsMutation
->;
-export const deleteMatchParticipants = /* GraphQL */ `mutation DeleteMatchParticipants(
-  $input: DeleteMatchParticipantsInput!
-  $condition: ModelMatchParticipantsConditionInput
-) {
-  deleteMatchParticipants(input: $input, condition: $condition) {
-    id
-    decksID
-    matchesID
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.DeleteMatchParticipantsMutationVariables,
-  APITypes.DeleteMatchParticipantsMutation
->;
-export const createUsers = /* GraphQL */ `mutation CreateUsers(
-  $input: CreateUsersInput!
-  $condition: ModelUsersConditionInput
-) {
-  createUsers(input: $input, condition: $condition) {
+  createUser(input: $input, condition: $condition) {
     id
     displayName
+    description
     lightThemeColor
     darkThemeColor
     profilePictureURL
     role
-    Decks {
+    lastOnline
+    decks {
       nextToken
       __typename
     }
-    WinningUser {
-      nextToken
-      __typename
-    }
-    lastLoggedIn
     createdAt
     updatedAt
     __typename
   }
 }
 ` as GeneratedMutation<
-  APITypes.CreateUsersMutationVariables,
-  APITypes.CreateUsersMutation
+  APITypes.CreateUserMutationVariables,
+  APITypes.CreateUserMutation
 >;
-export const updateUsers = /* GraphQL */ `mutation UpdateUsers(
-  $input: UpdateUsersInput!
-  $condition: ModelUsersConditionInput
+export const updateUser = /* GraphQL */ `mutation UpdateUser(
+  $input: UpdateUserInput!
+  $condition: ModelUserConditionInput
 ) {
-  updateUsers(input: $input, condition: $condition) {
+  updateUser(input: $input, condition: $condition) {
     id
     displayName
+    description
     lightThemeColor
     darkThemeColor
     profilePictureURL
     role
-    Decks {
+    lastOnline
+    decks {
       nextToken
       __typename
     }
-    WinningUser {
-      nextToken
-      __typename
-    }
-    lastLoggedIn
     createdAt
     updatedAt
     __typename
   }
 }
 ` as GeneratedMutation<
-  APITypes.UpdateUsersMutationVariables,
-  APITypes.UpdateUsersMutation
+  APITypes.UpdateUserMutationVariables,
+  APITypes.UpdateUserMutation
 >;
-export const deleteUsers = /* GraphQL */ `mutation DeleteUsers(
-  $input: DeleteUsersInput!
-  $condition: ModelUsersConditionInput
+export const deleteUser = /* GraphQL */ `mutation DeleteUser(
+  $input: DeleteUserInput!
+  $condition: ModelUserConditionInput
 ) {
-  deleteUsers(input: $input, condition: $condition) {
+  deleteUser(input: $input, condition: $condition) {
     id
     displayName
+    description
     lightThemeColor
     darkThemeColor
     profilePictureURL
     role
-    Decks {
+    lastOnline
+    decks {
       nextToken
       __typename
     }
-    WinningUser {
-      nextToken
-      __typename
-    }
-    lastLoggedIn
     createdAt
     updatedAt
     __typename
   }
 }
 ` as GeneratedMutation<
-  APITypes.DeleteUsersMutationVariables,
-  APITypes.DeleteUsersMutation
+  APITypes.DeleteUserMutationVariables,
+  APITypes.DeleteUserMutation
 >;
-export const createDecks = /* GraphQL */ `mutation CreateDecks(
-  $input: CreateDecksInput!
-  $condition: ModelDecksConditionInput
+export const createDeck = /* GraphQL */ `mutation CreateDeck(
+  $input: CreateDeckInput!
+  $condition: ModelDeckConditionInput
 ) {
-  createDecks(input: $input, condition: $condition) {
+  createDeck(input: $input, condition: $condition) {
     id
-    deckOwnerID
+    deckOwnerId
     deckName
     commanderName
     commanderColors
     deckType
-    MatchParticipants {
+    link
+    cost
+    winningMatches {
       nextToken
       __typename
     }
-    link
-    cost
+    matchParticipants {
+      nextToken
+      __typename
+    }
     createdAt
     updatedAt
     __typename
   }
 }
 ` as GeneratedMutation<
-  APITypes.CreateDecksMutationVariables,
-  APITypes.CreateDecksMutation
+  APITypes.CreateDeckMutationVariables,
+  APITypes.CreateDeckMutation
 >;
-export const updateDecks = /* GraphQL */ `mutation UpdateDecks(
-  $input: UpdateDecksInput!
-  $condition: ModelDecksConditionInput
+export const updateDeck = /* GraphQL */ `mutation UpdateDeck(
+  $input: UpdateDeckInput!
+  $condition: ModelDeckConditionInput
 ) {
-  updateDecks(input: $input, condition: $condition) {
+  updateDeck(input: $input, condition: $condition) {
     id
-    deckOwnerID
+    deckOwnerId
     deckName
     commanderName
     commanderColors
     deckType
-    MatchParticipants {
+    link
+    cost
+    winningMatches {
       nextToken
       __typename
     }
-    link
-    cost
+    matchParticipants {
+      nextToken
+      __typename
+    }
     createdAt
     updatedAt
     __typename
   }
 }
 ` as GeneratedMutation<
-  APITypes.UpdateDecksMutationVariables,
-  APITypes.UpdateDecksMutation
+  APITypes.UpdateDeckMutationVariables,
+  APITypes.UpdateDeckMutation
 >;
-export const deleteDecks = /* GraphQL */ `mutation DeleteDecks(
-  $input: DeleteDecksInput!
-  $condition: ModelDecksConditionInput
+export const deleteDeck = /* GraphQL */ `mutation DeleteDeck(
+  $input: DeleteDeckInput!
+  $condition: ModelDeckConditionInput
 ) {
-  deleteDecks(input: $input, condition: $condition) {
+  deleteDeck(input: $input, condition: $condition) {
     id
-    deckOwnerID
+    deckOwnerId
     deckName
     commanderName
     commanderColors
     deckType
-    MatchParticipants {
-      nextToken
-      __typename
-    }
     link
     cost
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.DeleteDecksMutationVariables,
-  APITypes.DeleteDecksMutation
->;
-export const createMatches = /* GraphQL */ `mutation CreateMatches(
-  $input: CreateMatchesInput!
-  $condition: ModelMatchesConditionInput
-) {
-  createMatches(input: $input, condition: $condition) {
-    id
-    winningUserID
-    matchType
-    isArchived
-    MatchParticipants {
+    winningMatches {
       nextToken
       __typename
     }
-    datePlayed
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.CreateMatchesMutationVariables,
-  APITypes.CreateMatchesMutation
->;
-export const updateMatches = /* GraphQL */ `mutation UpdateMatches(
-  $input: UpdateMatchesInput!
-  $condition: ModelMatchesConditionInput
-) {
-  updateMatches(input: $input, condition: $condition) {
-    id
-    winningUserID
-    matchType
-    isArchived
-    MatchParticipants {
+    matchParticipants {
       nextToken
       __typename
     }
-    datePlayed
     createdAt
     updatedAt
     __typename
   }
 }
 ` as GeneratedMutation<
-  APITypes.UpdateMatchesMutationVariables,
-  APITypes.UpdateMatchesMutation
+  APITypes.DeleteDeckMutationVariables,
+  APITypes.DeleteDeckMutation
 >;
-export const deleteMatches = /* GraphQL */ `mutation DeleteMatches(
-  $input: DeleteMatchesInput!
-  $condition: ModelMatchesConditionInput
+export const createMatch = /* GraphQL */ `mutation CreateMatch(
+  $input: CreateMatchInput!
+  $condition: ModelMatchConditionInput
 ) {
-  deleteMatches(input: $input, condition: $condition) {
+  createMatch(input: $input, condition: $condition) {
     id
-    winningUserID
+    winningDeckId
     matchType
     isArchived
-    MatchParticipants {
+    datePlayed
+    matchParticipants {
       nextToken
       __typename
     }
-    datePlayed
     createdAt
     updatedAt
     __typename
   }
 }
 ` as GeneratedMutation<
-  APITypes.DeleteMatchesMutationVariables,
-  APITypes.DeleteMatchesMutation
+  APITypes.CreateMatchMutationVariables,
+  APITypes.CreateMatchMutation
+>;
+export const updateMatch = /* GraphQL */ `mutation UpdateMatch(
+  $input: UpdateMatchInput!
+  $condition: ModelMatchConditionInput
+) {
+  updateMatch(input: $input, condition: $condition) {
+    id
+    winningDeckId
+    matchType
+    isArchived
+    datePlayed
+    matchParticipants {
+      nextToken
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateMatchMutationVariables,
+  APITypes.UpdateMatchMutation
+>;
+export const deleteMatch = /* GraphQL */ `mutation DeleteMatch(
+  $input: DeleteMatchInput!
+  $condition: ModelMatchConditionInput
+) {
+  deleteMatch(input: $input, condition: $condition) {
+    id
+    winningDeckId
+    matchType
+    isArchived
+    datePlayed
+    matchParticipants {
+      nextToken
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteMatchMutationVariables,
+  APITypes.DeleteMatchMutation
+>;
+export const createMatchParticipant = /* GraphQL */ `mutation CreateMatchParticipant(
+  $input: CreateMatchParticipantInput!
+  $condition: ModelMatchParticipantConditionInput
+) {
+  createMatchParticipant(input: $input, condition: $condition) {
+    id
+    deckId
+    matchId
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateMatchParticipantMutationVariables,
+  APITypes.CreateMatchParticipantMutation
+>;
+export const updateMatchParticipant = /* GraphQL */ `mutation UpdateMatchParticipant(
+  $input: UpdateMatchParticipantInput!
+  $condition: ModelMatchParticipantConditionInput
+) {
+  updateMatchParticipant(input: $input, condition: $condition) {
+    id
+    deckId
+    matchId
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateMatchParticipantMutationVariables,
+  APITypes.UpdateMatchParticipantMutation
+>;
+export const deleteMatchParticipant = /* GraphQL */ `mutation DeleteMatchParticipant(
+  $input: DeleteMatchParticipantInput!
+  $condition: ModelMatchParticipantConditionInput
+) {
+  deleteMatchParticipant(input: $input, condition: $condition) {
+    id
+    deckId
+    matchId
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteMatchParticipantMutationVariables,
+  APITypes.DeleteMatchParticipantMutation
 >;

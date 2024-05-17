@@ -2,23 +2,33 @@
 /* eslint-disable */
 //  This file was automatically generated and should not be edited.
 
-export type CreateMatchParticipantsInput = {
+export type CreateUserInput = {
   id?: string | null,
-  decksID: string,
-  matchesID: string,
+  displayName: string,
+  description?: string | null,
+  lightThemeColor?: string | null,
+  darkThemeColor?: string | null,
+  profilePictureURL?: string | null,
+  role?: string | null,
+  lastOnline?: string | null,
 };
 
-export type ModelMatchParticipantsConditionInput = {
-  decksID?: ModelIDInput | null,
-  matchesID?: ModelIDInput | null,
-  and?: Array< ModelMatchParticipantsConditionInput | null > | null,
-  or?: Array< ModelMatchParticipantsConditionInput | null > | null,
-  not?: ModelMatchParticipantsConditionInput | null,
+export type ModelUserConditionInput = {
+  displayName?: ModelStringInput | null,
+  description?: ModelStringInput | null,
+  lightThemeColor?: ModelStringInput | null,
+  darkThemeColor?: ModelStringInput | null,
+  profilePictureURL?: ModelStringInput | null,
+  role?: ModelStringInput | null,
+  lastOnline?: ModelStringInput | null,
+  and?: Array< ModelUserConditionInput | null > | null,
+  or?: Array< ModelUserConditionInput | null > | null,
+  not?: ModelUserConditionInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
 };
 
-export type ModelIDInput = {
+export type ModelStringInput = {
   ne?: string | null,
   eq?: string | null,
   le?: string | null,
@@ -58,7 +68,118 @@ export type ModelSizeInput = {
   between?: Array< number | null > | null,
 };
 
-export type ModelStringInput = {
+export type User = {
+  __typename: "User",
+  id: string,
+  displayName: string,
+  description?: string | null,
+  lightThemeColor?: string | null,
+  darkThemeColor?: string | null,
+  profilePictureURL?: string | null,
+  role?: string | null,
+  lastOnline?: string | null,
+  decks?: ModelDeckConnection | null,
+  createdAt: string,
+  updatedAt: string,
+};
+
+export type ModelDeckConnection = {
+  __typename: "ModelDeckConnection",
+  items:  Array<Deck | null >,
+  nextToken?: string | null,
+};
+
+export type Deck = {
+  __typename: "Deck",
+  id: string,
+  deckOwnerId: string,
+  deckName: string,
+  commanderName: string,
+  commanderColors?: Array< string > | null,
+  deckType: string,
+  link?: string | null,
+  cost?: number | null,
+  winningMatches?: ModelMatchConnection | null,
+  matchParticipants?: ModelMatchParticipantConnection | null,
+  createdAt: string,
+  updatedAt: string,
+};
+
+export type ModelMatchConnection = {
+  __typename: "ModelMatchConnection",
+  items:  Array<Match | null >,
+  nextToken?: string | null,
+};
+
+export type Match = {
+  __typename: "Match",
+  id: string,
+  winningDeckId: string,
+  matchType: string,
+  isArchived: boolean,
+  datePlayed: string,
+  matchParticipants?: ModelMatchParticipantConnection | null,
+  createdAt: string,
+  updatedAt: string,
+};
+
+export type ModelMatchParticipantConnection = {
+  __typename: "ModelMatchParticipantConnection",
+  items:  Array<MatchParticipant | null >,
+  nextToken?: string | null,
+};
+
+export type MatchParticipant = {
+  __typename: "MatchParticipant",
+  id: string,
+  deckId: string,
+  matchId: string,
+  createdAt: string,
+  updatedAt: string,
+};
+
+export type UpdateUserInput = {
+  id: string,
+  displayName?: string | null,
+  description?: string | null,
+  lightThemeColor?: string | null,
+  darkThemeColor?: string | null,
+  profilePictureURL?: string | null,
+  role?: string | null,
+  lastOnline?: string | null,
+};
+
+export type DeleteUserInput = {
+  id: string,
+};
+
+export type CreateDeckInput = {
+  id?: string | null,
+  deckOwnerId: string,
+  deckName: string,
+  commanderName: string,
+  commanderColors?: Array< string > | null,
+  deckType: string,
+  link?: string | null,
+  cost?: number | null,
+};
+
+export type ModelDeckConditionInput = {
+  deckOwnerId?: ModelIDInput | null,
+  deckName?: ModelStringInput | null,
+  commanderName?: ModelStringInput | null,
+  commanderColors?: ModelStringInput | null,
+  deckType?: ModelStringInput | null,
+  link?: ModelStringInput | null,
+  cost?: ModelFloatInput | null,
+  and?: Array< ModelDeckConditionInput | null > | null,
+  or?: Array< ModelDeckConditionInput | null > | null,
+  not?: ModelDeckConditionInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+};
+
+export type ModelIDInput = {
   ne?: string | null,
   eq?: string | null,
   le?: string | null,
@@ -74,128 +195,6 @@ export type ModelStringInput = {
   size?: ModelSizeInput | null,
 };
 
-export type MatchParticipants = {
-  __typename: "MatchParticipants",
-  id: string,
-  decksID: string,
-  matchesID: string,
-  createdAt: string,
-  updatedAt: string,
-};
-
-export type UpdateMatchParticipantsInput = {
-  id: string,
-  decksID?: string | null,
-  matchesID?: string | null,
-};
-
-export type DeleteMatchParticipantsInput = {
-  id: string,
-};
-
-export type CreateUsersInput = {
-  id?: string | null,
-  displayName: string,
-  lightThemeColor?: string | null,
-  darkThemeColor?: string | null,
-  profilePictureURL?: string | null,
-  role?: string | null,
-  lastLoggedIn?: string | null,
-};
-
-export type ModelUsersConditionInput = {
-  displayName?: ModelStringInput | null,
-  lightThemeColor?: ModelStringInput | null,
-  darkThemeColor?: ModelStringInput | null,
-  profilePictureURL?: ModelStringInput | null,
-  role?: ModelStringInput | null,
-  lastLoggedIn?: ModelStringInput | null,
-  and?: Array< ModelUsersConditionInput | null > | null,
-  or?: Array< ModelUsersConditionInput | null > | null,
-  not?: ModelUsersConditionInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-};
-
-export type Users = {
-  __typename: "Users",
-  id: string,
-  displayName: string,
-  lightThemeColor?: string | null,
-  darkThemeColor?: string | null,
-  profilePictureURL?: string | null,
-  role?: string | null,
-  Decks?: ModelMatchesConnection | null,
-  WinningUser?: ModelMatchesConnection | null,
-  lastLoggedIn?: string | null,
-  createdAt: string,
-  updatedAt: string,
-};
-
-export type ModelMatchesConnection = {
-  __typename: "ModelMatchesConnection",
-  items:  Array<Matches | null >,
-  nextToken?: string | null,
-};
-
-export type Matches = {
-  __typename: "Matches",
-  id: string,
-  winningUserID: string,
-  matchType: string,
-  isArchived: boolean,
-  MatchParticipants?: ModelMatchParticipantsConnection | null,
-  datePlayed: string,
-  createdAt: string,
-  updatedAt: string,
-};
-
-export type ModelMatchParticipantsConnection = {
-  __typename: "ModelMatchParticipantsConnection",
-  items:  Array<MatchParticipants | null >,
-  nextToken?: string | null,
-};
-
-export type UpdateUsersInput = {
-  id: string,
-  displayName?: string | null,
-  lightThemeColor?: string | null,
-  darkThemeColor?: string | null,
-  profilePictureURL?: string | null,
-  role?: string | null,
-  lastLoggedIn?: string | null,
-};
-
-export type DeleteUsersInput = {
-  id: string,
-};
-
-export type CreateDecksInput = {
-  id?: string | null,
-  deckOwnerID: string,
-  deckName: string,
-  commanderName: string,
-  commanderColors?: Array< string > | null,
-  deckType: string,
-  link?: string | null,
-  cost?: number | null,
-};
-
-export type ModelDecksConditionInput = {
-  deckOwnerID?: ModelIDInput | null,
-  deckName?: ModelStringInput | null,
-  commanderName?: ModelStringInput | null,
-  commanderColors?: ModelStringInput | null,
-  deckType?: ModelStringInput | null,
-  link?: ModelStringInput | null,
-  cost?: ModelFloatInput | null,
-  and?: Array< ModelDecksConditionInput | null > | null,
-  or?: Array< ModelDecksConditionInput | null > | null,
-  not?: ModelDecksConditionInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-};
-
 export type ModelFloatInput = {
   ne?: number | null,
   eq?: number | null,
@@ -208,24 +207,9 @@ export type ModelFloatInput = {
   attributeType?: ModelAttributeTypes | null,
 };
 
-export type Decks = {
-  __typename: "Decks",
+export type UpdateDeckInput = {
   id: string,
-  deckOwnerID: string,
-  deckName: string,
-  commanderName: string,
-  commanderColors?: Array< string > | null,
-  deckType: string,
-  MatchParticipants?: ModelMatchParticipantsConnection | null,
-  link?: string | null,
-  cost?: number | null,
-  createdAt: string,
-  updatedAt: string,
-};
-
-export type UpdateDecksInput = {
-  id: string,
-  deckOwnerID?: string | null,
+  deckOwnerId?: string | null,
   deckName?: string | null,
   commanderName?: string | null,
   commanderColors?: Array< string > | null,
@@ -234,26 +218,26 @@ export type UpdateDecksInput = {
   cost?: number | null,
 };
 
-export type DeleteDecksInput = {
+export type DeleteDeckInput = {
   id: string,
 };
 
-export type CreateMatchesInput = {
+export type CreateMatchInput = {
   id?: string | null,
-  winningUserID: string,
+  winningDeckId: string,
   matchType: string,
   isArchived: boolean,
   datePlayed: string,
 };
 
-export type ModelMatchesConditionInput = {
-  winningUserID?: ModelIDInput | null,
+export type ModelMatchConditionInput = {
+  winningDeckId?: ModelIDInput | null,
   matchType?: ModelStringInput | null,
   isArchived?: ModelBooleanInput | null,
   datePlayed?: ModelStringInput | null,
-  and?: Array< ModelMatchesConditionInput | null > | null,
-  or?: Array< ModelMatchesConditionInput | null > | null,
-  not?: ModelMatchesConditionInput | null,
+  and?: Array< ModelMatchConditionInput | null > | null,
+  or?: Array< ModelMatchConditionInput | null > | null,
+  not?: ModelMatchConditionInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
 };
@@ -265,59 +249,69 @@ export type ModelBooleanInput = {
   attributeType?: ModelAttributeTypes | null,
 };
 
-export type UpdateMatchesInput = {
+export type UpdateMatchInput = {
   id: string,
-  winningUserID?: string | null,
+  winningDeckId?: string | null,
   matchType?: string | null,
   isArchived?: boolean | null,
   datePlayed?: string | null,
 };
 
-export type DeleteMatchesInput = {
+export type DeleteMatchInput = {
   id: string,
 };
 
-export type ModelMatchParticipantsFilterInput = {
-  id?: ModelIDInput | null,
-  decksID?: ModelIDInput | null,
-  matchesID?: ModelIDInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelMatchParticipantsFilterInput | null > | null,
-  or?: Array< ModelMatchParticipantsFilterInput | null > | null,
-  not?: ModelMatchParticipantsFilterInput | null,
+export type CreateMatchParticipantInput = {
+  id?: string | null,
+  deckId: string,
+  matchId: string,
 };
 
-export enum ModelSortDirection {
-  ASC = "ASC",
-  DESC = "DESC",
-}
+export type ModelMatchParticipantConditionInput = {
+  deckId?: ModelIDInput | null,
+  matchId?: ModelIDInput | null,
+  and?: Array< ModelMatchParticipantConditionInput | null > | null,
+  or?: Array< ModelMatchParticipantConditionInput | null > | null,
+  not?: ModelMatchParticipantConditionInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+};
 
+export type UpdateMatchParticipantInput = {
+  id: string,
+  deckId?: string | null,
+  matchId?: string | null,
+};
 
-export type ModelUsersFilterInput = {
+export type DeleteMatchParticipantInput = {
+  id: string,
+};
+
+export type ModelUserFilterInput = {
   id?: ModelIDInput | null,
   displayName?: ModelStringInput | null,
+  description?: ModelStringInput | null,
   lightThemeColor?: ModelStringInput | null,
   darkThemeColor?: ModelStringInput | null,
   profilePictureURL?: ModelStringInput | null,
   role?: ModelStringInput | null,
-  lastLoggedIn?: ModelStringInput | null,
+  lastOnline?: ModelStringInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
-  and?: Array< ModelUsersFilterInput | null > | null,
-  or?: Array< ModelUsersFilterInput | null > | null,
-  not?: ModelUsersFilterInput | null,
+  and?: Array< ModelUserFilterInput | null > | null,
+  or?: Array< ModelUserFilterInput | null > | null,
+  not?: ModelUserFilterInput | null,
 };
 
-export type ModelUsersConnection = {
-  __typename: "ModelUsersConnection",
-  items:  Array<Users | null >,
+export type ModelUserConnection = {
+  __typename: "ModelUserConnection",
+  items:  Array<User | null >,
   nextToken?: string | null,
 };
 
-export type ModelDecksFilterInput = {
+export type ModelDeckFilterInput = {
   id?: ModelIDInput | null,
-  deckOwnerID?: ModelIDInput | null,
+  deckOwnerId?: ModelIDInput | null,
   deckName?: ModelStringInput | null,
   commanderName?: ModelStringInput | null,
   commanderColors?: ModelStringInput | null,
@@ -326,38 +320,54 @@ export type ModelDecksFilterInput = {
   cost?: ModelFloatInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
-  and?: Array< ModelDecksFilterInput | null > | null,
-  or?: Array< ModelDecksFilterInput | null > | null,
-  not?: ModelDecksFilterInput | null,
+  and?: Array< ModelDeckFilterInput | null > | null,
+  or?: Array< ModelDeckFilterInput | null > | null,
+  not?: ModelDeckFilterInput | null,
 };
 
-export type ModelDecksConnection = {
-  __typename: "ModelDecksConnection",
-  items:  Array<Decks | null >,
-  nextToken?: string | null,
-};
+export enum ModelSortDirection {
+  ASC = "ASC",
+  DESC = "DESC",
+}
 
-export type ModelMatchesFilterInput = {
+
+export type ModelMatchFilterInput = {
   id?: ModelIDInput | null,
-  winningUserID?: ModelIDInput | null,
+  winningDeckId?: ModelIDInput | null,
   matchType?: ModelStringInput | null,
   isArchived?: ModelBooleanInput | null,
   datePlayed?: ModelStringInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
-  and?: Array< ModelMatchesFilterInput | null > | null,
-  or?: Array< ModelMatchesFilterInput | null > | null,
-  not?: ModelMatchesFilterInput | null,
+  and?: Array< ModelMatchFilterInput | null > | null,
+  or?: Array< ModelMatchFilterInput | null > | null,
+  not?: ModelMatchFilterInput | null,
 };
 
-export type ModelSubscriptionMatchParticipantsFilterInput = {
+export type ModelMatchParticipantFilterInput = {
+  id?: ModelIDInput | null,
+  deckId?: ModelIDInput | null,
+  matchId?: ModelIDInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelMatchParticipantFilterInput | null > | null,
+  or?: Array< ModelMatchParticipantFilterInput | null > | null,
+  not?: ModelMatchParticipantFilterInput | null,
+};
+
+export type ModelSubscriptionUserFilterInput = {
   id?: ModelSubscriptionIDInput | null,
-  decksID?: ModelSubscriptionIDInput | null,
-  matchesID?: ModelSubscriptionIDInput | null,
+  displayName?: ModelSubscriptionStringInput | null,
+  description?: ModelSubscriptionStringInput | null,
+  lightThemeColor?: ModelSubscriptionStringInput | null,
+  darkThemeColor?: ModelSubscriptionStringInput | null,
+  profilePictureURL?: ModelSubscriptionStringInput | null,
+  role?: ModelSubscriptionStringInput | null,
+  lastOnline?: ModelSubscriptionStringInput | null,
   createdAt?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
-  and?: Array< ModelSubscriptionMatchParticipantsFilterInput | null > | null,
-  or?: Array< ModelSubscriptionMatchParticipantsFilterInput | null > | null,
+  and?: Array< ModelSubscriptionUserFilterInput | null > | null,
+  or?: Array< ModelSubscriptionUserFilterInput | null > | null,
 };
 
 export type ModelSubscriptionIDInput = {
@@ -390,23 +400,9 @@ export type ModelSubscriptionStringInput = {
   notIn?: Array< string | null > | null,
 };
 
-export type ModelSubscriptionUsersFilterInput = {
+export type ModelSubscriptionDeckFilterInput = {
   id?: ModelSubscriptionIDInput | null,
-  displayName?: ModelSubscriptionStringInput | null,
-  lightThemeColor?: ModelSubscriptionStringInput | null,
-  darkThemeColor?: ModelSubscriptionStringInput | null,
-  profilePictureURL?: ModelSubscriptionStringInput | null,
-  role?: ModelSubscriptionStringInput | null,
-  lastLoggedIn?: ModelSubscriptionStringInput | null,
-  createdAt?: ModelSubscriptionStringInput | null,
-  updatedAt?: ModelSubscriptionStringInput | null,
-  and?: Array< ModelSubscriptionUsersFilterInput | null > | null,
-  or?: Array< ModelSubscriptionUsersFilterInput | null > | null,
-};
-
-export type ModelSubscriptionDecksFilterInput = {
-  id?: ModelSubscriptionIDInput | null,
-  deckOwnerID?: ModelSubscriptionIDInput | null,
+  deckOwnerId?: ModelSubscriptionIDInput | null,
   deckName?: ModelSubscriptionStringInput | null,
   commanderName?: ModelSubscriptionStringInput | null,
   commanderColors?: ModelSubscriptionStringInput | null,
@@ -415,8 +411,8 @@ export type ModelSubscriptionDecksFilterInput = {
   cost?: ModelSubscriptionFloatInput | null,
   createdAt?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
-  and?: Array< ModelSubscriptionDecksFilterInput | null > | null,
-  or?: Array< ModelSubscriptionDecksFilterInput | null > | null,
+  and?: Array< ModelSubscriptionDeckFilterInput | null > | null,
+  or?: Array< ModelSubscriptionDeckFilterInput | null > | null,
 };
 
 export type ModelSubscriptionFloatInput = {
@@ -431,16 +427,16 @@ export type ModelSubscriptionFloatInput = {
   notIn?: Array< number | null > | null,
 };
 
-export type ModelSubscriptionMatchesFilterInput = {
+export type ModelSubscriptionMatchFilterInput = {
   id?: ModelSubscriptionIDInput | null,
-  winningUserID?: ModelSubscriptionIDInput | null,
+  winningDeckId?: ModelSubscriptionIDInput | null,
   matchType?: ModelSubscriptionStringInput | null,
   isArchived?: ModelSubscriptionBooleanInput | null,
   datePlayed?: ModelSubscriptionStringInput | null,
   createdAt?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
-  and?: Array< ModelSubscriptionMatchesFilterInput | null > | null,
-  or?: Array< ModelSubscriptionMatchesFilterInput | null > | null,
+  and?: Array< ModelSubscriptionMatchFilterInput | null > | null,
+  or?: Array< ModelSubscriptionMatchFilterInput | null > | null,
 };
 
 export type ModelSubscriptionBooleanInput = {
@@ -448,406 +444,335 @@ export type ModelSubscriptionBooleanInput = {
   eq?: boolean | null,
 };
 
-export type CreateMatchParticipantsMutationVariables = {
-  input: CreateMatchParticipantsInput,
-  condition?: ModelMatchParticipantsConditionInput | null,
+export type ModelSubscriptionMatchParticipantFilterInput = {
+  id?: ModelSubscriptionIDInput | null,
+  deckId?: ModelSubscriptionIDInput | null,
+  matchId?: ModelSubscriptionIDInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionMatchParticipantFilterInput | null > | null,
+  or?: Array< ModelSubscriptionMatchParticipantFilterInput | null > | null,
 };
 
-export type CreateMatchParticipantsMutation = {
-  createMatchParticipants?:  {
-    __typename: "MatchParticipants",
-    id: string,
-    decksID: string,
-    matchesID: string,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
+export type CreateUserMutationVariables = {
+  input: CreateUserInput,
+  condition?: ModelUserConditionInput | null,
 };
 
-export type UpdateMatchParticipantsMutationVariables = {
-  input: UpdateMatchParticipantsInput,
-  condition?: ModelMatchParticipantsConditionInput | null,
-};
-
-export type UpdateMatchParticipantsMutation = {
-  updateMatchParticipants?:  {
-    __typename: "MatchParticipants",
-    id: string,
-    decksID: string,
-    matchesID: string,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type DeleteMatchParticipantsMutationVariables = {
-  input: DeleteMatchParticipantsInput,
-  condition?: ModelMatchParticipantsConditionInput | null,
-};
-
-export type DeleteMatchParticipantsMutation = {
-  deleteMatchParticipants?:  {
-    __typename: "MatchParticipants",
-    id: string,
-    decksID: string,
-    matchesID: string,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type CreateUsersMutationVariables = {
-  input: CreateUsersInput,
-  condition?: ModelUsersConditionInput | null,
-};
-
-export type CreateUsersMutation = {
-  createUsers?:  {
-    __typename: "Users",
+export type CreateUserMutation = {
+  createUser?:  {
+    __typename: "User",
     id: string,
     displayName: string,
+    description?: string | null,
     lightThemeColor?: string | null,
     darkThemeColor?: string | null,
     profilePictureURL?: string | null,
     role?: string | null,
-    Decks?:  {
-      __typename: "ModelMatchesConnection",
+    lastOnline?: string | null,
+    decks?:  {
+      __typename: "ModelDeckConnection",
       nextToken?: string | null,
     } | null,
-    WinningUser?:  {
-      __typename: "ModelMatchesConnection",
-      nextToken?: string | null,
-    } | null,
-    lastLoggedIn?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
 };
 
-export type UpdateUsersMutationVariables = {
-  input: UpdateUsersInput,
-  condition?: ModelUsersConditionInput | null,
+export type UpdateUserMutationVariables = {
+  input: UpdateUserInput,
+  condition?: ModelUserConditionInput | null,
 };
 
-export type UpdateUsersMutation = {
-  updateUsers?:  {
-    __typename: "Users",
+export type UpdateUserMutation = {
+  updateUser?:  {
+    __typename: "User",
     id: string,
     displayName: string,
+    description?: string | null,
     lightThemeColor?: string | null,
     darkThemeColor?: string | null,
     profilePictureURL?: string | null,
     role?: string | null,
-    Decks?:  {
-      __typename: "ModelMatchesConnection",
+    lastOnline?: string | null,
+    decks?:  {
+      __typename: "ModelDeckConnection",
       nextToken?: string | null,
     } | null,
-    WinningUser?:  {
-      __typename: "ModelMatchesConnection",
-      nextToken?: string | null,
-    } | null,
-    lastLoggedIn?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
 };
 
-export type DeleteUsersMutationVariables = {
-  input: DeleteUsersInput,
-  condition?: ModelUsersConditionInput | null,
+export type DeleteUserMutationVariables = {
+  input: DeleteUserInput,
+  condition?: ModelUserConditionInput | null,
 };
 
-export type DeleteUsersMutation = {
-  deleteUsers?:  {
-    __typename: "Users",
+export type DeleteUserMutation = {
+  deleteUser?:  {
+    __typename: "User",
     id: string,
     displayName: string,
+    description?: string | null,
     lightThemeColor?: string | null,
     darkThemeColor?: string | null,
     profilePictureURL?: string | null,
     role?: string | null,
-    Decks?:  {
-      __typename: "ModelMatchesConnection",
+    lastOnline?: string | null,
+    decks?:  {
+      __typename: "ModelDeckConnection",
       nextToken?: string | null,
     } | null,
-    WinningUser?:  {
-      __typename: "ModelMatchesConnection",
-      nextToken?: string | null,
-    } | null,
-    lastLoggedIn?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
 };
 
-export type CreateDecksMutationVariables = {
-  input: CreateDecksInput,
-  condition?: ModelDecksConditionInput | null,
+export type CreateDeckMutationVariables = {
+  input: CreateDeckInput,
+  condition?: ModelDeckConditionInput | null,
 };
 
-export type CreateDecksMutation = {
-  createDecks?:  {
-    __typename: "Decks",
+export type CreateDeckMutation = {
+  createDeck?:  {
+    __typename: "Deck",
     id: string,
-    deckOwnerID: string,
+    deckOwnerId: string,
     deckName: string,
     commanderName: string,
     commanderColors?: Array< string > | null,
     deckType: string,
-    MatchParticipants?:  {
-      __typename: "ModelMatchParticipantsConnection",
-      nextToken?: string | null,
-    } | null,
     link?: string | null,
     cost?: number | null,
+    winningMatches?:  {
+      __typename: "ModelMatchConnection",
+      nextToken?: string | null,
+    } | null,
+    matchParticipants?:  {
+      __typename: "ModelMatchParticipantConnection",
+      nextToken?: string | null,
+    } | null,
     createdAt: string,
     updatedAt: string,
   } | null,
 };
 
-export type UpdateDecksMutationVariables = {
-  input: UpdateDecksInput,
-  condition?: ModelDecksConditionInput | null,
+export type UpdateDeckMutationVariables = {
+  input: UpdateDeckInput,
+  condition?: ModelDeckConditionInput | null,
 };
 
-export type UpdateDecksMutation = {
-  updateDecks?:  {
-    __typename: "Decks",
+export type UpdateDeckMutation = {
+  updateDeck?:  {
+    __typename: "Deck",
     id: string,
-    deckOwnerID: string,
+    deckOwnerId: string,
     deckName: string,
     commanderName: string,
     commanderColors?: Array< string > | null,
     deckType: string,
-    MatchParticipants?:  {
-      __typename: "ModelMatchParticipantsConnection",
-      nextToken?: string | null,
-    } | null,
     link?: string | null,
     cost?: number | null,
+    winningMatches?:  {
+      __typename: "ModelMatchConnection",
+      nextToken?: string | null,
+    } | null,
+    matchParticipants?:  {
+      __typename: "ModelMatchParticipantConnection",
+      nextToken?: string | null,
+    } | null,
     createdAt: string,
     updatedAt: string,
   } | null,
 };
 
-export type DeleteDecksMutationVariables = {
-  input: DeleteDecksInput,
-  condition?: ModelDecksConditionInput | null,
+export type DeleteDeckMutationVariables = {
+  input: DeleteDeckInput,
+  condition?: ModelDeckConditionInput | null,
 };
 
-export type DeleteDecksMutation = {
-  deleteDecks?:  {
-    __typename: "Decks",
+export type DeleteDeckMutation = {
+  deleteDeck?:  {
+    __typename: "Deck",
     id: string,
-    deckOwnerID: string,
+    deckOwnerId: string,
     deckName: string,
     commanderName: string,
     commanderColors?: Array< string > | null,
     deckType: string,
-    MatchParticipants?:  {
-      __typename: "ModelMatchParticipantsConnection",
-      nextToken?: string | null,
-    } | null,
     link?: string | null,
     cost?: number | null,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type CreateMatchesMutationVariables = {
-  input: CreateMatchesInput,
-  condition?: ModelMatchesConditionInput | null,
-};
-
-export type CreateMatchesMutation = {
-  createMatches?:  {
-    __typename: "Matches",
-    id: string,
-    winningUserID: string,
-    matchType: string,
-    isArchived: boolean,
-    MatchParticipants?:  {
-      __typename: "ModelMatchParticipantsConnection",
+    winningMatches?:  {
+      __typename: "ModelMatchConnection",
       nextToken?: string | null,
     } | null,
-    datePlayed: string,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type UpdateMatchesMutationVariables = {
-  input: UpdateMatchesInput,
-  condition?: ModelMatchesConditionInput | null,
-};
-
-export type UpdateMatchesMutation = {
-  updateMatches?:  {
-    __typename: "Matches",
-    id: string,
-    winningUserID: string,
-    matchType: string,
-    isArchived: boolean,
-    MatchParticipants?:  {
-      __typename: "ModelMatchParticipantsConnection",
+    matchParticipants?:  {
+      __typename: "ModelMatchParticipantConnection",
       nextToken?: string | null,
     } | null,
-    datePlayed: string,
     createdAt: string,
     updatedAt: string,
   } | null,
 };
 
-export type DeleteMatchesMutationVariables = {
-  input: DeleteMatchesInput,
-  condition?: ModelMatchesConditionInput | null,
+export type CreateMatchMutationVariables = {
+  input: CreateMatchInput,
+  condition?: ModelMatchConditionInput | null,
 };
 
-export type DeleteMatchesMutation = {
-  deleteMatches?:  {
-    __typename: "Matches",
+export type CreateMatchMutation = {
+  createMatch?:  {
+    __typename: "Match",
     id: string,
-    winningUserID: string,
+    winningDeckId: string,
     matchType: string,
     isArchived: boolean,
-    MatchParticipants?:  {
-      __typename: "ModelMatchParticipantsConnection",
+    datePlayed: string,
+    matchParticipants?:  {
+      __typename: "ModelMatchParticipantConnection",
       nextToken?: string | null,
     } | null,
-    datePlayed: string,
     createdAt: string,
     updatedAt: string,
   } | null,
 };
 
-export type GetMatchParticipantsQueryVariables = {
+export type UpdateMatchMutationVariables = {
+  input: UpdateMatchInput,
+  condition?: ModelMatchConditionInput | null,
+};
+
+export type UpdateMatchMutation = {
+  updateMatch?:  {
+    __typename: "Match",
+    id: string,
+    winningDeckId: string,
+    matchType: string,
+    isArchived: boolean,
+    datePlayed: string,
+    matchParticipants?:  {
+      __typename: "ModelMatchParticipantConnection",
+      nextToken?: string | null,
+    } | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type DeleteMatchMutationVariables = {
+  input: DeleteMatchInput,
+  condition?: ModelMatchConditionInput | null,
+};
+
+export type DeleteMatchMutation = {
+  deleteMatch?:  {
+    __typename: "Match",
+    id: string,
+    winningDeckId: string,
+    matchType: string,
+    isArchived: boolean,
+    datePlayed: string,
+    matchParticipants?:  {
+      __typename: "ModelMatchParticipantConnection",
+      nextToken?: string | null,
+    } | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type CreateMatchParticipantMutationVariables = {
+  input: CreateMatchParticipantInput,
+  condition?: ModelMatchParticipantConditionInput | null,
+};
+
+export type CreateMatchParticipantMutation = {
+  createMatchParticipant?:  {
+    __typename: "MatchParticipant",
+    id: string,
+    deckId: string,
+    matchId: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type UpdateMatchParticipantMutationVariables = {
+  input: UpdateMatchParticipantInput,
+  condition?: ModelMatchParticipantConditionInput | null,
+};
+
+export type UpdateMatchParticipantMutation = {
+  updateMatchParticipant?:  {
+    __typename: "MatchParticipant",
+    id: string,
+    deckId: string,
+    matchId: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type DeleteMatchParticipantMutationVariables = {
+  input: DeleteMatchParticipantInput,
+  condition?: ModelMatchParticipantConditionInput | null,
+};
+
+export type DeleteMatchParticipantMutation = {
+  deleteMatchParticipant?:  {
+    __typename: "MatchParticipant",
+    id: string,
+    deckId: string,
+    matchId: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type GetUserQueryVariables = {
   id: string,
 };
 
-export type GetMatchParticipantsQuery = {
-  getMatchParticipants?:  {
-    __typename: "MatchParticipants",
-    id: string,
-    decksID: string,
-    matchesID: string,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type ListMatchParticipantsQueryVariables = {
-  filter?: ModelMatchParticipantsFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListMatchParticipantsQuery = {
-  listMatchParticipants?:  {
-    __typename: "ModelMatchParticipantsConnection",
-    items:  Array< {
-      __typename: "MatchParticipants",
-      id: string,
-      decksID: string,
-      matchesID: string,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type MatchParticipantsByDecksIDQueryVariables = {
-  decksID: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelMatchParticipantsFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type MatchParticipantsByDecksIDQuery = {
-  matchParticipantsByDecksID?:  {
-    __typename: "ModelMatchParticipantsConnection",
-    items:  Array< {
-      __typename: "MatchParticipants",
-      id: string,
-      decksID: string,
-      matchesID: string,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type MatchParticipantsByMatchesIDQueryVariables = {
-  matchesID: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelMatchParticipantsFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type MatchParticipantsByMatchesIDQuery = {
-  matchParticipantsByMatchesID?:  {
-    __typename: "ModelMatchParticipantsConnection",
-    items:  Array< {
-      __typename: "MatchParticipants",
-      id: string,
-      decksID: string,
-      matchesID: string,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetUsersQueryVariables = {
-  id: string,
-};
-
-export type GetUsersQuery = {
-  getUsers?:  {
-    __typename: "Users",
+export type GetUserQuery = {
+  getUser?:  {
+    __typename: "User",
     id: string,
     displayName: string,
+    description?: string | null,
     lightThemeColor?: string | null,
     darkThemeColor?: string | null,
     profilePictureURL?: string | null,
     role?: string | null,
-    Decks?:  {
-      __typename: "ModelMatchesConnection",
+    lastOnline?: string | null,
+    decks?:  {
+      __typename: "ModelDeckConnection",
       nextToken?: string | null,
     } | null,
-    WinningUser?:  {
-      __typename: "ModelMatchesConnection",
-      nextToken?: string | null,
-    } | null,
-    lastLoggedIn?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
 };
 
 export type ListUsersQueryVariables = {
-  filter?: ModelUsersFilterInput | null,
+  filter?: ModelUserFilterInput | null,
   limit?: number | null,
   nextToken?: string | null,
 };
 
 export type ListUsersQuery = {
   listUsers?:  {
-    __typename: "ModelUsersConnection",
+    __typename: "ModelUserConnection",
     items:  Array< {
-      __typename: "Users",
+      __typename: "User",
       id: string,
       displayName: string,
+      description?: string | null,
       lightThemeColor?: string | null,
       darkThemeColor?: string | null,
       profilePictureURL?: string | null,
       role?: string | null,
-      lastLoggedIn?: string | null,
+      lastOnline?: string | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -855,43 +780,47 @@ export type ListUsersQuery = {
   } | null,
 };
 
-export type GetDecksQueryVariables = {
+export type GetDeckQueryVariables = {
   id: string,
 };
 
-export type GetDecksQuery = {
-  getDecks?:  {
-    __typename: "Decks",
+export type GetDeckQuery = {
+  getDeck?:  {
+    __typename: "Deck",
     id: string,
-    deckOwnerID: string,
+    deckOwnerId: string,
     deckName: string,
     commanderName: string,
     commanderColors?: Array< string > | null,
     deckType: string,
-    MatchParticipants?:  {
-      __typename: "ModelMatchParticipantsConnection",
-      nextToken?: string | null,
-    } | null,
     link?: string | null,
     cost?: number | null,
+    winningMatches?:  {
+      __typename: "ModelMatchConnection",
+      nextToken?: string | null,
+    } | null,
+    matchParticipants?:  {
+      __typename: "ModelMatchParticipantConnection",
+      nextToken?: string | null,
+    } | null,
     createdAt: string,
     updatedAt: string,
   } | null,
 };
 
 export type ListDecksQueryVariables = {
-  filter?: ModelDecksFilterInput | null,
+  filter?: ModelDeckFilterInput | null,
   limit?: number | null,
   nextToken?: string | null,
 };
 
 export type ListDecksQuery = {
   listDecks?:  {
-    __typename: "ModelDecksConnection",
+    __typename: "ModelDeckConnection",
     items:  Array< {
-      __typename: "Decks",
+      __typename: "Deck",
       id: string,
-      deckOwnerID: string,
+      deckOwnerId: string,
       deckName: string,
       commanderName: string,
       commanderColors?: Array< string > | null,
@@ -905,21 +834,21 @@ export type ListDecksQuery = {
   } | null,
 };
 
-export type DecksByDeckOwnerIDQueryVariables = {
-  deckOwnerID: string,
+export type DecksByDeckOwnerIdQueryVariables = {
+  deckOwnerId: string,
   sortDirection?: ModelSortDirection | null,
-  filter?: ModelDecksFilterInput | null,
+  filter?: ModelDeckFilterInput | null,
   limit?: number | null,
   nextToken?: string | null,
 };
 
-export type DecksByDeckOwnerIDQuery = {
-  decksByDeckOwnerID?:  {
-    __typename: "ModelDecksConnection",
+export type DecksByDeckOwnerIdQuery = {
+  decksByDeckOwnerId?:  {
+    __typename: "ModelDeckConnection",
     items:  Array< {
-      __typename: "Decks",
+      __typename: "Deck",
       id: string,
-      deckOwnerID: string,
+      deckOwnerId: string,
       deckName: string,
       commanderName: string,
       commanderColors?: Array< string > | null,
@@ -933,40 +862,40 @@ export type DecksByDeckOwnerIDQuery = {
   } | null,
 };
 
-export type GetMatchesQueryVariables = {
+export type GetMatchQueryVariables = {
   id: string,
 };
 
-export type GetMatchesQuery = {
-  getMatches?:  {
-    __typename: "Matches",
+export type GetMatchQuery = {
+  getMatch?:  {
+    __typename: "Match",
     id: string,
-    winningUserID: string,
+    winningDeckId: string,
     matchType: string,
     isArchived: boolean,
-    MatchParticipants?:  {
-      __typename: "ModelMatchParticipantsConnection",
+    datePlayed: string,
+    matchParticipants?:  {
+      __typename: "ModelMatchParticipantConnection",
       nextToken?: string | null,
     } | null,
-    datePlayed: string,
     createdAt: string,
     updatedAt: string,
   } | null,
 };
 
 export type ListMatchesQueryVariables = {
-  filter?: ModelMatchesFilterInput | null,
+  filter?: ModelMatchFilterInput | null,
   limit?: number | null,
   nextToken?: string | null,
 };
 
 export type ListMatchesQuery = {
   listMatches?:  {
-    __typename: "ModelMatchesConnection",
+    __typename: "ModelMatchConnection",
     items:  Array< {
-      __typename: "Matches",
+      __typename: "Match",
       id: string,
-      winningUserID: string,
+      winningDeckId: string,
       matchType: string,
       isArchived: boolean,
       datePlayed: string,
@@ -977,21 +906,21 @@ export type ListMatchesQuery = {
   } | null,
 };
 
-export type MatchesByWinningUserIDQueryVariables = {
-  winningUserID: string,
+export type MatchesByWinningDeckIdQueryVariables = {
+  winningDeckId: string,
   sortDirection?: ModelSortDirection | null,
-  filter?: ModelMatchesFilterInput | null,
+  filter?: ModelMatchFilterInput | null,
   limit?: number | null,
   nextToken?: string | null,
 };
 
-export type MatchesByWinningUserIDQuery = {
-  matchesByWinningUserID?:  {
-    __typename: "ModelMatchesConnection",
+export type MatchesByWinningDeckIdQuery = {
+  matchesByWinningDeckId?:  {
+    __typename: "ModelMatchConnection",
     items:  Array< {
-      __typename: "Matches",
+      __typename: "Match",
       id: string,
-      winningUserID: string,
+      winningDeckId: string,
       matchType: string,
       isArchived: boolean,
       datePlayed: string,
@@ -1002,262 +931,347 @@ export type MatchesByWinningUserIDQuery = {
   } | null,
 };
 
-export type OnCreateMatchParticipantsSubscriptionVariables = {
-  filter?: ModelSubscriptionMatchParticipantsFilterInput | null,
+export type GetMatchParticipantQueryVariables = {
+  id: string,
 };
 
-export type OnCreateMatchParticipantsSubscription = {
-  onCreateMatchParticipants?:  {
-    __typename: "MatchParticipants",
+export type GetMatchParticipantQuery = {
+  getMatchParticipant?:  {
+    __typename: "MatchParticipant",
     id: string,
-    decksID: string,
-    matchesID: string,
+    deckId: string,
+    matchId: string,
     createdAt: string,
     updatedAt: string,
   } | null,
 };
 
-export type OnUpdateMatchParticipantsSubscriptionVariables = {
-  filter?: ModelSubscriptionMatchParticipantsFilterInput | null,
+export type ListMatchParticipantsQueryVariables = {
+  filter?: ModelMatchParticipantFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
 };
 
-export type OnUpdateMatchParticipantsSubscription = {
-  onUpdateMatchParticipants?:  {
-    __typename: "MatchParticipants",
-    id: string,
-    decksID: string,
-    matchesID: string,
-    createdAt: string,
-    updatedAt: string,
+export type ListMatchParticipantsQuery = {
+  listMatchParticipants?:  {
+    __typename: "ModelMatchParticipantConnection",
+    items:  Array< {
+      __typename: "MatchParticipant",
+      id: string,
+      deckId: string,
+      matchId: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
   } | null,
 };
 
-export type OnDeleteMatchParticipantsSubscriptionVariables = {
-  filter?: ModelSubscriptionMatchParticipantsFilterInput | null,
+export type MatchParticipantsByDeckIdQueryVariables = {
+  deckId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelMatchParticipantFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
 };
 
-export type OnDeleteMatchParticipantsSubscription = {
-  onDeleteMatchParticipants?:  {
-    __typename: "MatchParticipants",
-    id: string,
-    decksID: string,
-    matchesID: string,
-    createdAt: string,
-    updatedAt: string,
+export type MatchParticipantsByDeckIdQuery = {
+  matchParticipantsByDeckId?:  {
+    __typename: "ModelMatchParticipantConnection",
+    items:  Array< {
+      __typename: "MatchParticipant",
+      id: string,
+      deckId: string,
+      matchId: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
   } | null,
 };
 
-export type OnCreateUsersSubscriptionVariables = {
-  filter?: ModelSubscriptionUsersFilterInput | null,
+export type MatchParticipantsByMatchIdQueryVariables = {
+  matchId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelMatchParticipantFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
 };
 
-export type OnCreateUsersSubscription = {
-  onCreateUsers?:  {
-    __typename: "Users",
+export type MatchParticipantsByMatchIdQuery = {
+  matchParticipantsByMatchId?:  {
+    __typename: "ModelMatchParticipantConnection",
+    items:  Array< {
+      __typename: "MatchParticipant",
+      id: string,
+      deckId: string,
+      matchId: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type OnCreateUserSubscriptionVariables = {
+  filter?: ModelSubscriptionUserFilterInput | null,
+};
+
+export type OnCreateUserSubscription = {
+  onCreateUser?:  {
+    __typename: "User",
     id: string,
     displayName: string,
+    description?: string | null,
     lightThemeColor?: string | null,
     darkThemeColor?: string | null,
     profilePictureURL?: string | null,
     role?: string | null,
-    Decks?:  {
-      __typename: "ModelMatchesConnection",
+    lastOnline?: string | null,
+    decks?:  {
+      __typename: "ModelDeckConnection",
       nextToken?: string | null,
     } | null,
-    WinningUser?:  {
-      __typename: "ModelMatchesConnection",
-      nextToken?: string | null,
-    } | null,
-    lastLoggedIn?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
 };
 
-export type OnUpdateUsersSubscriptionVariables = {
-  filter?: ModelSubscriptionUsersFilterInput | null,
+export type OnUpdateUserSubscriptionVariables = {
+  filter?: ModelSubscriptionUserFilterInput | null,
 };
 
-export type OnUpdateUsersSubscription = {
-  onUpdateUsers?:  {
-    __typename: "Users",
+export type OnUpdateUserSubscription = {
+  onUpdateUser?:  {
+    __typename: "User",
     id: string,
     displayName: string,
+    description?: string | null,
     lightThemeColor?: string | null,
     darkThemeColor?: string | null,
     profilePictureURL?: string | null,
     role?: string | null,
-    Decks?:  {
-      __typename: "ModelMatchesConnection",
+    lastOnline?: string | null,
+    decks?:  {
+      __typename: "ModelDeckConnection",
       nextToken?: string | null,
     } | null,
-    WinningUser?:  {
-      __typename: "ModelMatchesConnection",
-      nextToken?: string | null,
-    } | null,
-    lastLoggedIn?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
 };
 
-export type OnDeleteUsersSubscriptionVariables = {
-  filter?: ModelSubscriptionUsersFilterInput | null,
+export type OnDeleteUserSubscriptionVariables = {
+  filter?: ModelSubscriptionUserFilterInput | null,
 };
 
-export type OnDeleteUsersSubscription = {
-  onDeleteUsers?:  {
-    __typename: "Users",
+export type OnDeleteUserSubscription = {
+  onDeleteUser?:  {
+    __typename: "User",
     id: string,
     displayName: string,
+    description?: string | null,
     lightThemeColor?: string | null,
     darkThemeColor?: string | null,
     profilePictureURL?: string | null,
     role?: string | null,
-    Decks?:  {
-      __typename: "ModelMatchesConnection",
+    lastOnline?: string | null,
+    decks?:  {
+      __typename: "ModelDeckConnection",
       nextToken?: string | null,
     } | null,
-    WinningUser?:  {
-      __typename: "ModelMatchesConnection",
-      nextToken?: string | null,
-    } | null,
-    lastLoggedIn?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
 };
 
-export type OnCreateDecksSubscriptionVariables = {
-  filter?: ModelSubscriptionDecksFilterInput | null,
+export type OnCreateDeckSubscriptionVariables = {
+  filter?: ModelSubscriptionDeckFilterInput | null,
 };
 
-export type OnCreateDecksSubscription = {
-  onCreateDecks?:  {
-    __typename: "Decks",
+export type OnCreateDeckSubscription = {
+  onCreateDeck?:  {
+    __typename: "Deck",
     id: string,
-    deckOwnerID: string,
+    deckOwnerId: string,
     deckName: string,
     commanderName: string,
     commanderColors?: Array< string > | null,
     deckType: string,
-    MatchParticipants?:  {
-      __typename: "ModelMatchParticipantsConnection",
-      nextToken?: string | null,
-    } | null,
     link?: string | null,
     cost?: number | null,
+    winningMatches?:  {
+      __typename: "ModelMatchConnection",
+      nextToken?: string | null,
+    } | null,
+    matchParticipants?:  {
+      __typename: "ModelMatchParticipantConnection",
+      nextToken?: string | null,
+    } | null,
     createdAt: string,
     updatedAt: string,
   } | null,
 };
 
-export type OnUpdateDecksSubscriptionVariables = {
-  filter?: ModelSubscriptionDecksFilterInput | null,
+export type OnUpdateDeckSubscriptionVariables = {
+  filter?: ModelSubscriptionDeckFilterInput | null,
 };
 
-export type OnUpdateDecksSubscription = {
-  onUpdateDecks?:  {
-    __typename: "Decks",
+export type OnUpdateDeckSubscription = {
+  onUpdateDeck?:  {
+    __typename: "Deck",
     id: string,
-    deckOwnerID: string,
+    deckOwnerId: string,
     deckName: string,
     commanderName: string,
     commanderColors?: Array< string > | null,
     deckType: string,
-    MatchParticipants?:  {
-      __typename: "ModelMatchParticipantsConnection",
-      nextToken?: string | null,
-    } | null,
     link?: string | null,
     cost?: number | null,
+    winningMatches?:  {
+      __typename: "ModelMatchConnection",
+      nextToken?: string | null,
+    } | null,
+    matchParticipants?:  {
+      __typename: "ModelMatchParticipantConnection",
+      nextToken?: string | null,
+    } | null,
     createdAt: string,
     updatedAt: string,
   } | null,
 };
 
-export type OnDeleteDecksSubscriptionVariables = {
-  filter?: ModelSubscriptionDecksFilterInput | null,
+export type OnDeleteDeckSubscriptionVariables = {
+  filter?: ModelSubscriptionDeckFilterInput | null,
 };
 
-export type OnDeleteDecksSubscription = {
-  onDeleteDecks?:  {
-    __typename: "Decks",
+export type OnDeleteDeckSubscription = {
+  onDeleteDeck?:  {
+    __typename: "Deck",
     id: string,
-    deckOwnerID: string,
+    deckOwnerId: string,
     deckName: string,
     commanderName: string,
     commanderColors?: Array< string > | null,
     deckType: string,
-    MatchParticipants?:  {
-      __typename: "ModelMatchParticipantsConnection",
-      nextToken?: string | null,
-    } | null,
     link?: string | null,
     cost?: number | null,
+    winningMatches?:  {
+      __typename: "ModelMatchConnection",
+      nextToken?: string | null,
+    } | null,
+    matchParticipants?:  {
+      __typename: "ModelMatchParticipantConnection",
+      nextToken?: string | null,
+    } | null,
     createdAt: string,
     updatedAt: string,
   } | null,
 };
 
-export type OnCreateMatchesSubscriptionVariables = {
-  filter?: ModelSubscriptionMatchesFilterInput | null,
+export type OnCreateMatchSubscriptionVariables = {
+  filter?: ModelSubscriptionMatchFilterInput | null,
 };
 
-export type OnCreateMatchesSubscription = {
-  onCreateMatches?:  {
-    __typename: "Matches",
+export type OnCreateMatchSubscription = {
+  onCreateMatch?:  {
+    __typename: "Match",
     id: string,
-    winningUserID: string,
+    winningDeckId: string,
     matchType: string,
     isArchived: boolean,
-    MatchParticipants?:  {
-      __typename: "ModelMatchParticipantsConnection",
+    datePlayed: string,
+    matchParticipants?:  {
+      __typename: "ModelMatchParticipantConnection",
       nextToken?: string | null,
     } | null,
-    datePlayed: string,
     createdAt: string,
     updatedAt: string,
   } | null,
 };
 
-export type OnUpdateMatchesSubscriptionVariables = {
-  filter?: ModelSubscriptionMatchesFilterInput | null,
+export type OnUpdateMatchSubscriptionVariables = {
+  filter?: ModelSubscriptionMatchFilterInput | null,
 };
 
-export type OnUpdateMatchesSubscription = {
-  onUpdateMatches?:  {
-    __typename: "Matches",
+export type OnUpdateMatchSubscription = {
+  onUpdateMatch?:  {
+    __typename: "Match",
     id: string,
-    winningUserID: string,
+    winningDeckId: string,
     matchType: string,
     isArchived: boolean,
-    MatchParticipants?:  {
-      __typename: "ModelMatchParticipantsConnection",
+    datePlayed: string,
+    matchParticipants?:  {
+      __typename: "ModelMatchParticipantConnection",
       nextToken?: string | null,
     } | null,
-    datePlayed: string,
     createdAt: string,
     updatedAt: string,
   } | null,
 };
 
-export type OnDeleteMatchesSubscriptionVariables = {
-  filter?: ModelSubscriptionMatchesFilterInput | null,
+export type OnDeleteMatchSubscriptionVariables = {
+  filter?: ModelSubscriptionMatchFilterInput | null,
 };
 
-export type OnDeleteMatchesSubscription = {
-  onDeleteMatches?:  {
-    __typename: "Matches",
+export type OnDeleteMatchSubscription = {
+  onDeleteMatch?:  {
+    __typename: "Match",
     id: string,
-    winningUserID: string,
+    winningDeckId: string,
     matchType: string,
     isArchived: boolean,
-    MatchParticipants?:  {
-      __typename: "ModelMatchParticipantsConnection",
+    datePlayed: string,
+    matchParticipants?:  {
+      __typename: "ModelMatchParticipantConnection",
       nextToken?: string | null,
     } | null,
-    datePlayed: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnCreateMatchParticipantSubscriptionVariables = {
+  filter?: ModelSubscriptionMatchParticipantFilterInput | null,
+};
+
+export type OnCreateMatchParticipantSubscription = {
+  onCreateMatchParticipant?:  {
+    __typename: "MatchParticipant",
+    id: string,
+    deckId: string,
+    matchId: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnUpdateMatchParticipantSubscriptionVariables = {
+  filter?: ModelSubscriptionMatchParticipantFilterInput | null,
+};
+
+export type OnUpdateMatchParticipantSubscription = {
+  onUpdateMatchParticipant?:  {
+    __typename: "MatchParticipant",
+    id: string,
+    deckId: string,
+    matchId: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnDeleteMatchParticipantSubscriptionVariables = {
+  filter?: ModelSubscriptionMatchParticipantFilterInput | null,
+};
+
+export type OnDeleteMatchParticipantSubscription = {
+  onDeleteMatchParticipant?:  {
+    __typename: "MatchParticipant",
+    id: string,
+    deckId: string,
+    matchId: string,
     createdAt: string,
     updatedAt: string,
   } | null,

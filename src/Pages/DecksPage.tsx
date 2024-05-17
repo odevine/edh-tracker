@@ -1,4 +1,5 @@
 import {
+  Box,
   Grid,
   Link,
   MenuItem,
@@ -14,22 +15,28 @@ import {
   useMediaQuery,
   useTheme as useMuiTheme,
 } from "@mui/material";
-import { navigate } from "raviger";
+import PopupState, { bindHover, bindPopover } from "material-ui-popup-state";
+import HoverPopover from "material-ui-popup-state/HoverPopover";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { Decks, Users } from "@/API";
-import { CommanderColors, EnhancedTableHead, HeadCell } from "@/Components";
+import { Deck, User } from "@/API";
+import {
+  CommanderColors,
+  EnhancedTableHead,
+  HeadCell,
+  ProfileMiniCard,
+} from "@/Components";
 import { useDecks, useTheme, useUser } from "@/Context";
 import { ColumnSortOrder, getComparator } from "@/Logic";
 
-const headCells: HeadCell<Decks>[] = [
+const headCells: HeadCell<Deck>[] = [
   {
     id: "deckName",
     label: "name",
     sortable: true,
   },
   {
-    id: "deckOwnerID",
+    id: "deckOwnerId",
     label: "player",
     sortable: true,
   },
@@ -62,8 +69,8 @@ const headCells: HeadCell<Decks>[] = [
 ];
 
 const PlayerSelector = (props: {
-  allDecks: Decks[];
-  allUserProfiles: Users[];
+  allDecks: Deck[];
+  allUserProfiles: User[];
   filterUser: string;
   setFilterUser: (newUser: string) => void;
 }) => {
@@ -74,15 +81,15 @@ const PlayerSelector = (props: {
   const userOptions = useMemo(() => {
     // Get unique ownerIDs from allDecks
     const uniqueOwnerIDs = [
-      ...new Set(allDecks.map((deck) => deck.deckOwnerID)),
+      ...new Set(allDecks.map((deck) => deck.deckOwnerId)),
     ];
 
     // Map ownerIDs to user profiles, filter out undefined, and assert the remaining profiles are defined
     return uniqueOwnerIDs
-      .map((ownerID) =>
-        allUserProfiles.find((profile) => profile.id === ownerID),
+      .map((ownerId) =>
+        allUserProfiles.find((profile) => profile.id === ownerId),
       )
-      .filter((profile): profile is Users => profile !== undefined)
+      .filter((profile): profile is User => profile !== undefined)
       .map((profile) => ({
         id: profile.id,
         displayName: profile.displayName,
@@ -116,7 +123,7 @@ const PlayerSelector = (props: {
 };
 
 const TypeSelector = (props: {
-  allDecks: Decks[];
+  allDecks: Deck[];
   filterType: string;
   setFilterType: (newType: string) => void;
 }) => {
@@ -161,7 +168,7 @@ const loadStateFromLocalStorage = () => {
     filterUser: "all",
     searchQuery: "",
     order: "desc" as ColumnSortOrder,
-    orderBy: "updatedAt" as keyof Decks,
+    orderBy: "updatedAt" as keyof Deck,
     page: 0,
     rowsPerPage: 15,
   };
@@ -179,7 +186,7 @@ export const DecksPage = (): JSX.Element => {
   const [filterUser, setFilterUser] = useState(initialState.filterUser);
   const [searchQuery, setSearchQuery] = useState(initialState.searchQuery);
   const [order, setOrder] = useState<ColumnSortOrder>(initialState.order);
-  const [orderBy, setOrderBy] = useState<keyof Decks>(initialState.orderBy);
+  const [orderBy, setOrderBy] = useState<keyof Deck>(initialState.orderBy);
   const [page, setPage] = useState(initialState.page);
   const [rowsPerPage, setRowsPerPage] = useState(initialState.rowsPerPage);
 
@@ -197,7 +204,7 @@ export const DecksPage = (): JSX.Element => {
     localStorage.setItem(localStorageKey, newSettings);
   }, [filterType, filterUser, searchQuery, order, orderBy, page, rowsPerPage]);
 
-  const handleRequestSort = (property: keyof Decks) => {
+  const handleRequestSort = (property: keyof Deck) => {
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
@@ -217,7 +224,7 @@ export const DecksPage = (): JSX.Element => {
     return allDecks.filter(
       (deck) =>
         (filterUser === "all" ||
-          allUserProfiles.find((profile) => profile.id === deck.deckOwnerID)
+          allUserProfiles.find((profile) => profile.id === deck.deckOwnerId)
             ?.displayName === filterUser) &&
         (filterType === "all" || deck.deckType === filterType) &&
         (deck.deckName.toLowerCase().includes(lowercasedQuery) ||
@@ -226,22 +233,13 @@ export const DecksPage = (): JSX.Element => {
   }, [allDecks, searchQuery, filterType, filterUser]);
 
   const userProfileMap = useMemo(() => {
-    return new Map(
-      allUserProfiles.map((profile) => [
-        profile.id,
-        {
-          displayName: profile.displayName,
-          lightThemeColor: profile.lightThemeColor,
-          darkThemeColor: profile.darkThemeColor,
-        },
-      ]),
-    );
+    return new Map(allUserProfiles.map((profile) => [profile.id, profile]));
   }, [allUserProfiles, mode]);
 
   const visibleRows = useMemo(() => {
     // First, create a shallow copy of the rows array and then sort it
     return [...filteredDecks]
-      .sort(getComparator<Decks>(order, orderBy, userProfileMap))
+      .sort(getComparator<Deck>(order, orderBy, userProfileMap))
       .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
   }, [order, orderBy, page, rowsPerPage, filteredDecks, userProfileMap]);
 
@@ -272,7 +270,6 @@ export const DecksPage = (): JSX.Element => {
               label="search decks"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              // sx={{ minWidth: 140 }}
             />
           </Grid>
         </Grid>
@@ -287,7 +284,7 @@ export const DecksPage = (): JSX.Element => {
           />
           <TableBody>
             {visibleRows.map((deck) => {
-              const ownerProfile = userProfileMap.get(deck.deckOwnerID);
+              const ownerProfile = userProfileMap.get(deck.deckOwnerId);
               let ownerProfileColor;
               if (ownerProfile) {
                 ownerProfileColor =
@@ -325,19 +322,26 @@ export const DecksPage = (): JSX.Element => {
                   </TableCell>
                   <TableCell>
                     {ownerProfile && (
-                      <Link
-                        sx={{
-                          color: ownerProfileColor ?? "inherit",
-                          textDecoration: "none",
-                          cursor: "pointer",
-                          "&:hover": {
-                            textDecoration: "underline",
-                          },
-                        }}
-                        onClick={() => navigate(`/profile/${deck.deckOwnerID}`)}
-                      >
-                        {userProfileMap.get(deck.deckOwnerID)?.displayName}
-                      </Link>
+                      <PopupState variant="popover">
+                        {(popupState) => (
+                          <Box {...bindHover(popupState)}>
+                            {ownerProfile.displayName}
+                            <HoverPopover
+                              {...bindPopover(popupState)}
+                              anchorOrigin={{
+                                vertical: "top",
+                                horizontal: "left",
+                              }}
+                              transformOrigin={{
+                                vertical: "center",
+                                horizontal: "right",
+                              }}
+                            >
+                              <ProfileMiniCard profile={ownerProfile} />
+                            </HoverPopover>
+                          </Box>
+                        )}
+                      </PopupState>
                     )}
                   </TableCell>
                   <TableCell>{deck.deckType}</TableCell>

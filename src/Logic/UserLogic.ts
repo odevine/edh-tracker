@@ -1,25 +1,21 @@
-import { createUsers, updateUsers } from "@/graphql/mutations";
+import { createUser } from "@/graphql/mutations";
 import { AuthUser } from "aws-amplify/auth";
 import { generateClient } from "aws-amplify/data";
 
-import { CreateUsersInput, UpdateUsersInput, Users } from "@/API";
-import { getUsers, listUsers } from "@/graphql/queries";
+import { CreateUserInput, UpdateUserInput, User } from "@/API";
+import { updateUser } from "@/graphql/mutations";
+import { getUser, listUsers } from "@/graphql/queries";
 
 const client = generateClient();
 
-/**
- * Retrieves or creates a user profile based on the provided user object.
- * @param {AuthUser} user - The authenticated user object.
- * @returns {Promise<Users | null>} The user profile object or null in case of errors.
- */
-export async function getAllUsers(): Promise<Users[]> {
+export async function getAllUsersFn(): Promise<User[]> {
   try {
     const allUsersResponse = await client.graphql({
       query: listUsers,
     });
 
     if (allUsersResponse.data && allUsersResponse.data.listUsers) {
-      return allUsersResponse.data.listUsers.items as Users[];
+      return allUsersResponse.data.listUsers.items as User[];
     }
     return [];
   } catch (error) {
@@ -28,14 +24,9 @@ export async function getAllUsers(): Promise<Users[]> {
   }
 }
 
-/**
- * Retrieves or creates a user profile based on the provided user object.
- * @param {AuthUser} user - The authenticated user object.
- * @returns {Promise<Users | null>} The user profile object or null in case of errors.
- */
-export async function getCurrentUserProfile(
+export async function getCurrentUserProfileFn(
   user: AuthUser,
-): Promise<Users | null> {
+): Promise<User | null> {
   if (!user || !user.userId) {
     console.error("Invalid or missing user object");
     return null; // Return early if user object is not valid
@@ -43,17 +34,17 @@ export async function getCurrentUserProfile(
 
   try {
     const userProfileResponse = await client.graphql({
-      query: getUsers,
+      query: getUser,
       variables: { id: user.userId },
     });
 
-    if (userProfileResponse.data && userProfileResponse.data.getUsers) {
-      return userProfileResponse.data.getUsers as Users;
+    if (userProfileResponse.data && userProfileResponse.data.getUser) {
+      return userProfileResponse.data.getUser as User;
     } else {
       console.log(
         `No user profile found for ${user.userId}, creating new user profile`,
       );
-      return await createUser(user);
+      return await createUserFn(user);
     }
   } catch (error) {
     console.error("Error retrieving or creating user information:", error);
@@ -61,13 +52,8 @@ export async function getCurrentUserProfile(
   }
 }
 
-/**
- * Creates a new user profile with default data.
- * @param {AuthUser} user - The authenticated user object.
- * @returns {Promise<Users>} The newly created user profile.
- */
-export async function createUser(user: AuthUser): Promise<Users> {
-  const newUser: CreateUsersInput = {
+export async function createUserFn(user: AuthUser): Promise<User> {
+  const newUser: CreateUserInput = {
     id: user.userId,
     displayName: user.username, // Assuming username exists
     // Add other necessary initial fields or defaults
@@ -75,15 +61,12 @@ export async function createUser(user: AuthUser): Promise<Users> {
 
   try {
     const newUserProfileResponse = await client.graphql({
-      query: createUsers,
+      query: createUser,
       variables: { input: newUser },
     });
 
-    if (
-      newUserProfileResponse.data &&
-      newUserProfileResponse.data.createUsers
-    ) {
-      return newUserProfileResponse.data.createUsers as Users;
+    if (newUserProfileResponse.data && newUserProfileResponse.data.createUser) {
+      return newUserProfileResponse.data.createUser as User;
     } else {
       throw new Error("Failed to create a new user profile.");
     }
@@ -93,26 +76,20 @@ export async function createUser(user: AuthUser): Promise<Users> {
   }
 }
 
-/**
- * Updates an existing user profile with the provided data.
- * @param {string} userId - The ID of the user to update.
- * @param {UpdateUsersInput} updateData - The data to update the user profile with.
- * @returns {Promise<Users | null>} The updated user profile or null in case of errors.
- */
-export async function updateUser(
-  updateData: UpdateUsersInput,
-): Promise<Users | null> {
+export async function updateUserFn(
+  updateData: UpdateUserInput,
+): Promise<User | null> {
   try {
     const updatedUserProfileResponse = await client.graphql({
-      query: updateUsers,
+      query: updateUser,
       variables: { input: updateData },
     });
 
     if (
       updatedUserProfileResponse.data &&
-      updatedUserProfileResponse.data.updateUsers
+      updatedUserProfileResponse.data.updateUser
     ) {
-      return updatedUserProfileResponse.data.updateUsers as Users;
+      return updatedUserProfileResponse.data.updateUser as User;
     } else {
       console.log(
         `No user profile found for ${updateData.id}, or update failed`,
