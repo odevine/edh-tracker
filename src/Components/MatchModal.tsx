@@ -15,8 +15,8 @@ import { DatePicker } from "@mui/x-date-pickers";
 import { DateTime } from "luxon";
 import { useMemo, useState } from "react";
 
-import { CreateMatchInput, Deck, User } from "@/API";
-import { useDecks, useMatches, useTheme, useUser } from "@/Context";
+import { Deck, User } from "@/API";
+import { useDecks, useTheme, useUser } from "@/Context";
 
 interface NewMatchModalProps {
   open: boolean;
@@ -34,7 +34,6 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
   onClose,
   deckToUserMap,
 }) => {
-  const { createNewMatch } = useMatches();
   const { allDecks } = useDecks();
   const { mode } = useTheme();
   const { authenticatedUser } = useUser();
@@ -43,7 +42,6 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
   const [winningDeckId, setWinningDeckId] = useState("");
   const [participantDecks, setParticipantDecks] = useState<Deck[]>([]);
 
-  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
 
   const validateForm = (): boolean => {
@@ -80,13 +78,12 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
     }
 
     if (validateForm()) {
-      const matchData: CreateMatchInput = {
-        winningDeckId: winningDeckId,
-        datePlayed: datePlayed.toFormat("yyyy-MM-dd"),
-        matchType,
-        isArchived: false,
-      };
-
+      // const matchData: CreateMatchInput = {
+      //   winningDeckId: winningDeckId,
+      //   datePlayed: datePlayed.toFormat("yyyy-MM-dd"),
+      //   matchType,
+      //   isArchived: false,
+      // };
       // setLoading(true);
       // createNewMatch(
       //   matchData,

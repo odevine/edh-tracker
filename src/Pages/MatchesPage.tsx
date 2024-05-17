@@ -8,10 +8,7 @@ import {
   TableContainer,
   TablePagination,
   TableRow,
-  TextField,
   Toolbar,
-  useMediaQuery,
-  useTheme as useMuiTheme,
 } from "@mui/material";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -65,7 +62,6 @@ export const MatchesPage = (): JSX.Element => {
   const { allDecks } = useDecks();
   const { allUserProfiles } = useUser();
   const { allMatches, allMatchParticipants } = useMatches();
-  const theme = useMuiTheme();
 
   const initialState = loadStateFromLocalStorage();
 
