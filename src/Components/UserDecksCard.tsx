@@ -20,7 +20,7 @@ import {
 import { useState } from "react";
 
 import { User } from "@/API";
-import { DeckModal } from "@/Components";
+import { CommanderColors, DeckModal } from "@/Components";
 import { useDecks } from "@/Context";
 
 export const UserDecksCard = (props: {
@@ -67,6 +67,9 @@ export const UserDecksCard = (props: {
                   <TableCell>
                     <Typography sx={{ fontWeight: "bold" }}>type</Typography>
                   </TableCell>
+                  <TableCell>
+                    <Typography sx={{ fontWeight: "bold" }}>colors</Typography>
+                  </TableCell>
                   <TableCell align="right">
                     <Typography sx={{ fontWeight: "bold" }}>cost</Typography>
                   </TableCell>
@@ -100,8 +103,24 @@ export const UserDecksCard = (props: {
                         deck.deckName
                       )}
                     </TableCell>
-                    <TableCell>{deck.commanderName}</TableCell>
+                    <TableCell>
+                      {deck.commanderName}
+                      {deck.secondCommanderName && (
+                        <>
+                          <br />
+                          {deck.secondCommanderName}
+                        </>
+                      )}
+                    </TableCell>
                     <TableCell>{deck.deckType}</TableCell>
+                    <TableCell>
+                      <CommanderColors
+                        colors={[
+                          ...(deck.commanderColors ?? []),
+                          ...(deck.secondCommanderColors ?? []),
+                        ]}
+                      />
+                    </TableCell>
                     <TableCell align="right">
                       {deck.cost?.toLocaleString("en-US", {
                         style: "currency",

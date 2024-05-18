@@ -16,6 +16,8 @@ type Deck @model @auth(rules: [{allow: private}]) {
   deckName: String!
   commanderName: String!
   commanderColors: [String!]
+  secondCommanderName: String
+  secondCommanderColors: [String]
   deckType: String!
   link: String
   cost: Float

@@ -59,6 +59,8 @@ export const getDeck = /* GraphQL */ `query GetDeck($id: ID!) {
     deckName
     commanderName
     commanderColors
+    secondCommanderName
+    secondCommanderColors
     deckType
     link
     cost
@@ -88,6 +90,8 @@ export const listDecks = /* GraphQL */ `query ListDecks(
       deckName
       commanderName
       commanderColors
+      secondCommanderName
+      secondCommanderColors
       deckType
       link
       cost
@@ -120,6 +124,8 @@ export const decksByDeckOwnerId = /* GraphQL */ `query DecksByDeckOwnerId(
       deckName
       commanderName
       commanderColors
+      secondCommanderName
+      secondCommanderColors
       deckType
       link
       cost

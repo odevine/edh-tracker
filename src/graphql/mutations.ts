@@ -96,6 +96,8 @@ export const createDeck = /* GraphQL */ `mutation CreateDeck(
     deckName
     commanderName
     commanderColors
+    secondCommanderName
+    secondCommanderColors
     deckType
     link
     cost
@@ -126,6 +128,8 @@ export const updateDeck = /* GraphQL */ `mutation UpdateDeck(
     deckName
     commanderName
     commanderColors
+    secondCommanderName
+    secondCommanderColors
     deckType
     link
     cost
@@ -156,6 +160,8 @@ export const deleteDeck = /* GraphQL */ `mutation DeleteDeck(
     deckName
     commanderName
     commanderColors
+    secondCommanderName
+    secondCommanderColors
     deckType
     link
     cost

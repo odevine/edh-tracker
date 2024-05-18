@@ -125,6 +125,7 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
           pt: 2,
           px: 4,
           pb: 3,
+          minWidth: { xs: 310, sm: 480 },
           "&:focus": {
             outline: "none",
           },

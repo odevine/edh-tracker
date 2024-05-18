@@ -84,6 +84,8 @@ export const onCreateDeck = /* GraphQL */ `subscription OnCreateDeck($filter: Mo
     deckName
     commanderName
     commanderColors
+    secondCommanderName
+    secondCommanderColors
     deckType
     link
     cost
@@ -111,6 +113,8 @@ export const onUpdateDeck = /* GraphQL */ `subscription OnUpdateDeck($filter: Mo
     deckName
     commanderName
     commanderColors
+    secondCommanderName
+    secondCommanderColors
     deckType
     link
     cost
@@ -138,6 +142,8 @@ export const onDeleteDeck = /* GraphQL */ `subscription OnDeleteDeck($filter: Mo
     deckName
     commanderName
     commanderColors
+    secondCommanderName
+    secondCommanderColors
     deckType
     link
     cost

@@ -129,6 +129,13 @@ export const deleteDeckFn = async (deckId: string): Promise<boolean> => {
   }
 };
 
+const colorOrder = ["W", "B", "U", "R", "G"];
+export const sortColors = (arr: string[]) => {
+  return arr.sort((a, b) => {
+    return colorOrder.indexOf(a) - colorOrder.indexOf(b);
+  });
+};
+
 export const useCommanderSearch = () => {
   const [commanderSearchTerm, setCommanderSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
