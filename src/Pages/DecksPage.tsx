@@ -228,7 +228,8 @@ export const DecksPage = (): JSX.Element => {
             ?.displayName === filterUser) &&
         (filterType === "all" || deck.deckType === filterType) &&
         (deck.deckName.toLowerCase().includes(lowercasedQuery) ||
-          deck.commanderName.toLowerCase().includes(lowercasedQuery)),
+          deck.commanderName.toLowerCase().includes(lowercasedQuery) ||
+          deck.secondCommanderName?.toLowerCase().includes(lowercasedQuery)),
     );
   }, [allDecks, searchQuery, filterType, filterUser]);
 
@@ -353,9 +354,22 @@ export const DecksPage = (): JSX.Element => {
                     )}
                   </TableCell>
                   <TableCell>{deck.deckType}</TableCell>
-                  <TableCell>{deck.commanderName}</TableCell>
                   <TableCell>
-                    <CommanderColors colors={deck.commanderColors ?? []} />
+                    {deck.commanderName}
+                    {deck.secondCommanderName && (
+                      <>
+                        <br />
+                        {deck.secondCommanderName}
+                      </>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <CommanderColors
+                      colors={[
+                        ...(deck.commanderColors ?? []),
+                        ...(deck.secondCommanderColors ?? []),
+                      ]}
+                    />
                   </TableCell>
                   <TableCell align="right">
                     {deck.cost

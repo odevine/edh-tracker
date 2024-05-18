@@ -1,9 +1,13 @@
 import { Box } from "@mui/material";
 
-export const CommanderColors = (props: { colors: string[] }) => {
-  const { colors } = props;
+import { sortColors } from "@/Logic";
 
-  if (colors.length === 0) {
+export const CommanderColors = (props: { colors: Array<string | null> }) => {
+  const sortedColors = Array.from(
+    new Set(sortColors(props.colors.map((c) => String(c)))),
+  );
+
+  if (sortedColors.length === 0) {
     return <i className="ms ms-c" />;
   }
 
@@ -17,15 +21,19 @@ export const CommanderColors = (props: { colors: string[] }) => {
     G: "ms ms-g",
   };
 
-  return colors.map((color) => {
-    const className = colorClassMap[color as ColorKey];
-    return className ? (
-      <Box
-        component="i"
-        className={className}
-        key={color}
-        sx={{ marginRight: "2px" }}
-      />
-    ) : null;
-  });
+  return (
+    <>
+      {sortedColors.map((color) => {
+        const className = colorClassMap[color as ColorKey];
+        return className ? (
+          <Box
+            component="i"
+            className={className}
+            key={color}
+            sx={{ marginRight: "2px" }}
+          />
+        ) : null;
+      })}
+    </>
+  );
 };
