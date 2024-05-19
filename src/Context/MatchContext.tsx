@@ -20,7 +20,7 @@ import {
   deleteMatchWithParticipantsFn,
   getAllMatchParticipantsFn,
   getAllMatchesFn,
-  updateMatchFn,
+  updateMatchWithParticipantsFn,
 } from "@/Logic";
 
 // Define the type for the user profile context
@@ -32,14 +32,18 @@ interface MatchesContextType {
     newMatch: CreateMatchInput,
     deckIds: string[],
   ) => Promise<void>;
-  updateExistingMatch: (updatedMatch: UpdateMatchInput) => Promise<void>;
+  updateMatchWithParticipants: (
+    updatedMatch: UpdateMatchInput,
+    newParticipantDeckIds: string[],
+  ) => Promise<void>;
+  deleteMatch: (matchId: string) => Promise<void>;
 }
 
 // Create the context
 const MatchesContext = createContext<MatchesContextType | undefined>(undefined);
 
 // UserProvider component
-export const MatchesProvider = ({ children }: PropsWithChildren<{}>) => {
+export const MatchProvider = ({ children }: PropsWithChildren<{}>) => {
   const { addAppMessage } = useApp();
   const { user } = useAuthenticator((context) => [context.user]);
   const [allMatches, setAllMatches] = useState<Match[]>([]);
@@ -90,13 +94,17 @@ export const MatchesProvider = ({ children }: PropsWithChildren<{}>) => {
       );
       if (!createdParticipants) {
         throw new Error("failed to create match participants");
+      } else {
+        setAllMatches((prevState) => [...prevState, match as Match]);
+        setAllMatchParticipants((prevState) => [
+          ...prevState,
+          ...(createdParticipants as MatchParticipant[]),
+        ]);
+        addAppMessage({
+          content: "match has been added",
+          severity: "success",
+        });
       }
-
-      setAllMatches((prevState) => [...prevState, match as Match]);
-      addAppMessage({
-        content: "match has been added",
-        severity: "success",
-      });
     } catch (error) {
       console.error("error creating new match or participants:", error);
 
@@ -113,28 +121,70 @@ export const MatchesProvider = ({ children }: PropsWithChildren<{}>) => {
     }
   };
 
-  const updateExistingMatch = async (updatedMatch: UpdateMatchInput) => {
+  const updateMatchWithParticipants = async (
+    updatedMatch: UpdateMatchInput,
+    newParticipantDeckIds: string[],
+  ) => {
     setMatchesLoading(true);
-    const updateMatchResponse = await updateMatchFn(updatedMatch);
-    if (updateMatchResponse) {
-      addAppMessage({
-        content: "Match has been updated",
-        severity: "success",
-      });
-      // Update the match in the state
-      setAllMatches((prevState) =>
-        prevState.map((m) =>
-          m.id === updatedMatch.id ? updateMatchResponse : m,
-        ),
+    try {
+      const updatedMatchResponse = await updateMatchWithParticipantsFn(
+        updatedMatch,
+        newParticipantDeckIds,
       );
-    } else {
+
+      if (updatedMatchResponse) {
+        setAllMatches((prevState) =>
+          prevState.map((match) =>
+            match.id === updatedMatch.id ? updatedMatchResponse : match,
+          ),
+        );
+
+        const participantsResponse = await getAllMatchParticipantsFn();
+        setAllMatchParticipants(participantsResponse ?? []);
+
+        addAppMessage({
+          content: "match and participants have been updated",
+          severity: "success",
+        });
+      } else {
+        throw new Error("failed to update match");
+      }
+    } catch (error) {
+      console.error("failed to update match with participants:", error);
       addAppMessage({
-        title: "failed to update match",
-        content: "check console for more details",
+        content: "failed to update match",
         severity: "error",
       });
+    } finally {
+      setMatchesLoading(false);
     }
-    setMatchesLoading(false);
+  };
+
+  const deleteMatch = async (matchId: string) => {
+    setMatchesLoading(true);
+    try {
+      await deleteMatchWithParticipantsFn(matchId);
+      setAllMatches((prevMatches) =>
+        prevMatches.filter((match) => match.id !== matchId),
+      );
+      setAllMatchParticipants((prevParticipants) =>
+        prevParticipants.filter(
+          (participant) => participant.matchId !== matchId,
+        ),
+      );
+      addAppMessage({
+        content: "Match deleted successfully",
+        severity: "success",
+      });
+    } catch (error) {
+      console.error("Failed to delete match:", error);
+      addAppMessage({
+        content: "Failed to delete match",
+        severity: "error",
+      });
+    } finally {
+      setMatchesLoading(false);
+    }
   };
 
   return (
@@ -144,7 +194,8 @@ export const MatchesProvider = ({ children }: PropsWithChildren<{}>) => {
         allMatchParticipants,
         matchesLoading,
         createNewMatch,
-        updateExistingMatch,
+        updateMatchWithParticipants,
+        deleteMatch,
       }}
     >
       {children}
@@ -153,10 +204,10 @@ export const MatchesProvider = ({ children }: PropsWithChildren<{}>) => {
 };
 
 // Export the useMatches hook to access the context
-export const useMatches = () => {
+export const useMatch = () => {
   const context = useContext(MatchesContext);
   if (!context) {
-    throw new Error("useMatches must be used within a MatchesProvider");
+    throw new Error("useMatch must be used within a MatchProvider");
   }
   return context;
 };

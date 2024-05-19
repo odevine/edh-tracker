@@ -2,8 +2,8 @@ import { PropsWithChildren } from "react";
 
 import {
   AppProvider,
-  DecksProvider,
-  MatchesProvider,
+  DeckProvider,
+  MatchProvider,
   ThemeProvider,
   UserProvider,
 } from "@/Context";
@@ -13,9 +13,9 @@ export const CombinedProvider = (props: PropsWithChildren) => {
     <AppProvider>
       <UserProvider>
         <ThemeProvider>
-          <MatchesProvider>
-            <DecksProvider>{props.children}</DecksProvider>
-          </MatchesProvider>
+          <DeckProvider>
+            <MatchProvider>{props.children}</MatchProvider>
+          </DeckProvider>
         </ThemeProvider>
       </UserProvider>
     </AppProvider>

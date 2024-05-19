@@ -1,4 +1,4 @@
 export * from "./DeckLogic";
-export * from "./MatchesLogic";
+export * from "./MatchLogic";
 export * from "./TableLogic";
 export * from "./UserLogic";

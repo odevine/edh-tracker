@@ -12,7 +12,7 @@ import {
 import { useEffect, useState } from "react";
 
 import { CreateDeckInput, UpdateDeckInput } from "@/API";
-import { useDecks, useUser } from "@/Context";
+import { useDeck, useUser } from "@/Context";
 import { sortColors, useCommanderSearch } from "@/Logic";
 
 interface ICommander {
@@ -28,7 +28,7 @@ export const DeckModal = (props: {
 }) => {
   const { open, onClose, editingDeckId } = props;
   const { authenticatedUser } = useUser();
-  const { allDecks, createNewDeck, updateExistingDeck } = useDecks();
+  const { allDecks, createNewDeck, updateExistingDeck } = useDeck();
 
   // Find the editing deck based on the editingDeckId
   const editingDeck = allDecks.find((deck) => deck.id === editingDeckId);

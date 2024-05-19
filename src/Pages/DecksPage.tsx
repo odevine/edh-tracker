@@ -3,7 +3,6 @@ import {
   Button,
   Grid,
   Link,
-  MenuItem,
   Paper,
   Table,
   TableBody,
@@ -18,15 +17,17 @@ import PopupState, { bindHover, bindPopover } from "material-ui-popup-state";
 import HoverPopover from "material-ui-popup-state/HoverPopover";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { Deck, User } from "@/API";
+import { Deck } from "@/API";
 import {
   CommanderColors,
   DeckModal,
   EnhancedTableHead,
   HeadCell,
+  PlayerSelector,
   ProfileMiniCard,
+  TypeSelector,
 } from "@/Components";
-import { useDecks, useTheme, useUser } from "@/Context";
+import { useDeck, useTheme, useUser } from "@/Context";
 import { ColumnSortOrder, getComparator } from "@/Logic";
 
 const headCells: HeadCell<Deck>[] = [
@@ -62,96 +63,11 @@ const headCells: HeadCell<Deck>[] = [
   },
   {
     id: "updatedAt",
-    label: "last updated",
+    label: "updated",
     alignment: "right",
     sortable: true,
   },
 ];
-
-const PlayerSelector = (props: {
-  allDecks: Deck[];
-  allUserProfiles: User[];
-  filterUser: string;
-  setFilterUser: (newUser: string) => void;
-}) => {
-  const { allDecks, allUserProfiles, filterUser, setFilterUser } = props;
-  const { mode } = useTheme();
-
-  // Generate the unique list of user options
-  const userOptions = useMemo(() => {
-    // Get unique ownerIDs from allDecks
-    const uniqueOwnerIDs = [
-      ...new Set(allDecks.map((deck) => deck.deckOwnerId)),
-    ];
-
-    // Map ownerIDs to user profiles, filter out undefined, and assert the remaining profiles are defined
-    return uniqueOwnerIDs
-      .map((ownerId) =>
-        allUserProfiles.find((profile) => profile.id === ownerId),
-      )
-      .filter((profile): profile is User => profile !== undefined)
-      .map((profile) => ({
-        id: profile.id,
-        displayName: profile.displayName,
-        color:
-          mode === "light" ? profile.lightThemeColor : profile.darkThemeColor,
-      }));
-  }, [allDecks, allUserProfiles]);
-
-  return (
-    <TextField
-      fullWidth
-      select
-      size="small"
-      value={filterUser}
-      label="player"
-      onChange={(e) => setFilterUser(e.target.value)}
-      sx={{ minWidth: 140 }}
-    >
-      <MenuItem value="all">all users</MenuItem>
-      {userOptions.map((option) => (
-        <MenuItem
-          key={option.id}
-          value={option.displayName}
-          sx={{ color: option.color }}
-        >
-          {option.displayName}
-        </MenuItem>
-      ))}
-    </TextField>
-  );
-};
-
-const TypeSelector = (props: {
-  allDecks: Deck[];
-  filterType: string;
-  setFilterType: (newType: string) => void;
-}) => {
-  const { allDecks, filterType, setFilterType } = props;
-  const deckTypes = useMemo(() => {
-    // Extract unique deck types from all decks
-    return [...new Set(allDecks.map((deck) => deck.deckType))];
-  }, [allDecks]);
-
-  return (
-    <TextField
-      fullWidth
-      select
-      size="small"
-      value={filterType}
-      label="type"
-      onChange={(e) => setFilterType(e.target.value)}
-      sx={{ minWidth: 140 }}
-    >
-      <MenuItem value="all">all types</MenuItem>
-      {deckTypes.map((type) => (
-        <MenuItem key={type} value={type}>
-          {type}
-        </MenuItem>
-      ))}
-    </TextField>
-  );
-};
 
 const dateFormatter = new Intl.DateTimeFormat("en-us", {
   dateStyle: "medium",
@@ -165,7 +81,7 @@ const loadStateFromLocalStorage = () => {
   }
   return {
     filterType: "all",
-    filterUser: "all",
+    filterUser: "",
     searchQuery: "",
     order: "desc" as ColumnSortOrder,
     orderBy: "updatedAt" as keyof Deck,
@@ -175,7 +91,7 @@ const loadStateFromLocalStorage = () => {
 };
 
 export const DecksPage = (): JSX.Element => {
-  const { allDecks } = useDecks();
+  const { allDecks } = useDeck();
   const { allUserProfiles } = useUser();
   const { mode } = useTheme();
 
@@ -223,9 +139,9 @@ export const DecksPage = (): JSX.Element => {
     const lowercasedQuery = searchQuery.toLowerCase();
     return allDecks.filter(
       (deck) =>
-        (filterUser === "all" ||
+        (filterUser === "" ||
           allUserProfiles.find((profile) => profile.id === deck.deckOwnerId)
-            ?.displayName === filterUser) &&
+            ?.id === filterUser) &&
         (filterType === "all" || deck.deckType === filterType) &&
         (deck.deckName.toLowerCase().includes(lowercasedQuery) ||
           deck.commanderName.toLowerCase().includes(lowercasedQuery) ||
@@ -235,7 +151,7 @@ export const DecksPage = (): JSX.Element => {
 
   const userProfileMap = useMemo(() => {
     return new Map(allUserProfiles.map((profile) => [profile.id, profile]));
-  }, [allUserProfiles, mode]);
+  }, [allUserProfiles]);
 
   const visibleRows = useMemo(() => {
     // First, create a shallow copy of the rows array and then sort it
@@ -257,8 +173,6 @@ export const DecksPage = (): JSX.Element => {
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <PlayerSelector
-              allDecks={allDecks}
-              allUserProfiles={allUserProfiles}
               filterUser={filterUser}
               setFilterUser={setFilterUser}
             />

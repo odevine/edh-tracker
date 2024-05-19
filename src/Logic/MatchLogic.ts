@@ -76,24 +76,68 @@ export const createMatchFn = async (
   }
 };
 
-export const updateMatchFn = async (
+export const updateMatchWithParticipantsFn = async (
   updatedMatch: UpdateMatchInput,
+  newParticipantDeckIds: string[],
 ): Promise<Match | null> => {
   try {
+    // Update the match
     const updatedMatchResponse = await client.graphql({
       query: updateMatch,
       variables: { input: updatedMatch },
     });
-    if (updatedMatchResponse.data && updatedMatchResponse.data.updateMatch) {
-      return updatedMatchResponse.data.updateMatch as Match;
-    } else {
-      console.log(`no match found for ${updatedMatch.id}, or update failed`);
-      return null;
+
+    if (!updatedMatchResponse.data.updateMatch) {
+      throw new Error("Failed to update match");
     }
+
+    const updatedMatchData = updatedMatchResponse.data.updateMatch;
+
+    // Fetch current participants of the match
+    const participantsResponse = await client.graphql({
+      query: listMatchParticipants,
+      variables: { filter: { matchId: { eq: updatedMatch.id } } },
+    });
+
+    const currentParticipants = participantsResponse.data.listMatchParticipants
+      .items as MatchParticipant[];
+
+    // Find participants to remove
+    const participantsToRemove = currentParticipants.filter(
+      (participant) => !newParticipantDeckIds.includes(participant.deckId),
+    );
+
+    // Find participants to add
+    const currentDeckIds = currentParticipants.map((p) => p.deckId);
+    const participantsToAdd = newParticipantDeckIds.filter(
+      (deckId) => !currentDeckIds.includes(deckId),
+    );
+
+    // Remove old participants
+    await deleteMatchParticipantsBatchFn(participantsToRemove);
+
+    // Add new participants
+    await createNewMatchParticipantsFn(updatedMatch.id, participantsToAdd);
+
+    return updatedMatchData as Match;
   } catch (error) {
-    console.error("Error updating match:", error);
+    console.error("Error updating match with participants:", error);
     return null;
   }
+};
+
+export const deleteMatchParticipantsBatchFn = async (
+  participants: MatchParticipant[],
+) => {
+  await Promise.all(
+    participants.map(async (participant) => {
+      const input: DeleteMatchParticipantInput = { id: participant.id };
+      await client.graphql({
+        query: deleteMatchParticipant,
+        variables: { input },
+      });
+    }),
+  );
 };
 
 export const createNewMatchParticipantsFn = async (
@@ -122,30 +166,28 @@ export const createNewMatchParticipantsFn = async (
   } catch (error) {
     console.error("error creating match participants:", error);
     // Rollback created participants
-    await deleteMatchParticipantsBatch(createdParticipants);
+    await deleteMatchParticipantsBatchFn(createdParticipants);
     return null;
   }
 };
 
-export const deleteMatchParticipantsBatch = async (
-  participants: MatchParticipant[],
-) => {
-  await Promise.all(
-    participants.map(async (participant) => {
-      const input: DeleteMatchParticipantInput = { id: participant.id };
-      await client.graphql({
-        query: deleteMatchParticipant,
-        variables: { input },
-      });
-    }),
-  );
-};
-
 export const deleteMatchWithParticipantsFn = async (
   matchId: string,
-  participants: MatchParticipant[],
-) => {
-  await deleteMatchParticipantsBatch(participants);
+  participants?: MatchParticipant[],
+): Promise<void> => {
+  let participantsToDelete: MatchParticipant[] = [];
+  if (participants && participants.length > 0) {
+    participantsToDelete = participants;
+  } else {
+    const participantsResponse = await client.graphql({
+      query: listMatchParticipants,
+      variables: { filter: { matchId: { eq: matchId } } },
+    });
+    participantsToDelete =
+      participantsResponse.data.listMatchParticipants.items;
+  }
+
+  await deleteMatchParticipantsBatchFn(participantsToDelete);
 
   const input: DeleteMatchInput = { id: matchId };
   await client.graphql({

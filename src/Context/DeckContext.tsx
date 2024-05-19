@@ -1,4 +1,3 @@
-import { useAuthenticator } from "@aws-amplify/ui-react";
 import {
   PropsWithChildren,
   createContext,
@@ -8,8 +7,8 @@ import {
   useState,
 } from "react";
 
-import { CreateDeckInput, Deck, UpdateDeckInput } from "@/API";
-import { useApp } from "@/Context";
+import { CreateDeckInput, Deck, UpdateDeckInput, User } from "@/API";
+import { useApp, useTheme, useUser } from "@/Context";
 import {
   createDeckFn,
   deleteDeckFn,
@@ -21,6 +20,8 @@ interface DecksContextType {
   allDecks: Deck[];
   userDecks: Deck[];
   decksLoading: boolean;
+  deckToUserMap: Map<string, User>;
+  getDeckUserColor: (ownerId: string) => string;
   createNewDeck: (newDeck: CreateDeckInput) => Promise<void>;
   updateExistingDeck: (updatedDeck: UpdateDeckInput) => Promise<void>;
   deleteDeckById: (deckId: string) => Promise<void>;
@@ -28,19 +29,33 @@ interface DecksContextType {
 
 const DecksContext = createContext<DecksContextType | undefined>(undefined);
 
-export const DecksProvider = ({ children }: PropsWithChildren<{}>) => {
+export const DeckProvider = ({ children }: PropsWithChildren<{}>) => {
   const { addAppMessage } = useApp();
-  const { user } = useAuthenticator((context) => [context.user]);
+  const { mode } = useTheme();
+  const { authenticatedUser, allUserProfiles } = useUser();
+
   const [allDecks, setAllDecks] = useState<Deck[]>([]);
   const [userDecks, setUserDecks] = useState<Deck[]>([]);
   const [decksLoading, setDecksLoading] = useState(true);
+  const [deckToUserMap, setDeckToUserMap] = useState(new Map<string, User>());
 
   useEffect(() => {
-    if (user) {
+    if (authenticatedUser) {
       setDecksLoading(true);
       fetchDecks();
     }
-  }, [user]);
+  }, [authenticatedUser]);
+
+  useEffect(() => {
+    const map = new Map<string, User>();
+    allDecks.forEach((deck) => {
+      const user = allUserProfiles.find((user) => user.id === deck.deckOwnerId);
+      if (user) {
+        map.set(deck.id, user);
+      }
+    });
+    setDeckToUserMap(map);
+  }, [allDecks, allUserProfiles]);
 
   const fetchDecks = async () => {
     try {
@@ -48,7 +63,9 @@ export const DecksProvider = ({ children }: PropsWithChildren<{}>) => {
       const allDecksResponse = decks ?? [];
       setAllDecks(allDecksResponse);
       setUserDecks(
-        allDecksResponse.filter((deck) => deck.deckOwnerId === user.userId),
+        allDecksResponse.filter(
+          (deck) => deck.deckOwnerId === authenticatedUser?.userId,
+        ),
       );
     } catch (error) {
       addAppMessage({
@@ -72,7 +89,7 @@ export const DecksProvider = ({ children }: PropsWithChildren<{}>) => {
       });
       // Add the new deck to the state
       setAllDecks((prevDecks) => [...prevDecks, deck]);
-      if (deck.deckOwnerId === user?.userId) {
+      if (deck.deckOwnerId === authenticatedUser?.userId) {
         setUserDecks((prevDecks) => [...prevDecks, deck]);
       }
     } else {
@@ -92,13 +109,13 @@ export const DecksProvider = ({ children }: PropsWithChildren<{}>) => {
         content: `${updatedDeck.deckName} has been updated`,
         severity: "success",
       });
-      // Add the updated deck to the state
+      // Update the state with the updated deck
       setAllDecks((prevDecks) =>
         prevDecks.map((d) =>
           d.id === updatedDeck.id ? updateDeckResponse : d,
         ),
       );
-      if (updatedDeck.deckOwnerId === user?.userId) {
+      if (updatedDeck.deckOwnerId === authenticatedUser?.userId) {
         setUserDecks((prevDecks) =>
           prevDecks.map((d) =>
             d.id === updatedDeck.id ? updateDeckResponse : d,
@@ -140,16 +157,31 @@ export const DecksProvider = ({ children }: PropsWithChildren<{}>) => {
     setDecksLoading(false);
   };
 
+  const getDeckUserColor = useMemo(
+    () => (deckId: string) => {
+      const deckUser = deckToUserMap.get(deckId);
+      if (!deckUser) {
+        return "inherit";
+      }
+      return mode === "light"
+        ? deckUser.lightThemeColor ?? "inherit"
+        : deckUser.darkThemeColor ?? "inherit";
+    },
+    [deckToUserMap, mode],
+  );
+
   const value = useMemo(
     () => ({
       allDecks,
+      getDeckUserColor,
       userDecks,
+      deckToUserMap,
       decksLoading,
       createNewDeck,
       updateExistingDeck,
       deleteDeckById,
     }),
-    [allDecks, userDecks, decksLoading],
+    [allDecks, userDecks, decksLoading, deckToUserMap, getDeckUserColor],
   );
 
   return (
@@ -157,10 +189,10 @@ export const DecksProvider = ({ children }: PropsWithChildren<{}>) => {
   );
 };
 
-export const useDecks = () => {
+export const useDeck = () => {
   const context = useContext(DecksContext);
   if (!context) {
-    throw new Error("useDecks must be used within a DecksProvider");
+    throw new Error("useDeck must be used within a DeckProvider");
   }
   return context;
 };
