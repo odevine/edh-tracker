@@ -152,8 +152,6 @@ export const DeckModal = (props: {
         cost: deckCost !== "" ? Number(deckCost) : undefined,
         link: deckLink !== "" ? deckLink : undefined,
       };
-      console.log(commander, secondCommander);
-      console.log("  ~ handleSubmit ~ deckInput:", deckInput);
 
       if (editingDeck) {
         updateExistingDeck({ ...deckInput, id: editingDeck.id });

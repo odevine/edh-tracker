@@ -15,6 +15,7 @@ import {
   Toolbar,
   Typography,
 } from "@mui/material";
+import { DateTime } from "luxon";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Match } from "@/API";
@@ -29,10 +30,6 @@ import {
 import { useDeck, useMatch, useUser } from "@/Context";
 import { ColumnSortOrder, getComparator } from "@/Logic";
 
-const dateFormatter = new Intl.DateTimeFormat("en-us", {
-  dateStyle: "medium",
-});
-
 const localStorageKey = "matchesPageState";
 const loadStateFromLocalStorage = () => {
   const savedState = localStorage.getItem(localStorageKey);
@@ -46,7 +43,7 @@ const loadStateFromLocalStorage = () => {
     order: "desc" as ColumnSortOrder,
     orderBy: "datePlayed" as keyof Match,
     page: 0,
-    rowsPerPage: 15,
+    rowsPerPage: 10,
   };
 };
 
@@ -136,7 +133,6 @@ export const MatchesPage = (): JSX.Element => {
       <Typography
         key={participant.id}
         variant="body2"
-        // component="span"
         sx={{ color: getDeckUserColor(participant.deckId) }}
       >
         {allDecks.find((deck) => deck.id === participant.deckId)?.deckName}
@@ -254,7 +250,9 @@ export const MatchesPage = (): JSX.Element => {
                     }}
                   >
                     <TableCell align="right">
-                      {dateFormatter.format(new Date(match.datePlayed))}
+                      {DateTime.fromISO(match.datePlayed)
+                        .setLocale("en-us")
+                        .toLocaleString(DateTime.DATE_MED)}
                     </TableCell>
                     <TableCell>{match.matchType}</TableCell>
                     <TableCell
@@ -294,7 +292,7 @@ export const MatchesPage = (): JSX.Element => {
             <TableFooter>
               <TableRow>
                 <TablePagination
-                  rowsPerPageOptions={[15, 25, 50]}
+                  rowsPerPageOptions={[10, 15, 25]}
                   count={filteredMatches.length}
                   page={page}
                   rowsPerPage={rowsPerPage}
@@ -310,7 +308,10 @@ export const MatchesPage = (): JSX.Element => {
       </Paper>
       <MatchModal
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={() => {
+          setExistingMatchId("");
+          setModalOpen(false);
+        }}
         editingMatchId={existingMatchId}
       />
     </>

@@ -43,7 +43,7 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
   const editingMatch = allMatches.find((match) => match.id === editingMatchId);
 
   const [loading, setLoading] = useState(false);
-  const [matchType, setMatchType] = useState(DECK_TYPES[0].value);
+  const [matchType, setMatchType] = useState(DECK_TYPES[1].value);
   const [datePlayed, setDatePlayed] = useState(DateTime.now());
   const [winningDeckId, setWinningDeckId] = useState("");
   const [participantDecks, setParticipantDecks] = useState<Deck[]>([]);
@@ -72,7 +72,7 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
       );
       setParticipantDecks(participantDecks);
     } else {
-      setMatchType(DECK_TYPES[0].value);
+      setMatchType(DECK_TYPES[1].value);
       setDatePlayed(DateTime.now());
       setWinningDeckId("");
       setParticipantDecks([]);

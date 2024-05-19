@@ -33,9 +33,8 @@ export const DeckSelector = (props: {
         color: getDeckUserColor(deck.id),
       }));
 
-    setFilterDeck(multi ? [] : "")
     return decks;
-  }, [allDecks, mode, getDeckUserColor, deckToUserMap, filterType]);
+  }, [allDecks, mode, filterType, getDeckUserColor]);
 
   // Find the selected option(s) based on filterUser
   const selectedOption = useMemo(() => {

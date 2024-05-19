@@ -89,11 +89,13 @@ export const PlayerSelector = (props: {
           label={multi ? "players" : "player"}
           fullWidth
           placeholder={
-            multi && !filterUser.length
-              ? "all players"
-              : !multi && !selectedOption
-                ? "all players"
-                : ""
+            multi
+              ? filterUser.length
+                ? ""
+                : "all players"
+              : selectedOption
+                ? ""
+                : "all players"
           }
         />
       )}

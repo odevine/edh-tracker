@@ -4,8 +4,8 @@ import { Box, Stack, Typography } from "@mui/material";
 import { Amplify } from "aws-amplify";
 import { Redirect, useRoutes } from "raviger";
 
-import { AppAlertList, Toolbar } from "@/Components";
-import { useApp } from "@/Context";
+import { AppAlertList, LoadingBackdrop, Toolbar } from "@/Components";
+import { useApp, useMatch, useUser, useDeck } from "@/Context";
 import { DecksPage, HomePage, MatchesPage, Profile } from "@/Pages";
 import config from "./aws-exports";
 
@@ -40,7 +40,12 @@ const ProtectedRoutes = () => (
 
 export const App = () => {
   const { appMessages, deleteAppMessage } = useApp();
+  const { usersLoading } = useUser();
+  const { matchesLoading } = useMatch();
+  const { decksLoading } = useDeck();
   const routeResult = useRoutes(baseRoutes);
+
+  const showLoading = usersLoading || matchesLoading || decksLoading;
 
   return (
     <>
@@ -54,6 +59,7 @@ export const App = () => {
       >
         {routeResult || <h1>404 Not Found</h1>}
       </Box>
+      {showLoading && <LoadingBackdrop />}
       <AppAlertList messages={appMessages} onDelete={deleteAppMessage} />
     </>
   );
