@@ -18,14 +18,30 @@ const client = generateClient();
 
 export const getAllDecksFn = async (): Promise<Deck[] | null> => {
   try {
-    const allDecksResponse = await client.graphql({ query: listDecks });
+    let allDecks: Deck[] = [];
+    let nextToken: string | null = null;
 
-    if (allDecksResponse.data && allDecksResponse.data.listDecks) {
-      return allDecksResponse.data.listDecks.items as Deck[];
-    }
-    return null;
+    do {
+      const response: any = await client.graphql({
+        query: listDecks,
+        variables: { nextToken },
+      });
+
+      if (
+        response.data &&
+        response.data.listDecks &&
+        response.data.listDecks.items
+      ) {
+        allDecks = [...allDecks, ...response.data.listDecks.items];
+        nextToken = response.data.listDecks.nextToken;
+      } else {
+        nextToken = null;
+      }
+    } while (nextToken);
+
+    return allDecks;
   } catch (error) {
-    console.error("Error fetching decks:", error);
+    console.error("error fetching decks:", error);
     return null;
   }
 };
@@ -91,11 +107,11 @@ export const updateDeckFn = async (
     if (updatedDeckResponse.data && updatedDeckResponse.data.updateDeck) {
       return updatedDeckResponse.data.updateDeck as Deck;
     } else {
-      console.log(`No deck found for ${updatedDeck.id}, or update failed`);
+      console.log(`no deck found for ${updatedDeck.id}, or update failed`);
       return null;
     }
   } catch (error) {
-    console.error("Error updating deck:", error);
+    console.error("error updating deck:", error);
     return null;
   }
 };

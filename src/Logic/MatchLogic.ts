@@ -21,12 +21,28 @@ const client = generateClient();
 
 export const getAllMatchesFn = async (): Promise<Match[] | null> => {
   try {
-    const allMatchesResponse = await client.graphql({ query: listMatches });
+    let allMatches: Match[] = [];
+    let nextToken: string | null = null;
 
-    if (allMatchesResponse.data && allMatchesResponse.data.listMatches) {
-      return allMatchesResponse.data.listMatches.items as Match[];
-    }
-    return null;
+    do {
+      const response: any = await client.graphql({
+        query: listMatches,
+        variables: { nextToken },
+      });
+
+      if (
+        response.data &&
+        response.data.listMatches &&
+        response?.data?.listMatches?.items
+      ) {
+        allMatches = [...allMatches, ...response.data.listMatches.items];
+        nextToken = response.data.listMatches.nextToken;
+      } else {
+        nextToken = null;
+      }
+    } while (nextToken);
+
+    return allMatches;
   } catch (error) {
     console.error("error fetching matches:", error);
     return null;
@@ -37,20 +53,33 @@ export const getAllMatchParticipantsFn = async (): Promise<
   MatchParticipant[] | null
 > => {
   try {
-    const allParticipantsResponse = await client.graphql({
-      query: listMatchParticipants,
-    });
+    let allParticipants: MatchParticipant[] = [];
+    let nextToken: string | null = null;
 
-    if (
-      allParticipantsResponse.data &&
-      allParticipantsResponse.data.listMatchParticipants
-    ) {
-      return allParticipantsResponse.data.listMatchParticipants
-        .items as MatchParticipant[];
-    }
-    return null;
+    do {
+      const response: any = await client.graphql({
+        query: listMatchParticipants,
+        variables: { nextToken },
+      });
+
+      if (
+        response.data &&
+        response.data.listMatchParticipants &&
+        response.data.listMatchParticipants.items
+      ) {
+        allParticipants = [
+          ...allParticipants,
+          ...response.data.listMatchParticipants.items,
+        ];
+        nextToken = response.data.listMatchParticipants.nextToken;
+      } else {
+        nextToken = null;
+      }
+    } while (nextToken);
+
+    return allParticipants;
   } catch (error) {
-    console.error("Error fetching match participants:", error);
+    console.error("error fetching match participants:", error);
     return null;
   }
 };
