@@ -33,14 +33,7 @@ import { ColumnSortOrder, getComparator } from "@/Logic";
 
 const localStorageKey = "matchesPageState";
 const loadStateFromLocalStorage = () => {
-  const savedState = localStorage.getItem(localStorageKey);
-  if (savedState) {
-    const parsedState = JSON.parse(savedState);
-    if (parsedState.stateVersion === LOCAL_STORAGE_VERSION) {
-      return JSON.parse(savedState);
-    }
-  }
-  return {
+  const initialState = {
     stateVersion: LOCAL_STORAGE_VERSION,
     filterType: "",
     filterUser: [],
@@ -50,6 +43,20 @@ const loadStateFromLocalStorage = () => {
     page: 0,
     rowsPerPage: 10,
   };
+
+  const savedState = localStorage.getItem(localStorageKey);
+
+  if (savedState) {
+    const parsedState = JSON.parse(savedState);
+    if (parsedState.stateVersion === LOCAL_STORAGE_VERSION) {
+      console.log(parsedState.filterDeck);
+      return parsedState;
+    } else {
+      localStorage.removeItem(localStorageKey);
+      localStorage.setItem(localStorageKey, JSON.stringify(initialState));
+    }
+  }
+  return initialState;
 };
 
 export const MatchesPage = (): JSX.Element => {
@@ -59,9 +66,11 @@ export const MatchesPage = (): JSX.Element => {
 
   const initialState = loadStateFromLocalStorage();
 
-  const [filterType, setFilterType] = useState(initialState.filterType);
-  const [filterDeck, setFilterDeck] = useState(initialState.filterType);
-  const [filterUser, setFilterUser] = useState<string | string[]>(
+  const [filterType, setFilterType] = useState<string>(initialState.filterType);
+  const [filterDeck, setFilterDeck] = useState<string[] | string>(
+    initialState.filterDeck,
+  );
+  const [filterUser, setFilterUser] = useState<string[] | string>(
     initialState.filterUser,
   );
   const [order, setOrder] = useState<ColumnSortOrder>(initialState.order);
@@ -73,6 +82,7 @@ export const MatchesPage = (): JSX.Element => {
 
   useEffect(() => {
     const newSettings = JSON.stringify({
+      stateVersion: LOCAL_STORAGE_VERSION,
       filterType,
       filterUser,
       filterDeck,
@@ -81,8 +91,9 @@ export const MatchesPage = (): JSX.Element => {
       page,
       rowsPerPage,
     });
+    console.log("  ~ useEffect ~ newSettings:", newSettings);
     localStorage.setItem(localStorageKey, newSettings);
-  }, [order, orderBy, page, rowsPerPage, filterType, filterUser]);
+  }, [order, orderBy, page, rowsPerPage, filterType, filterUser, filterDeck]);
 
   const headCells: HeadCell<Match>[] = [
     {

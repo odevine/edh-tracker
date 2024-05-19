@@ -77,14 +77,7 @@ const dateFormatter = new Intl.DateTimeFormat("en-us", {
 
 const localStorageKey = "decksPageState";
 const loadStateFromLocalStorage = () => {
-  const savedState = localStorage.getItem(localStorageKey);
-  if (savedState) {
-    const parsedState = JSON.parse(savedState);
-    if (parsedState.stateVersion === LOCAL_STORAGE_VERSION) {
-      return JSON.parse(savedState);
-    }
-  }
-  return {
+  const initialState = {
     stateVersion: LOCAL_STORAGE_VERSION,
     filterType: "",
     filterUser: "",
@@ -94,6 +87,19 @@ const loadStateFromLocalStorage = () => {
     page: 0,
     rowsPerPage: 15,
   };
+
+  const savedState = localStorage.getItem(localStorageKey);
+
+  if (savedState) {
+    const parsedState = JSON.parse(savedState);
+    if (parsedState.stateVersion === LOCAL_STORAGE_VERSION) {
+      return JSON.parse(savedState);
+    } else {
+      localStorage.removeItem(localStorageKey);
+      localStorage.setItem(localStorageKey, JSON.stringify(initialState));
+    }
+  }
+  return initialState;
 };
 
 export const DecksPage = (): JSX.Element => {
@@ -115,6 +121,7 @@ export const DecksPage = (): JSX.Element => {
   // Save state to local storage whenever it changes
   useEffect(() => {
     const newSettings = JSON.stringify({
+      stateVersion: LOCAL_STORAGE_VERSION,
       filterType,
       filterUser,
       searchQuery,
