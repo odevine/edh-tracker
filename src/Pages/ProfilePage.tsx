@@ -9,12 +9,15 @@ import {
 } from "@mui/material";
 
 import { LoadingBackdrop, UserDecksCard, UserProfileForm } from "@/Components";
-import { useTheme, useUser } from "@/Context";
+import { useDeck, useMatch, useTheme, useUser } from "@/Context";
+import { getUserStats } from "@/Logic";
 
 export const Profile = (props: { profileId: string }): JSX.Element => {
   const { profileId } = props;
   const { allUserProfiles, usersLoading, authenticatedUser } = useUser();
   const { mode } = useTheme();
+  const { allDecks } = useDeck();
+  const { allMatches, allMatchParticipants } = useMatch();
 
   const currentProfile = allUserProfiles.filter(
     (profile) => profile.id === profileId,
@@ -28,6 +31,12 @@ export const Profile = (props: { profileId: string }): JSX.Element => {
   if (!currentProfile) {
     return <LoadingBackdrop />;
   } else {
+    const userStats = getUserStats(
+      currentProfile.id,
+      allDecks,
+      allMatches,
+      allMatchParticipants,
+    );
     return (
       <>
         {usersLoading && <LoadingBackdrop />}
@@ -50,14 +59,32 @@ export const Profile = (props: { profileId: string }): JSX.Element => {
                       }}
                       src={currentProfile?.profilePictureURL ?? ""}
                     />
-                    <Stack direction="row" alignItems="center" spacing={1}>
-                      <Typography
-                        sx={{ color: userColor ?? "inherit" }}
-                        variant="h5"
-                      >
-                        {currentProfile.displayName}
-                      </Typography>
-                    </Stack>
+                    <Typography
+                      sx={{ color: userColor ?? "inherit" }}
+                      variant="h5"
+                    >
+                      {currentProfile.displayName}
+                    </Typography>
+                    <Grid container>
+                      <Grid item xs={6}>
+                        <Stack spacing={1}>
+                          <Typography variant="body1">
+                            matches played:
+                          </Typography>
+                          <Typography variant="body1">wins:</Typography>
+                        </Stack>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Stack spacing={1} alignItems="flex-end">
+                          <Typography variant="body1">
+                            {userStats.totalMatches}
+                          </Typography>
+                          <Typography variant="body1">
+                            {userStats.totalWins}
+                          </Typography>
+                        </Stack>
+                      </Grid>
+                    </Grid>
                   </Stack>
                 </CardContent>
               </Card>

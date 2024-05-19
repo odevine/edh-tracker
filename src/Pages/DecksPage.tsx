@@ -1,23 +1,3 @@
-import {
-  Box,
-  Button,
-  Grid,
-  Link,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableFooter,
-  TablePagination,
-  TableRow,
-  TextField,
-  Toolbar,
-} from "@mui/material";
-import PopupState, { bindHover, bindPopover } from "material-ui-popup-state";
-import HoverPopover from "material-ui-popup-state/HoverPopover";
-import { useCallback, useEffect, useMemo, useState } from "react";
-
 import { Deck } from "@/API";
 import {
   CommanderColors,
@@ -29,51 +9,52 @@ import {
   TypeSelector,
 } from "@/Components";
 import { LOCAL_STORAGE_VERSION } from "@/Constants";
-import { useDeck, useTheme, useUser } from "@/Context";
-import { ColumnSortOrder, getComparator } from "@/Logic";
+import { useDeck, useMatch, useTheme, useUser } from "@/Context";
+import {
+  ColumnSortOrder,
+  DeckStats,
+  getComparator,
+  getDeckStats,
+} from "@/Logic";
+import {
+  Box,
+  Button,
+  Divider,
+  Grid,
+  Link,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableFooter,
+  TablePagination,
+  TableRow,
+  TextField,
+  Toolbar,
+  Typography,
+  useMediaQuery,
+  useTheme as useMuiTheme,
+} from "@mui/material";
+import PopupState, { bindHover, bindPopover } from "material-ui-popup-state";
+import HoverPopover from "material-ui-popup-state/HoverPopover";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-const headCells: HeadCell<Deck>[] = [
-  {
-    id: "deckName",
-    label: "name",
-    sortable: true,
-  },
-  {
-    id: "deckOwnerId",
-    label: "player",
-    sortable: true,
-  },
-  {
-    id: "deckType",
-    label: "type",
-    sortable: true,
-  },
-  {
-    id: "commanderName",
-    label: "commander",
-    sortable: true,
-  },
-  {
-    id: "commanderColors",
-    label: "colors",
-  },
-  {
-    id: "cost",
-    label: "cost",
-    alignment: "right",
-    sortable: true,
-  },
-  {
-    id: "updatedAt",
-    label: "updated",
-    alignment: "right",
-    sortable: true,
-  },
+interface DeckWithStats extends Deck, DeckStats {}
+
+const headCells: HeadCell<DeckWithStats>[] = [
+  { id: "deckName", label: "name", sortable: true },
+  { id: "deckOwnerId", label: "player", sortable: true },
+  { id: "deckType", label: "type", sortable: true },
+  { id: "commanderName", label: "commander", sortable: true },
+  { id: "commanderColors", label: "colors" },
+  { id: "totalWins", label: "wins", alignment: "right", sortable: true },
+  { id: "totalMatches", label: "matches", alignment: "right", sortable: true },
+  { id: "cost", label: "cost", alignment: "right", sortable: true },
 ];
-
-const dateFormatter = new Intl.DateTimeFormat("en-us", {
-  dateStyle: "medium",
-});
 
 const localStorageKey = "decksPageState";
 const loadStateFromLocalStorage = () => {
@@ -83,13 +64,12 @@ const loadStateFromLocalStorage = () => {
     filterUser: "",
     searchQuery: "",
     order: "desc" as ColumnSortOrder,
-    orderBy: "updatedAt" as keyof Deck,
+    orderBy: "updatedAt" as keyof DeckWithStats,
     page: 0,
     rowsPerPage: 15,
   };
 
   const savedState = localStorage.getItem(localStorageKey);
-
   if (savedState) {
     const parsedState = JSON.parse(savedState);
     if (parsedState.stateVersion === LOCAL_STORAGE_VERSION) {
@@ -106,6 +86,9 @@ export const DecksPage = (): JSX.Element => {
   const { allDecks } = useDeck();
   const { allUserProfiles } = useUser();
   const { mode } = useTheme();
+  const { allMatches, allMatchParticipants } = useMatch();
+  const theme = useMuiTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const initialState = loadStateFromLocalStorage();
 
@@ -113,12 +96,13 @@ export const DecksPage = (): JSX.Element => {
   const [filterUser, setFilterUser] = useState(initialState.filterUser);
   const [searchQuery, setSearchQuery] = useState(initialState.searchQuery);
   const [order, setOrder] = useState<ColumnSortOrder>(initialState.order);
-  const [orderBy, setOrderBy] = useState<keyof Deck>(initialState.orderBy);
+  const [orderBy, setOrderBy] = useState<keyof DeckWithStats>(
+    initialState.orderBy,
+  );
   const [page, setPage] = useState(initialState.page);
   const [rowsPerPage, setRowsPerPage] = useState(initialState.rowsPerPage);
   const [modalOpen, setModalOpen] = useState(false);
 
-  // Save state to local storage whenever it changes
   useEffect(() => {
     const newSettings = JSON.stringify({
       stateVersion: LOCAL_STORAGE_VERSION,
@@ -133,7 +117,7 @@ export const DecksPage = (): JSX.Element => {
     localStorage.setItem(localStorageKey, newSettings);
   }, [filterType, filterUser, searchQuery, order, orderBy, page, rowsPerPage]);
 
-  const handleRequestSort = (property: keyof Deck) => {
+  const handleRequestSort = (property: keyof DeckWithStats) => {
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
@@ -166,12 +150,18 @@ export const DecksPage = (): JSX.Element => {
     return new Map(allUserProfiles.map((profile) => [profile.id, profile]));
   }, [allUserProfiles]);
 
+  const decksWithStats = useMemo(() => {
+    return filteredDecks.map((deck) => {
+      const deckStats = getDeckStats(deck.id, allMatches, allMatchParticipants);
+      return { ...deck, ...deckStats };
+    });
+  }, [filteredDecks, allMatches, allMatchParticipants]);
+
   const visibleRows = useMemo(() => {
-    // First, create a shallow copy of the rows array and then sort it
-    return [...filteredDecks]
-      .sort(getComparator<Deck>(order, orderBy, userProfileMap))
+    return [...decksWithStats]
+      .sort(getComparator<DeckWithStats>(order, orderBy, userProfileMap))
       .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
-  }, [order, orderBy, page, rowsPerPage, filteredDecks, userProfileMap]);
+  }, [order, orderBy, page, rowsPerPage, decksWithStats, userProfileMap]);
 
   return (
     <Paper sx={{ m: 3 }}>
@@ -209,126 +199,269 @@ export const DecksPage = (): JSX.Element => {
           </Grid>
         </Grid>
       </Toolbar>
-      <TableContainer>
-        <Table size="small">
-          <EnhancedTableHead
-            headCells={headCells}
-            order={order}
-            orderBy={orderBy}
-            onRequestSort={(_event, property) => handleRequestSort(property)}
-          />
-          <TableBody>
-            {visibleRows.map((deck) => {
-              const ownerProfile = userProfileMap.get(deck.deckOwnerId);
-              let ownerProfileColor;
-              if (ownerProfile) {
-                ownerProfileColor =
-                  mode === "light"
-                    ? ownerProfile.lightThemeColor
-                    : ownerProfile.darkThemeColor;
-              }
-              return (
-                <TableRow
-                  key={deck.id}
-                  sx={{
-                    backgroundColor: ownerProfileColor
-                      ? `${ownerProfileColor}26`
-                      : "none",
-                  }}
-                >
-                  <TableCell>
-                    {deck.link ? (
-                      <Link
-                        href={deck.link ?? undefined}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        sx={{
-                          color: (theme) => theme.palette.text.primary,
-                          fontWeight: "bold",
-                          textDecoration: "none",
-                          "&:hover": { textDecoration: "underline" },
-                        }}
-                      >
-                        {deck.deckName}
-                      </Link>
-                    ) : (
-                      deck.deckName
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {ownerProfile && (
-                      <PopupState variant="popover">
-                        {(popupState) => (
-                          <Box {...bindHover(popupState)}>
-                            {ownerProfile.displayName}
-                            <HoverPopover
-                              {...bindPopover(popupState)}
-                              anchorOrigin={{
-                                vertical: "top",
-                                horizontal: "left",
-                              }}
-                              transformOrigin={{
-                                vertical: "center",
-                                horizontal: "right",
-                              }}
-                            >
-                              <ProfileMiniCard profile={ownerProfile} />
-                            </HoverPopover>
-                          </Box>
-                        )}
-                      </PopupState>
-                    )}
-                  </TableCell>
-                  <TableCell>{deck.deckType}</TableCell>
-                  <TableCell>
-                    {deck.commanderName}
+      {isSmallScreen ? (
+        <Box>
+          <Grid container sx={{ px: 2 }} spacing={1}>
+            <Grid item xs={6}>
+              <Select
+                fullWidth
+                size="small"
+                value={orderBy}
+                onChange={(e) =>
+                  setOrderBy(e.target.value as keyof DeckWithStats)
+                }
+                displayEmpty
+              >
+                {headCells.map((headCell) =>
+                  headCell.sortable ? (
+                    <MenuItem
+                      key={headCell.id as string}
+                      value={headCell.id as string}
+                    >
+                      {headCell.label}
+                    </MenuItem>
+                  ) : null,
+                )}
+              </Select>
+            </Grid>
+            <Grid item xs={6}>
+              <Select
+                fullWidth
+                size="small"
+                value={order}
+                onChange={(e) => setOrder(e.target.value as ColumnSortOrder)}
+                displayEmpty
+              >
+                <MenuItem value="asc">asc</MenuItem>
+                <MenuItem value="desc">desc</MenuItem>
+              </Select>
+            </Grid>
+          </Grid>
+          {visibleRows.map((deck) => {
+            const ownerProfile = userProfileMap.get(deck.deckOwnerId);
+            const ownerProfileColor = ownerProfile
+              ? mode === "light"
+                ? ownerProfile.lightThemeColor
+                : ownerProfile.darkThemeColor
+              : undefined;
+
+            return (
+              <Box key={deck.id}>
+                <Grid container sx={{ px: 2, py: 1 }}>
+                  <Grid item xs={12}>
+                    <Typography variant="h6" sx={{ color: ownerProfileColor }}>
+                      {deck.deckName}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2">player:</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2">
+                      {ownerProfile?.displayName}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2">type:</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2">{deck.deckType}</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2">commander:</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2">
+                      {deck.commanderName}
+                    </Typography>
                     {deck.secondCommanderName && (
-                      <>
-                        <br />
+                      <Typography variant="body2">
                         {deck.secondCommanderName}
-                      </>
+                      </Typography>
                     )}
-                  </TableCell>
-                  <TableCell>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2">colors:</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
                     <CommanderColors
                       colors={[
                         ...(deck.commanderColors ?? []),
                         ...(deck.secondCommanderColors ?? []),
                       ]}
                     />
-                  </TableCell>
-                  <TableCell align="right">
-                    {deck.cost
-                      ? deck.cost?.toLocaleString("en-US", {
-                          style: "currency",
-                          currency: "USD",
-                        })
-                      : "-"}
-                  </TableCell>
-                  <TableCell align="right">
-                    {dateFormatter.format(new Date(deck.updatedAt))}
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-          <TableFooter>
-            <TableRow>
-              <TablePagination
-                rowsPerPageOptions={[15, 25, 50]}
-                count={filteredDecks.length}
-                page={page}
-                rowsPerPage={rowsPerPage}
-                onPageChange={(_event, value) => handleChangePage(value)}
-                onRowsPerPageChange={(event) =>
-                  handleChangeRowsPerPage(event.target.value)
-                }
-              />
-            </TableRow>
-          </TableFooter>
-        </Table>
-      </TableContainer>
-
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2">wins:</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2">{deck.totalWins}</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2">matches:</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2">{deck.totalMatches}</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2">cost:</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2">
+                      {deck.cost
+                        ? deck.cost.toLocaleString("en-US", {
+                            style: "currency",
+                            currency: "USD",
+                          })
+                        : "-"}
+                    </Typography>
+                  </Grid>
+                </Grid>
+                <Divider />
+              </Box>
+            );
+          })}
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            sx={{ p: 2 }}
+          >
+            <Button
+              onClick={() => handleChangePage(page - 1)}
+              disabled={page === 0}
+            >
+              previous
+            </Button>
+            <Typography>{page + 1}</Typography>
+            <Button
+              onClick={() => handleChangePage(page + 1)}
+              disabled={
+                page >= Math.ceil(filteredDecks.length / rowsPerPage) - 1
+              }
+            >
+              next
+            </Button>
+          </Stack>
+        </Box>
+      ) : (
+        <TableContainer>
+          <Table size="small">
+            <EnhancedTableHead
+              headCells={headCells}
+              order={order}
+              orderBy={orderBy}
+              onRequestSort={(_event, property) => handleRequestSort(property)}
+            />
+            <TableBody>
+              {visibleRows.map((deck) => {
+                const ownerProfile = userProfileMap.get(deck.deckOwnerId);
+                const ownerProfileColor = ownerProfile
+                  ? mode === "light"
+                    ? ownerProfile.lightThemeColor
+                    : ownerProfile.darkThemeColor
+                  : undefined;
+                return (
+                  <TableRow
+                    key={deck.id}
+                    sx={{
+                      backgroundColor: ownerProfileColor
+                        ? `${ownerProfileColor}26`
+                        : "none",
+                    }}
+                  >
+                    <TableCell>
+                      {deck.link ? (
+                        <Link
+                          href={deck.link ?? undefined}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          sx={{
+                            color: (theme) => theme.palette.text.primary,
+                            fontWeight: "bold",
+                            textDecoration: "none",
+                            "&:hover": { textDecoration: "underline" },
+                          }}
+                        >
+                          {deck.deckName}
+                        </Link>
+                      ) : (
+                        deck.deckName
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {ownerProfile && (
+                        <PopupState variant="popover">
+                          {(popupState) => (
+                            <Box {...bindHover(popupState)}>
+                              {ownerProfile.displayName}
+                              <HoverPopover
+                                {...bindPopover(popupState)}
+                                anchorOrigin={{
+                                  vertical: "top",
+                                  horizontal: "left",
+                                }}
+                                transformOrigin={{
+                                  vertical: "center",
+                                  horizontal: "right",
+                                }}
+                              >
+                                <ProfileMiniCard profile={ownerProfile} />
+                              </HoverPopover>
+                            </Box>
+                          )}
+                        </PopupState>
+                      )}
+                    </TableCell>
+                    <TableCell>{deck.deckType}</TableCell>
+                    <TableCell>
+                      {deck.commanderName}
+                      {deck.secondCommanderName && (
+                        <>
+                          <br />
+                          {deck.secondCommanderName}
+                        </>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <CommanderColors
+                        colors={[
+                          ...(deck.commanderColors ?? []),
+                          ...(deck.secondCommanderColors ?? []),
+                        ]}
+                      />
+                    </TableCell>
+                    <TableCell align="right">{deck.totalWins}</TableCell>
+                    <TableCell align="right">{deck.totalMatches}</TableCell>
+                    <TableCell align="right">
+                      {deck.cost
+                        ? deck.cost.toLocaleString("en-US", {
+                            style: "currency",
+                            currency: "USD",
+                          })
+                        : "-"}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TablePagination
+                  rowsPerPageOptions={[15, 25, 50]}
+                  count={filteredDecks.length}
+                  page={page}
+                  rowsPerPage={rowsPerPage}
+                  onPageChange={(_event, value) => handleChangePage(value)}
+                  onRowsPerPageChange={(event) =>
+                    handleChangeRowsPerPage(event.target.value)
+                  }
+                />
+              </TableRow>
+            </TableFooter>
+          </Table>
+        </TableContainer>
+      )}
       <DeckModal open={modalOpen} onClose={() => setModalOpen(false)} />
     </Paper>
   );

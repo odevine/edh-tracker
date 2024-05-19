@@ -49,7 +49,6 @@ const loadStateFromLocalStorage = () => {
   if (savedState) {
     const parsedState = JSON.parse(savedState);
     if (parsedState.stateVersion === LOCAL_STORAGE_VERSION) {
-      console.log(parsedState.filterDeck);
       return parsedState;
     } else {
       localStorage.removeItem(localStorageKey);
@@ -91,7 +90,6 @@ export const MatchesPage = (): JSX.Element => {
       page,
       rowsPerPage,
     });
-    console.log("  ~ useEffect ~ newSettings:", newSettings);
     localStorage.setItem(localStorageKey, newSettings);
   }, [order, orderBy, page, rowsPerPage, filterType, filterUser, filterDeck]);
 
