@@ -5,7 +5,7 @@ import { Amplify } from "aws-amplify";
 import { Redirect, useRoutes } from "raviger";
 
 import { AppAlertList, LoadingBackdrop, Toolbar } from "@/Components";
-import { useApp, useMatch, useDeck, useUser } from "@/Context";
+import { useApp, useDeck, useMatch, useUser } from "@/Context";
 import { DecksPage, HomePage, MatchesPage, Profile } from "@/Pages";
 import config from "./aws-exports";
 

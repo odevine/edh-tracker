@@ -32,7 +32,6 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider = ({ children }: PropsWithChildren<{}>) => {
   const { addAppMessage } = useApp();
   const { user, signOut } = useAuthenticator((context) => [context.user]);
-  console.log("  ~ UserProvider ~ user:", user);
   const [allUserProfiles, setAllUserProfiles] = useState<User[]>([]);
   const [currentUserProfile, setCurrentUserProfile] = useState<User | null>(
     null,
