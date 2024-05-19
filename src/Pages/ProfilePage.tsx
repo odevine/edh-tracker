@@ -68,19 +68,17 @@ export const Profile = (props: { profileId: string }): JSX.Element => {
                     <Grid container>
                       <Grid item xs={6}>
                         <Stack spacing={1}>
-                          <Typography variant="body1">
-                            matches played:
-                          </Typography>
-                          <Typography variant="body1">wins:</Typography>
+                          <Typography>wins:</Typography>
+                          <Typography>matches&nbsp;played:</Typography>
+                          <Typography>overall&nbsp;winrate:</Typography>
                         </Stack>
                       </Grid>
                       <Grid item xs={6}>
                         <Stack spacing={1} alignItems="flex-end">
-                          <Typography variant="body1">
-                            {userStats.totalMatches}
-                          </Typography>
-                          <Typography variant="body1">
-                            {userStats.totalWins}
+                          <Typography>{userStats.totalMatches}</Typography>
+                          <Typography>{userStats.totalWins}</Typography>
+                          <Typography>
+                            {(userStats.winRate * 100).toFixed(2)}%
                           </Typography>
                         </Stack>
                       </Grid>

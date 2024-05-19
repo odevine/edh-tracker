@@ -1,21 +1,3 @@
-import { Deck } from "@/API";
-import {
-  CommanderColors,
-  DeckModal,
-  EnhancedTableHead,
-  HeadCell,
-  PlayerSelector,
-  ProfileMiniCard,
-  TypeSelector,
-} from "@/Components";
-import { LOCAL_STORAGE_VERSION } from "@/Constants";
-import { useDeck, useMatch, useTheme, useUser } from "@/Context";
-import {
-  ColumnSortOrder,
-  DeckStats,
-  getComparator,
-  getDeckStats,
-} from "@/Logic";
 import {
   Box,
   Button,
@@ -42,6 +24,25 @@ import {
 import PopupState, { bindHover, bindPopover } from "material-ui-popup-state";
 import HoverPopover from "material-ui-popup-state/HoverPopover";
 import { useCallback, useEffect, useMemo, useState } from "react";
+
+import { Deck } from "@/API";
+import {
+  CommanderColors,
+  DeckModal,
+  EnhancedTableHead,
+  HeadCell,
+  PlayerSelector,
+  ProfileMiniCard,
+  TypeSelector,
+} from "@/Components";
+import { LOCAL_STORAGE_VERSION } from "@/Constants";
+import { useDeck, useMatch, useTheme, useUser } from "@/Context";
+import {
+  ColumnSortOrder,
+  DeckStats,
+  getComparator,
+  getDeckStats,
+} from "@/Logic";
 
 interface DeckWithStats extends Deck, DeckStats {}
 
@@ -394,7 +395,9 @@ export const DecksPage = (): JSX.Element => {
                         <PopupState variant="popover">
                           {(popupState) => (
                             <Box {...bindHover(popupState)}>
-                              {ownerProfile.displayName}
+                              <Box sx={{ cursor: "pointer" }}>
+                                {ownerProfile.displayName}
+                              </Box>
                               <HoverPopover
                                 {...bindPopover(popupState)}
                                 anchorOrigin={{

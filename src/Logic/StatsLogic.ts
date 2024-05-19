@@ -3,6 +3,7 @@ import { Deck, Match, MatchParticipant } from "@/API";
 export interface UserStats {
   totalMatches: number;
   totalWins: number;
+  winRate: number;
 }
 
 export const getUserStats = (
@@ -36,12 +37,14 @@ export const getUserStats = (
   return {
     totalMatches,
     totalWins,
+    winRate: totalWins / totalMatches,
   };
 };
 
 export interface DeckStats {
   totalMatches: number;
   totalWins: number;
+  winRate: number;
 }
 
 export const getDeckStats = (
@@ -70,5 +73,6 @@ export const getDeckStats = (
   return {
     totalMatches,
     totalWins,
+    winRate: totalWins / totalMatches,
   };
 };
