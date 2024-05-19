@@ -10,12 +10,24 @@ import { visuallyHidden } from "@mui/utils";
 
 import { ColumnSortOrder } from "@/Logic";
 
-export interface HeadCell<T> {
+// Define a type for sortable head cells
+export interface SortableHeadCell<T> {
   id: keyof T;
   label: string;
   alignment?: "right" | "left";
-  sortable?: boolean;
+  sortable: true;
 }
+
+// Define a type for non-sortable head cells
+export interface NonSortableHeadCell {
+  id?: string;
+  label: string;
+  alignment?: "right" | "left";
+  sortable?: false;
+}
+
+// Combine both types into a single HeadCell type
+export type HeadCell<T> = SortableHeadCell<T> | NonSortableHeadCell;
 
 export interface EnhancedTableProps<T> {
   onRequestSort: (event: React.MouseEvent<unknown>, property: keyof T) => void;
@@ -40,11 +52,11 @@ export const EnhancedTableHead = <T,>(props: EnhancedTableProps<T>) => {
             align={headCell.alignment ?? "left"}
             sortDirection={orderBy === headCell.id ? order : false}
           >
-            {headCell.sortable && (
+            {headCell.sortable ? (
               <TableSortLabel
                 active={orderBy === headCell.id}
                 direction={orderBy === headCell.id ? order : "asc"}
-                onClick={createSortHandler(headCell.id)}
+                onClick={createSortHandler(headCell.id as keyof T)}
               >
                 <Typography sx={{ fontWeight: "bold" }}>
                   {headCell.label}
@@ -57,8 +69,7 @@ export const EnhancedTableHead = <T,>(props: EnhancedTableProps<T>) => {
                   </Box>
                 ) : null}
               </TableSortLabel>
-            )}
-            {!headCell.sortable && (
+            ) : (
               <Typography sx={{ fontWeight: "bold" }}>
                 {headCell.label}
               </Typography>

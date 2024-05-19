@@ -1,5 +1,6 @@
 import { Delete, Edit } from "@mui/icons-material";
 import {
+  Box,
   Button,
   Card,
   CardActions,
@@ -21,17 +22,24 @@ import { useState } from "react";
 
 import { User } from "@/API";
 import { CommanderColors, DeckModal } from "@/Components";
-import { useDecks } from "@/Context";
+import { useDeck, useMatch, useTheme } from "@/Context";
 
 export const UserDecksCard = (props: {
   ownUser: boolean;
   userProfile: User;
 }) => {
   const { ownUser, userProfile } = props;
-  const { allDecks, deleteDeckById } = useDecks();
+  const { allDecks, deleteDeckById } = useDeck();
+  const { allMatchParticipants } = useMatch();
+  const { mode } = useTheme();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingDeckId, setEditingDeckId] = useState("");
+
+  const userColor =
+    mode === "light"
+      ? userProfile?.lightThemeColor
+      : userProfile?.darkThemeColor;
 
   const userDecks = allDecks.filter(
     (deck) => deck.deckOwnerId === userProfile.id,
@@ -48,9 +56,6 @@ export const UserDecksCard = (props: {
           {userDecks.length === 0 ? (
             <Stack justifyContent="center" alignItems="center" sx={{ pt: 3 }}>
               <Typography variant="h5">no decks found</Typography>
-              <Typography variant="caption">
-                click 'add deck' to get started
-              </Typography>
             </Stack>
           ) : (
             <Table size="small">
@@ -84,7 +89,10 @@ export const UserDecksCard = (props: {
               </TableHead>
               <TableBody>
                 {userDecks.map((deck) => (
-                  <TableRow key={deck.id}>
+                  <TableRow
+                    key={deck.id}
+                    sx={{ bgcolor: userColor ? `${userColor}26` : "none" }}
+                  >
                     <TableCell>
                       {deck.link ? (
                         <Link
@@ -141,15 +149,30 @@ export const UserDecksCard = (props: {
                               <Edit fontSize="small" />
                             </IconButton>
                           </Tooltip>
-                          {/* TODO: deleting decks should not be an option if it appears as any match participant */}
-                          <Tooltip arrow title="delete deck">
-                            <IconButton
-                              size="small"
-                              onClick={() => deleteDeckById(deck.id)}
+                          {
+                            <Tooltip
+                              arrow
+                              title={
+                                allMatchParticipants.some(
+                                  (p) => p.deckId === deck.id,
+                                )
+                                  ? "cannot delete, used in match"
+                                  : "delete deck"
+                              }
                             >
-                              <Delete fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
+                              <Box component="span">
+                                <IconButton
+                                  disabled={allMatchParticipants.some(
+                                    (p) => p.deckId === deck.id,
+                                  )}
+                                  size="small"
+                                  onClick={() => deleteDeckById(deck.id)}
+                                >
+                                  <Delete fontSize="small" />
+                                </IconButton>
+                              </Box>
+                            </Tooltip>
+                          }
                         </Stack>
                       </TableCell>
                     )}

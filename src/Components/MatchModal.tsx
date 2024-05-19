@@ -13,36 +13,72 @@ import {
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import { DateTime } from "luxon";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import { Deck, User } from "@/API";
-import { useDecks, useTheme, useUser } from "@/Context";
+import { CreateMatchInput, Deck } from "@/API";
+import { DECK_TYPES } from "@/Constants";
+import { useDeck, useMatch, useUser } from "@/Context";
 
 interface NewMatchModalProps {
   open: boolean;
   onClose: () => void;
-  deckToUserMap: Map<string, User>;
+  editingMatchId?: string;
 }
-
-const deckTypes = [
-  { label: "precon/precon(u)", value: "precon" },
-  { label: "constructed", value: "constructed" },
-];
 
 export const MatchModal: React.FC<NewMatchModalProps> = ({
   open,
   onClose,
-  deckToUserMap,
+  editingMatchId,
 }) => {
-  const { allDecks } = useDecks();
-  const { mode } = useTheme();
+  const { allDecks, getDeckUserColor, deckToUserMap } = useDeck();
   const { authenticatedUser } = useUser();
-  const [matchType, setMatchType] = useState(deckTypes[0].value);
+  const {
+    createNewMatch,
+    allMatches,
+    allMatchParticipants,
+    updateMatchWithParticipants,
+  } = useMatch();
+
+  // Find the editing deck based on the editingDeckId
+  const editingMatch = allMatches.find((match) => match.id === editingMatchId);
+
+  const [loading, setLoading] = useState(false);
+  const [matchType, setMatchType] = useState(DECK_TYPES[1].value);
   const [datePlayed, setDatePlayed] = useState(DateTime.now());
   const [winningDeckId, setWinningDeckId] = useState("");
   const [participantDecks, setParticipantDecks] = useState<Deck[]>([]);
-
   const [errors, setErrors] = useState<string[]>([]);
+
+  // update state when editingDeck changes
+  useEffect(() => {
+    if (editingMatch?.datePlayed) {
+      setMatchType(editingMatch.matchType);
+      setWinningDeckId(editingMatch.winningDeckId);
+      // set match date
+      const existingDateTime = DateTime.fromISO(editingMatch.datePlayed);
+      if (existingDateTime.isValid) {
+        setDatePlayed(existingDateTime);
+      } else {
+        setDatePlayed(DateTime.now());
+      }
+      // set match decks
+      const existingMatchDeckIds = new Set(
+        allMatchParticipants
+          .filter((participant) => participant.matchId === editingMatch.id)
+          .map((participant) => participant.deckId),
+      );
+      const participantDecks = allDecks.filter((deck) =>
+        existingMatchDeckIds.has(deck.id),
+      );
+      setParticipantDecks(participantDecks);
+    } else {
+      setMatchType(DECK_TYPES[1].value);
+      setDatePlayed(DateTime.now());
+      setWinningDeckId("");
+      setParticipantDecks([]);
+      setErrors([]);
+    }
+  }, [editingMatch, open]);
 
   const validateForm = (): boolean => {
     const localErrors: string[] = [];
@@ -64,7 +100,7 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
 
   const handleClose = () => {
     setDatePlayed(DateTime.now());
-    setMatchType(deckTypes[0].value);
+    setMatchType(DECK_TYPES[0].value);
     setParticipantDecks([]);
     setWinningDeckId("");
     onClose();
@@ -78,31 +114,30 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
     }
 
     if (validateForm()) {
-      // const matchData: CreateMatchInput = {
-      //   winningDeckId: winningDeckId,
-      //   datePlayed: datePlayed.toFormat("yyyy-MM-dd"),
-      //   matchType,
-      //   isArchived: false,
-      // };
-      // setLoading(true);
-      // createNewMatch(
-      //   matchData,
-      //   participantDecks.map((deck) => deck.id),
-      // ).finally(() => {
-      //   setLoading(false);
-      //   handleClose();
-      // });
+      const matchData: CreateMatchInput = {
+        winningDeckId: winningDeckId,
+        datePlayed: datePlayed.toFormat("yyyy-MM-dd"),
+        matchType,
+        isArchived: false,
+      };
+      setLoading(true);
+      try {
+        if (editingMatch) {
+          await updateMatchWithParticipants(
+            { ...matchData, id: editingMatch.id },
+            participantDecks.map((deck) => deck.id),
+          );
+        } else {
+          await createNewMatch(
+            matchData,
+            participantDecks.map((deck) => deck.id),
+          );
+        }
+      } finally {
+        setLoading(false);
+        handleClose();
+      }
     }
-  };
-
-  const getDeckColor = (deckId: string) => {
-    const deckUser = deckToUserMap.get(deckId);
-    if (!deckUser) {
-      return "inherit";
-    }
-    return mode === "light"
-      ? deckUser.lightThemeColor ?? "inherit"
-      : deckUser.darkThemeColor ?? "inherit";
   };
 
   const filteredDecks = useMemo(() => {
@@ -132,7 +167,7 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
         }}
       >
         <Typography variant="h4" sx={{ mb: 3 }}>
-          new match
+          {editingMatch ? "edit" : "add"} match
         </Typography>
         <Grid container spacing={2}>
           <Grid item xs={12} xl={6}>
@@ -156,7 +191,7 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
                 setWinningDeckId("");
               }}
             >
-              {deckTypes.map((type) => (
+              {DECK_TYPES.map((type) => (
                 <MenuItem key={type.value} value={type.value}>
                   {type.label}
                 </MenuItem>
@@ -199,7 +234,7 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
                             whiteSpace: "nowrap",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
-                            color: getDeckColor(option.id),
+                            color: getDeckUserColor(option.id),
                           }}
                         >
                           {`${deckToUserMap.get(option.id)?.displayName} - ${option.deckName}`}
@@ -215,7 +250,7 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
                     sx={{
                       overflow: "hidden",
                       textOverflow: "ellipsis",
-                      color: getDeckColor(option.id),
+                      color: getDeckUserColor(option.id),
                     }}
                   >
                     {`${deckToUserMap.get(option.id)?.displayName} - ${option.deckName}`}
@@ -253,7 +288,7 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
                     sx={{
                       overflow: "hidden",
                       textOverflow: "ellipsis",
-                      color: getDeckColor(deck.id),
+                      color: getDeckUserColor(deck.id),
                     }}
                   >
                     {`${deckToUserMap.get(deck.id)?.displayName} - ${deck.deckName}`}
@@ -274,18 +309,16 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
           </Grid>
         </Grid>
         <Stack direction="row" justifyContent="flex-end" sx={{ mt: 2 }}>
-          <Tooltip title="coming soon" arrow placement="left">
-            <Box component="span">
-              <Button
-                disabled={true}
-                variant="contained"
-                onClick={handleSubmit}
-                sx={{ width: 150, height: 40 }}
-              >
-                add match
-              </Button>
-            </Box>
-          </Tooltip>
+          <Box component="span">
+            <Button
+              disabled={loading}
+              variant="contained"
+              onClick={handleSubmit}
+              sx={{ width: 150, height: 40 }}
+            >
+              {editingMatch ? "edit" : "add"} match
+            </Button>
+          </Box>
         </Stack>
       </Box>
     </Modal>

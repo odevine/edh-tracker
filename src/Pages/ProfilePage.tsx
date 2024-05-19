@@ -9,16 +9,21 @@ import {
 } from "@mui/material";
 
 import { LoadingBackdrop, UserDecksCard, UserProfileForm } from "@/Components";
-import { useUser } from "@/Context";
+import { useTheme, useUser } from "@/Context";
 
 export const Profile = (props: { profileId: string }): JSX.Element => {
   const { profileId } = props;
   const { allUserProfiles, usersLoading, authenticatedUser } = useUser();
+  const { mode } = useTheme();
 
   const currentProfile = allUserProfiles.filter(
     (profile) => profile.id === profileId,
   )[0];
   const ownUser = profileId === authenticatedUser?.userId;
+  const userColor =
+    mode === "light"
+      ? currentProfile?.lightThemeColor
+      : currentProfile?.darkThemeColor;
 
   if (!currentProfile) {
     return <LoadingBackdrop />;
@@ -46,7 +51,12 @@ export const Profile = (props: { profileId: string }): JSX.Element => {
                       src={currentProfile?.profilePictureURL ?? ""}
                     />
                     <Stack direction="row" alignItems="center" spacing={1}>
-                      <Typography>{currentProfile.displayName}</Typography>
+                      <Typography
+                        sx={{ color: userColor ?? "inherit" }}
+                        variant="h5"
+                      >
+                        {currentProfile.displayName}
+                      </Typography>
                     </Stack>
                   </Stack>
                 </CardContent>

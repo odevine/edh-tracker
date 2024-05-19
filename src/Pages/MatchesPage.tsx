@@ -1,48 +1,34 @@
+import { Delete, Edit } from "@mui/icons-material";
 import {
   Button,
   Grid,
+  IconButton,
   Paper,
+  Stack,
   Table,
   TableBody,
   TableCell,
   TableContainer,
+  TableFooter,
   TablePagination,
   TableRow,
   Toolbar,
+  Typography,
 } from "@mui/material";
+import { DateTime } from "luxon";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { Match, User } from "@/API";
-import { EnhancedTableHead, HeadCell, MatchModal } from "@/Components";
-import { useDecks, useMatches, useUser } from "@/Context";
+import { Match } from "@/API";
+import {
+  DeckSelector,
+  EnhancedTableHead,
+  HeadCell,
+  MatchModal,
+  PlayerSelector,
+  TypeSelector,
+} from "@/Components";
+import { useDeck, useMatch, useUser } from "@/Context";
 import { ColumnSortOrder, getComparator } from "@/Logic";
-
-const headCells: HeadCell<Match>[] = [
-  {
-    id: "datePlayed",
-    label: "Date Played",
-    sortable: true,
-    alignment: "right",
-  },
-  {
-    id: "matchType",
-    label: "type",
-    sortable: true,
-  },
-  {
-    id: "winningDeckId",
-    label: "winner",
-    sortable: true,
-  },
-  {
-    id: "isArchived",
-    label: "Participants",
-  },
-];
-
-const dateFormatter = new Intl.DateTimeFormat("en-us", {
-  dateStyle: "medium",
-});
 
 const localStorageKey = "matchesPageState";
 const loadStateFromLocalStorage = () => {
@@ -51,36 +37,77 @@ const loadStateFromLocalStorage = () => {
     return JSON.parse(savedState);
   }
   return {
+    filterType: "",
+    filterUser: [],
+    filterDeck: [],
     order: "desc" as ColumnSortOrder,
     orderBy: "datePlayed" as keyof Match,
     page: 0,
-    rowsPerPage: 15,
+    rowsPerPage: 10,
   };
 };
 
 export const MatchesPage = (): JSX.Element => {
-  const { allDecks } = useDecks();
-  const { allUserProfiles } = useUser();
-  const { allMatches, allMatchParticipants } = useMatches();
+  const { allDecks, getDeckUserColor } = useDeck();
+  const { isAdmin } = useUser();
+  const { allMatches, allMatchParticipants, deleteMatch } = useMatch();
 
   const initialState = loadStateFromLocalStorage();
 
+  const [filterType, setFilterType] = useState(initialState.filterType);
+  const [filterDeck, setFilterDeck] = useState(initialState.filterType);
+  const [filterUser, setFilterUser] = useState<string | string[]>(
+    initialState.filterUser,
+  );
   const [order, setOrder] = useState<ColumnSortOrder>(initialState.order);
   const [orderBy, setOrderBy] = useState<keyof Match>(initialState.orderBy);
   const [page, setPage] = useState(initialState.page);
   const [rowsPerPage, setRowsPerPage] = useState(initialState.rowsPerPage);
   const [modalOpen, setModalOpen] = useState(false);
+  const [existingMatchId, setExistingMatchId] = useState("");
 
   // Save state to local storage whenever it changes
   useEffect(() => {
     const newSettings = JSON.stringify({
+      filterType,
+      filterUser,
       order,
       orderBy,
       page,
       rowsPerPage,
     });
     localStorage.setItem(localStorageKey, newSettings);
-  }, [order, orderBy, page, rowsPerPage]);
+  }, [order, orderBy, page, rowsPerPage, filterType, filterUser]);
+
+  const headCells: HeadCell<Match>[] = [
+    {
+      id: "datePlayed",
+      label: "date",
+      sortable: true,
+      alignment: "right",
+    },
+    {
+      id: "matchType",
+      label: "type",
+      sortable: true,
+    },
+    {
+      id: "winningDeckId",
+      label: "winner",
+    },
+    {
+      id: "decks",
+      label: "decks",
+    },
+  ];
+
+  if (isAdmin) {
+    headCells.push({
+      id: "actions",
+      label: "actions",
+      alignment: "right",
+    });
+  }
 
   const handleRequestSort = (property: keyof Match) => {
     const isAsc = orderBy === property && order === "asc";
@@ -97,44 +124,99 @@ export const MatchesPage = (): JSX.Element => {
     setPage(0);
   }, []);
 
-  // Create a map of deck IDs to user profiles
-  const deckToUserMap = useMemo(() => {
-    const map = new Map<string, User>();
-    allDecks.forEach((deck) => {
-      const user = allUserProfiles.find((user) => user.id === deck.deckOwnerId);
-      if (user) {
-        map.set(deck.id, user);
-      }
-    });
-    return map;
-  }, [allDecks, allUserProfiles]);
-
-  const getParticipantsDisplayNames = (matchId: string) => {
-    return allMatchParticipants
-      .filter((participant) => participant.matchId === matchId)
-      .map(
-        (participant) =>
-          deckToUserMap.get(participant.deckId)?.displayName ?? "Unknown",
-      )
-      .join(", ");
+  const getParticipantDeckNames = (matchId: string) => {
+    const participants = allMatchParticipants.filter(
+      (participant) => participant.matchId === matchId,
+    );
+    return participants.map((participant) => (
+      <Typography
+        key={participant.id}
+        variant="body2"
+        sx={{ color: getDeckUserColor(participant.deckId) }}
+      >
+        {allDecks.find((deck) => deck.id === participant.deckId)?.deckName}
+      </Typography>
+    ));
   };
 
-  const sortedMatches = useMemo(() => {
-    return [...allMatches].sort(getComparator<Match>(order, orderBy));
-  }, [allMatches, order, orderBy]);
+  const filteredMatches = useMemo(() => {
+    const userFilterSet = new Set(
+      Array.isArray(filterUser) ? filterUser : [filterUser],
+    );
+    const deckFilterSet = new Set(
+      Array.isArray(filterDeck) ? filterDeck : [filterDeck],
+    );
+
+    return allMatches.filter((match) => {
+      const participants = allMatchParticipants.filter(
+        (participant) => participant.matchId === match.id,
+      );
+
+      const participantOwnerIds = new Set(
+        participants
+          .map(
+            (participant) =>
+              allDecks.find((deck) => deck.id === participant.deckId)
+                ?.deckOwnerId,
+          )
+          .filter(Boolean),
+      );
+
+      const participantDeckIds = new Set(
+        participants.map((participant) => participant.deckId),
+      );
+
+      const userFilterCondition =
+        !filterUser.length ||
+        [...userFilterSet].every((userId) => participantOwnerIds.has(userId));
+      const deckFilterCondition =
+        !filterDeck.length ||
+        [...deckFilterSet].every((deckId) => participantDeckIds.has(deckId));
+      const typeFilterCondition = !filterType || match.matchType === filterType;
+
+      return userFilterCondition && deckFilterCondition && typeFilterCondition;
+    });
+  }, [
+    allMatches,
+    allMatchParticipants,
+    allDecks,
+    filterType,
+    filterUser,
+    filterDeck,
+  ]);
 
   const visibleRows = useMemo(() => {
-    return sortedMatches.slice(
-      page * rowsPerPage,
-      page * rowsPerPage + rowsPerPage,
-    );
-  }, [sortedMatches, page, rowsPerPage]);
+    return [...filteredMatches]
+      .sort(getComparator<Match>(order, orderBy))
+      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  }, [filteredMatches, page, rowsPerPage, order, orderBy]);
 
   return (
     <>
       <Paper sx={{ m: 3 }}>
         <Toolbar sx={{ p: 2, justifyContent: "space-between" }}>
           <Grid container spacing={2} justifyContent="flex-end">
+            <Grid item xs={12} sm={6} md={3} lg={2}>
+              <TypeSelector
+                filterType={filterType}
+                setFilterType={setFilterType}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3} lg={4}>
+              <DeckSelector
+                multi
+                filterType={filterType}
+                filterDeck={filterDeck}
+                setFilterDeck={setFilterDeck}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3} lg={4}>
+              <PlayerSelector
+                multi
+                filterUser={filterUser}
+                setFilterUser={setFilterUser}
+              />
+            </Grid>
             <Grid item xs={12} sm={6} md={3} lg={2}>
               <Button
                 fullWidth
@@ -157,39 +239,79 @@ export const MatchesPage = (): JSX.Element => {
             <TableBody>
               {visibleRows.map((match) => {
                 return (
-                  <TableRow key={match.id}>
+                  <TableRow
+                    key={match.id}
+                    sx={{
+                      backgroundColor:
+                        getDeckUserColor(match.winningDeckId) !== "inherit"
+                          ? `${getDeckUserColor(match.winningDeckId)}26`
+                          : "none",
+                    }}
+                  >
                     <TableCell align="right">
-                      {dateFormatter.format(new Date(match.datePlayed))}
+                      {DateTime.fromISO(match.datePlayed)
+                        .setLocale("en-us")
+                        .toLocaleString(DateTime.DATE_MED)}
                     </TableCell>
                     <TableCell>{match.matchType}</TableCell>
-                    <TableCell>
-                      {deckToUserMap.get(match.winningDeckId)?.displayName}
+                    <TableCell
+                      sx={{ color: getDeckUserColor(match.winningDeckId) }}
+                    >
+                      {
+                        allDecks.find((deck) => deck.id === match.winningDeckId)
+                          ?.deckName
+                      }
                     </TableCell>
-                    <TableCell>
-                      {getParticipantsDisplayNames(match.id)}
-                    </TableCell>
+                    <TableCell>{getParticipantDeckNames(match.id)}</TableCell>
+                    {isAdmin && (
+                      <TableCell align="right">
+                        <Stack direction="row" justifyContent="flex-end">
+                          <IconButton
+                            size="small"
+                            onClick={() => {
+                              setExistingMatchId(match.id);
+                              setModalOpen(true);
+                            }}
+                          >
+                            <Edit fontSize="small" />
+                          </IconButton>
+                          <IconButton
+                            size="small"
+                            onClick={() => deleteMatch(match.id)}
+                          >
+                            <Delete fontSize="small" />
+                          </IconButton>
+                        </Stack>
+                      </TableCell>
+                    )}
                   </TableRow>
                 );
               })}
             </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TablePagination
+                  rowsPerPageOptions={[10, 15, 25]}
+                  count={filteredMatches.length}
+                  page={page}
+                  rowsPerPage={rowsPerPage}
+                  onPageChange={(_event, value) => handleChangePage(value)}
+                  onRowsPerPageChange={(event) =>
+                    handleChangeRowsPerPage(event.target.value)
+                  }
+                />
+              </TableRow>
+            </TableFooter>
           </Table>
         </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[15, 25, 50]}
-          component="div"
-          count={sortedMatches.length}
-          page={page}
-          rowsPerPage={rowsPerPage}
-          onPageChange={(_event, value) => handleChangePage(value)}
-          onRowsPerPageChange={(event) =>
-            handleChangeRowsPerPage(event.target.value)
-          }
-        />
       </Paper>
       <MatchModal
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        deckToUserMap={deckToUserMap}
+        onClose={() => {
+          setExistingMatchId("");
+          setModalOpen(false);
+        }}
+        editingMatchId={existingMatchId}
       />
     </>
   );

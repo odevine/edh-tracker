@@ -17,29 +17,43 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { navigate } from "raviger";
+import { navigate, usePath } from "raviger";
 import { useState } from "react";
 
 import { ThemeToggle } from "@/Components";
-import { useUser } from "@/Context";
+import { useTheme, useUser } from "@/Context";
 
 export const Toolbar = () => {
   const { authenticatedUser, currentUserProfile, signOutUser } = useUser();
+  const { mode } = useTheme();
 
   const [userMenuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  const navItems = [
-    { label: "overview", action: () => navigate("/"), disabled: false },
+  interface NavItem {
+    label: string;
+    action: () => void;
+    disabled: boolean;
+    pathMatch: RegExp;
+  }
+  const navItems: NavItem[] = [
+    {
+      label: "overview",
+      action: () => navigate("/"),
+      disabled: false,
+      pathMatch: /^\/$/,
+    },
     {
       label: "decks",
       action: () => navigate("/decks"),
       disabled: !authenticatedUser,
+      pathMatch: /\/decks/,
     },
     {
       label: "matches",
       action: () => navigate("/matches"),
       disabled: !authenticatedUser,
+      pathMatch: /\/matches/,
     },
   ];
 
@@ -100,9 +114,36 @@ export const Toolbar = () => {
     </Menu>
   );
 
-  const CustomMenuItem = (props: MenuItemProps) => (
-    <MenuItem sx={{ borderRadius: 2 }} {...props} />
-  );
+  interface CustomMenuItemProps extends MenuItemProps {
+    highlight: boolean;
+  }
+  const CustomMenuItem = (props: CustomMenuItemProps) => {
+    const { highlight, sx, ...rest } = props;
+
+    return (
+      <MenuItem
+        sx={{
+          borderRadius: 2,
+          backgroundColor: (theme) =>
+            highlight
+              ? mode === "light"
+                ? theme.palette.primary.light
+                : theme.palette.primary.main
+              : "transparent",
+          color: (theme) =>
+            highlight ? theme.palette.primary.contrastText : "inherit",
+          "&:hover": {
+            backgroundColor: (theme) =>
+              highlight
+                ? theme.palette.primary.dark
+                : theme.palette.action.hover,
+          },
+          ...sx,
+        }}
+        {...rest}
+      />
+    );
+  };
 
   return (
     <>
@@ -125,6 +166,7 @@ export const Toolbar = () => {
                 onClick={item.action}
                 disabled={item.disabled}
                 key={item.label}
+                highlight={item.pathMatch.test(usePath() ?? "")}
               >
                 {item.label}
               </CustomMenuItem>
