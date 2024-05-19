@@ -82,7 +82,7 @@ const loadStateFromLocalStorage = () => {
   }
   return {
     filterType: "",
-    filterUser: [],
+    filterUser: "",
     searchQuery: "",
     order: "desc" as ColumnSortOrder,
     orderBy: "updatedAt" as keyof Deck,
@@ -109,9 +109,20 @@ export const DecksPage = (): JSX.Element => {
 
   // Save state to local storage whenever it changes
   useEffect(() => {
+    // HACK: fix people's localStorage
+    let correctedFilterUser = filterUser;
+    if (Array.isArray(filterUser)) {
+      correctedFilterUser = "";
+    }
+
+    let correctedFilterType = filterType;
+    if (correctedFilterType === "all") {
+      correctedFilterType = "";
+    }
+
     const newSettings = JSON.stringify({
-      filterType,
-      filterUser,
+      filterType: correctedFilterType,
+      filterUser: correctedFilterUser,
       searchQuery,
       order,
       orderBy,

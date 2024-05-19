@@ -32,6 +32,7 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider = ({ children }: PropsWithChildren<{}>) => {
   const { addAppMessage } = useApp();
   const { user, signOut } = useAuthenticator((context) => [context.user]);
+  console.log("  ~ UserProvider ~ user:", user);
   const [allUserProfiles, setAllUserProfiles] = useState<User[]>([]);
   const [currentUserProfile, setCurrentUserProfile] = useState<User | null>(
     null,
@@ -43,6 +44,8 @@ export const UserProvider = ({ children }: PropsWithChildren<{}>) => {
       setUsersLoading(true);
       fetchUsers();
       updateLastOnline(user.userId);
+    } else {
+      setUsersLoading(false);
     }
   }, [user]);
 
