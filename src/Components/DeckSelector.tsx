@@ -9,73 +9,67 @@ import {
 } from "@mui/material";
 import { useMemo } from "react";
 
-import { User } from "@/API";
-import { useDeck, useTheme, useUser } from "@/Context";
+import { useDeck, useTheme } from "@/Context";
 
-export const PlayerSelector = (props: {
-  filterUser: string | string[];
-  setFilterUser: (newUser: string | string[]) => void;
+export const DeckSelector = (props: {
+  filterType: string;
+  filterDeck: string | string[];
+  setFilterDeck: (newUser: string | string[]) => void;
   multi?: boolean;
 }) => {
-  const { filterUser, setFilterUser, multi = false } = props;
+  const { filterType, filterDeck, setFilterDeck, multi = false } = props;
   const { mode } = useTheme();
-  const { allDecks } = useDeck();
-  const { allUserProfiles } = useUser();
+  const { allDecks, getDeckUserColor, deckToUserMap } = useDeck();
 
   // Generate the unique list of user options
-  const userOptions = useMemo(() => {
-    // Get unique ownerIDs from allDecks
-    const uniqueOwnerIDs = [
-      ...new Set(allDecks.map((deck) => deck.deckOwnerId)),
-    ];
-
+  const deckOptions = useMemo(() => {
     // Map ownerIDs to user profiles, filter out undefined, and assert the remaining profiles are defined
-    const users = uniqueOwnerIDs
-      .map((ownerId) =>
-        allUserProfiles.find((profile) => profile.id === ownerId),
-      )
-      .filter((profile): profile is User => profile !== undefined)
-      .map((profile) => ({
-        id: profile.id,
-        displayName: profile.displayName,
-        color:
-          mode === "light" ? profile.lightThemeColor : profile.darkThemeColor,
+    const decks = allDecks
+      .filter((deck) => filterType === "" || deck.deckType === filterType)
+      .sort((a, b) => (a.deckOwnerId < b.deckOwnerId ? -1 : 1))
+      .map((deck) => ({
+        id: deck.id,
+        deckName: deck.deckName,
+        color: getDeckUserColor(deck.id),
       }));
 
-    return users;
-  }, [allDecks, allUserProfiles, mode]);
+    setFilterDeck(multi ? [] : "")
+    return decks;
+  }, [allDecks, mode, getDeckUserColor, deckToUserMap, filterType]);
 
   // Find the selected option(s) based on filterUser
   const selectedOption = useMemo(() => {
     if (multi) {
-      return Array.isArray(filterUser)
-        ? filterUser
-            .map((id) => userOptions.find((option) => option.id === id))
+      return Array.isArray(filterDeck)
+        ? filterDeck
+            .map((id) => deckOptions.find((option) => option.id === id))
             .filter(Boolean)
         : [];
     } else {
-      return typeof filterUser === "string"
-        ? userOptions.find((option) => option.id === filterUser) || null
+      return typeof filterDeck === "string"
+        ? deckOptions.find((option) => option.id === filterDeck) || null
         : null;
     }
-  }, [filterUser, userOptions, multi]);
+  }, [filterDeck, deckOptions, multi]);
 
   return (
     <Autocomplete
       size="small"
       multiple={multi}
-      options={userOptions}
-      getOptionLabel={(option) => option?.displayName ?? ""}
+      options={deckOptions}
+      getOptionLabel={(option) =>
+        `${deckToUserMap.get(option?.id ?? "")?.displayName} - ${option?.deckName}`
+      }
       value={selectedOption}
       onChange={(_event, newValue) => {
         if (multi) {
-          setFilterUser(
+          setFilterDeck(
             Array.isArray(newValue)
               ? newValue.map((option) => option?.id || "")
               : [],
           );
         } else {
-          setFilterUser(
+          setFilterDeck(
             newValue && typeof newValue === "object" && "id" in newValue
               ? newValue.id
               : "",
@@ -86,13 +80,13 @@ export const PlayerSelector = (props: {
       renderInput={(params) => (
         <TextField
           {...params}
-          label={multi ? "players" : "player"}
+          label={multi ? "decks" : "deck"}
           fullWidth
           placeholder={
-            multi && !filterUser.length
-              ? "all players"
+            multi && !filterDeck.length
+              ? "all decks"
               : !multi && !selectedOption
-                ? "all players"
+                ? "all decks"
                 : ""
           }
         />
@@ -106,7 +100,7 @@ export const PlayerSelector = (props: {
               variant="outlined"
               size="small"
               label={
-                <Tooltip title={option.displayName} placement="top" arrow>
+                <Tooltip title={option.deckName} placement="top" arrow>
                   <Box
                     sx={{
                       maxWidth: 120,
@@ -116,7 +110,7 @@ export const PlayerSelector = (props: {
                       color: option.color,
                     }}
                   >
-                    {option.displayName}
+                    {`${deckToUserMap.get(option?.id ?? "")?.displayName} - ${option?.deckName}`}
                   </Box>
                 </Tooltip>
               }
@@ -134,7 +128,7 @@ export const PlayerSelector = (props: {
                 color: option.color,
               }}
             >
-              {option.displayName}
+              {`${deckToUserMap.get(option?.id ?? "")?.displayName} - ${option?.deckName}`}
             </Typography>
           </MenuItem>
         ) : null

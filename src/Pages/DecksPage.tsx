@@ -80,8 +80,8 @@ const loadStateFromLocalStorage = () => {
     return JSON.parse(savedState);
   }
   return {
-    filterType: "all",
-    filterUser: "",
+    filterType: "",
+    filterUser: [],
     searchQuery: "",
     order: "desc" as ColumnSortOrder,
     orderBy: "updatedAt" as keyof Deck,
@@ -142,7 +142,7 @@ export const DecksPage = (): JSX.Element => {
         (filterUser === "" ||
           allUserProfiles.find((profile) => profile.id === deck.deckOwnerId)
             ?.id === filterUser) &&
-        (filterType === "all" || deck.deckType === filterType) &&
+        (filterType === "" || deck.deckType === filterType) &&
         (deck.deckName.toLowerCase().includes(lowercasedQuery) ||
           deck.commanderName.toLowerCase().includes(lowercasedQuery) ||
           deck.secondCommanderName?.toLowerCase().includes(lowercasedQuery)),
@@ -166,7 +166,6 @@ export const DecksPage = (): JSX.Element => {
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6} md={3}>
             <TypeSelector
-              allDecks={allDecks}
               filterType={filterType}
               setFilterType={setFilterType}
             />

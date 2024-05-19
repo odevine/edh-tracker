@@ -21,7 +21,7 @@ interface DecksContextType {
   userDecks: Deck[];
   decksLoading: boolean;
   deckToUserMap: Map<string, User>;
-  getDeckUserColor: (ownerId: string) => string;
+  getDeckUserColor: (deckId: string) => string;
   createNewDeck: (newDeck: CreateDeckInput) => Promise<void>;
   updateExistingDeck: (updatedDeck: UpdateDeckInput) => Promise<void>;
   deleteDeckById: (deckId: string) => Promise<void>;

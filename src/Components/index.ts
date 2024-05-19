@@ -1,6 +1,7 @@
 export * from "./AppAlerts";
 export * from "./CommanderColors";
 export * from "./DeckModal";
+export * from "./DeckSelector";
 export * from "./EnhancedTableHeader";
 export * from "./GradientChip";
 export * from "./LoadingBackdrop";

@@ -18,6 +18,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Match } from "@/API";
 import {
+  DeckSelector,
   EnhancedTableHead,
   HeadCell,
   MatchModal,
@@ -38,8 +39,9 @@ const loadStateFromLocalStorage = () => {
     return JSON.parse(savedState);
   }
   return {
-    filterType: "all",
-    filterUser: "all",
+    filterType: "",
+    filterUser: [],
+    filterDeck: [],
     order: "desc" as ColumnSortOrder,
     orderBy: "datePlayed" as keyof Match,
     page: 0,
@@ -55,6 +57,7 @@ export const MatchesPage = (): JSX.Element => {
   const initialState = loadStateFromLocalStorage();
 
   const [filterType, setFilterType] = useState(initialState.filterType);
+  const [filterDeck, setFilterDeck] = useState(initialState.filterType);
   const [filterUser, setFilterUser] = useState<string | string[]>(
     initialState.filterUser,
   );
@@ -141,28 +144,50 @@ export const MatchesPage = (): JSX.Element => {
   };
 
   const filteredMatches = useMemo(() => {
+    const userFilterSet = new Set(
+      Array.isArray(filterUser) ? filterUser : [filterUser],
+    );
+    const deckFilterSet = new Set(
+      Array.isArray(filterDeck) ? filterDeck : [filterDeck],
+    );
+
     return allMatches.filter((match) => {
-      // Get the participants for this match
       const participants = allMatchParticipants.filter(
         (participant) => participant.matchId === match.id,
       );
 
-      // Get the deck owner IDs from the participants
-      const participantOwnerIds = participants.map((participant) => {
-        const deck = allDecks.find((deck) => deck.id === participant.deckId);
-        return deck?.deckOwnerId;
-      });
-
-      const userFilterCondition = Array.isArray(filterUser)
-        ? filterUser.every((userId) => participantOwnerIds.includes(userId))
-        : participantOwnerIds.includes(filterUser);
-
-      return (
-        userFilterCondition &&
-        (filterType === "all" || match.matchType === filterType)
+      const participantOwnerIds = new Set(
+        participants
+          .map(
+            (participant) =>
+              allDecks.find((deck) => deck.id === participant.deckId)
+                ?.deckOwnerId,
+          )
+          .filter(Boolean),
       );
+
+      const participantDeckIds = new Set(
+        participants.map((participant) => participant.deckId),
+      );
+
+      const userFilterCondition =
+        !filterUser.length ||
+        [...userFilterSet].every((userId) => participantOwnerIds.has(userId));
+      const deckFilterCondition =
+        !filterDeck.length ||
+        [...deckFilterSet].every((deckId) => participantDeckIds.has(deckId));
+      const typeFilterCondition = !filterType || match.matchType === filterType;
+
+      return userFilterCondition && deckFilterCondition && typeFilterCondition;
     });
-  }, [allMatches, allMatchParticipants, allDecks, filterType, filterUser]);
+  }, [
+    allMatches,
+    allMatchParticipants,
+    allDecks,
+    filterType,
+    filterUser,
+    filterDeck,
+  ]);
 
   const visibleRows = useMemo(() => {
     return [...filteredMatches]
@@ -175,14 +200,21 @@ export const MatchesPage = (): JSX.Element => {
       <Paper sx={{ m: 3 }}>
         <Toolbar sx={{ p: 2, justifyContent: "space-between" }}>
           <Grid container spacing={2} justifyContent="flex-end">
-            <Grid item>
+            <Grid item xs={12} sm={6} md={3} lg={2}>
               <TypeSelector
-                allDecks={allDecks}
                 filterType={filterType}
                 setFilterType={setFilterType}
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid item xs={12} sm={6} md={3} lg={4}>
+              <DeckSelector
+                multi
+                filterType={filterType}
+                filterDeck={filterDeck}
+                setFilterDeck={setFilterDeck}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3} lg={4}>
               <PlayerSelector
                 multi
                 filterUser={filterUser}
@@ -272,7 +304,11 @@ export const MatchesPage = (): JSX.Element => {
           }
         />
       </Paper>
-      <MatchModal open={modalOpen} onClose={() => setModalOpen(false)} editingMatchId={existingMatchId}/>
+      <MatchModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        editingMatchId={existingMatchId}
+      />
     </>
   );
 };
