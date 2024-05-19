@@ -27,6 +27,7 @@ import {
   PlayerSelector,
   TypeSelector,
 } from "@/Components";
+import { LOCAL_STORAGE_VERSION } from "@/Constants";
 import { useDeck, useMatch, useUser } from "@/Context";
 import { ColumnSortOrder, getComparator } from "@/Logic";
 
@@ -34,9 +35,13 @@ const localStorageKey = "matchesPageState";
 const loadStateFromLocalStorage = () => {
   const savedState = localStorage.getItem(localStorageKey);
   if (savedState) {
-    return JSON.parse(savedState);
+    const parsedState = JSON.parse(savedState);
+    if (parsedState.stateVersion === LOCAL_STORAGE_VERSION) {
+      return JSON.parse(savedState);
+    }
   }
   return {
+    stateVersion: LOCAL_STORAGE_VERSION,
     filterType: "",
     filterUser: [],
     filterDeck: [],
@@ -66,22 +71,10 @@ export const MatchesPage = (): JSX.Element => {
   const [modalOpen, setModalOpen] = useState(false);
   const [existingMatchId, setExistingMatchId] = useState("");
 
-  // Save state to local storage whenever it changes
   useEffect(() => {
-    // HACK: fix people's localStorage
-    let correctedFilterUser = filterUser;
-    if (!Array.isArray(filterUser)) {
-      correctedFilterUser = [];
-    }
-
-    let correctedFilterType = filterType;
-    if (correctedFilterType === "all") {
-      correctedFilterType = "";
-    }
-
     const newSettings = JSON.stringify({
-      filterType: correctedFilterType,
-      filterUser: correctedFilterUser,
+      filterType,
+      filterUser,
       filterDeck,
       order,
       orderBy,
