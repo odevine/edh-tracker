@@ -5,7 +5,7 @@ import { Amplify } from "aws-amplify";
 import { Redirect, useRoutes } from "raviger";
 
 import { AppAlertList, LoadingBackdrop, Toolbar } from "@/Components";
-import { useApp } from "@/Context";
+import { useApp, useMatch, useDeck, useUser } from "@/Context";
 import { DecksPage, HomePage, MatchesPage, Profile } from "@/Pages";
 import config from "./aws-exports";
 
@@ -40,13 +40,12 @@ const ProtectedRoutes = () => (
 
 export const App = () => {
   const { appMessages, deleteAppMessage } = useApp();
-  // const { usersLoading } = useUser();
-  // const { matchesLoading } = useMatch();
-  // const { decksLoading } = useDeck();
+  const { usersLoading } = useUser();
+  const { matchesLoading } = useMatch();
+  const { decksLoading } = useDeck();
   const routeResult = useRoutes(baseRoutes);
 
-  // const showLoading = usersLoading || matchesLoading || decksLoading;
-  const showLoading = false;
+  const showLoading = usersLoading || matchesLoading || decksLoading;
 
   return (
     <>

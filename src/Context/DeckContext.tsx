@@ -43,6 +43,8 @@ export const DeckProvider = ({ children }: PropsWithChildren<{}>) => {
     if (authenticatedUser) {
       setDecksLoading(true);
       fetchDecks();
+    } else {
+      setDecksLoading(false);
     }
   }, [authenticatedUser]);
 

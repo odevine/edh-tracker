@@ -56,6 +56,8 @@ export const MatchProvider = ({ children }: PropsWithChildren<{}>) => {
     if (user) {
       setMatchesLoading(true);
       fetchMatches();
+    } else {
+      setMatchesLoading(false);
     }
   }, [user]);
 
