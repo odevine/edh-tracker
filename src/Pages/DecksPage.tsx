@@ -8,6 +8,7 @@ import {
   TableBody,
   TableCell,
   TableContainer,
+  TableFooter,
   TablePagination,
   TableRow,
   TextField,
@@ -299,19 +300,23 @@ export const DecksPage = (): JSX.Element => {
               );
             })}
           </TableBody>
+          <TableFooter>
+            <TableRow>
+              <TablePagination
+                rowsPerPageOptions={[15, 25, 50]}
+                count={filteredDecks.length}
+                page={page}
+                rowsPerPage={rowsPerPage}
+                onPageChange={(_event, value) => handleChangePage(value)}
+                onRowsPerPageChange={(event) =>
+                  handleChangeRowsPerPage(event.target.value)
+                }
+              />
+            </TableRow>
+          </TableFooter>
         </Table>
       </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[15, 25, 50]}
-        component="div"
-        count={filteredDecks.length}
-        page={page}
-        rowsPerPage={rowsPerPage}
-        onPageChange={(_event, value) => handleChangePage(value)}
-        onRowsPerPageChange={(event) =>
-          handleChangeRowsPerPage(event.target.value)
-        }
-      />
+
       <DeckModal open={modalOpen} onClose={() => setModalOpen(false)} />
     </Paper>
   );

@@ -9,6 +9,7 @@ import {
   TableBody,
   TableCell,
   TableContainer,
+  TableFooter,
   TablePagination,
   TableRow,
   Toolbar,
@@ -290,19 +291,22 @@ export const MatchesPage = (): JSX.Element => {
                 );
               })}
             </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TablePagination
+                  rowsPerPageOptions={[15, 25, 50]}
+                  count={filteredMatches.length}
+                  page={page}
+                  rowsPerPage={rowsPerPage}
+                  onPageChange={(_event, value) => handleChangePage(value)}
+                  onRowsPerPageChange={(event) =>
+                    handleChangeRowsPerPage(event.target.value)
+                  }
+                />
+              </TableRow>
+            </TableFooter>
           </Table>
         </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[15, 25, 50]}
-          component="div"
-          count={filteredMatches.length}
-          page={page}
-          rowsPerPage={rowsPerPage}
-          onPageChange={(_event, value) => handleChangePage(value)}
-          onRowsPerPageChange={(event) =>
-            handleChangeRowsPerPage(event.target.value)
-          }
-        />
       </Paper>
       <MatchModal
         open={modalOpen}
