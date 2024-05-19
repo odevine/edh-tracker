@@ -94,7 +94,6 @@ export const MatchesPage = (): JSX.Element => {
     {
       id: "winningDeckId",
       label: "winner",
-      sortable: true,
     },
     {
       id: "decks",
@@ -190,7 +189,7 @@ export const MatchesPage = (): JSX.Element => {
     return [...filteredMatches]
       .sort(getComparator<Match>(order, orderBy))
       .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
-  }, [filteredMatches, page, rowsPerPage]);
+  }, [filteredMatches, page, rowsPerPage, order, orderBy]);
 
   return (
     <>
