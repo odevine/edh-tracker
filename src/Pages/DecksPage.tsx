@@ -171,13 +171,19 @@ export const DecksPage = (): JSX.Element => {
           <Grid item xs={12} sm={6} md={3}>
             <TypeSelector
               filterType={filterType}
-              setFilterType={setFilterType}
+              setFilterType={(newType) => {
+                setPage(0);
+                setFilterType(newType);
+              }}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <PlayerSelector
               filterUser={filterUser}
-              setFilterUser={setFilterUser}
+              setFilterUser={(newUser) => {
+                setPage(0);
+                setFilterUser(newUser);
+              }}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
@@ -186,7 +192,10 @@ export const DecksPage = (): JSX.Element => {
               size="small"
               label="search decks"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setPage(0);
+                setSearchQuery(e.target.value);
+              }}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={2}>

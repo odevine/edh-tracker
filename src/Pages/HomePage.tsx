@@ -9,7 +9,7 @@ export const HomePage = (): JSX.Element => {
       spacing={2}
     >
       <Typography variant="h2">home page</Typography>
-      <Typography variant="caption">(coming soon)</Typography>
+      <Typography variant="caption">(coming soon?)</Typography>
     </Stack>
   );
 };

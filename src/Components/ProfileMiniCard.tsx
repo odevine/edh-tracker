@@ -95,6 +95,7 @@ export const ProfileMiniCard: React.FC<ProfileMiniCardProps> = ({
         <Grid container spacing={1}>
           <Grid item xs={8}>
             <Stack spacing={1}>
+              <Typography variant="body2">decks:</Typography>
               <Typography variant="body2">wins:</Typography>
               <Typography variant="body2">matches&nbsp;played:</Typography>
               <Typography variant="body2">overall&nbsp;winrate:</Typography>
@@ -102,6 +103,7 @@ export const ProfileMiniCard: React.FC<ProfileMiniCardProps> = ({
           </Grid>
           <Grid item xs={4}>
             <Stack spacing={1} alignItems="flex-end">
+              <Typography variant="body2">{userStats.deckCount}</Typography>
               <Typography variant="body2">{userStats.totalWins}</Typography>
               <Typography variant="body2">{userStats.totalMatches}</Typography>
               <Typography variant="body2">
@@ -113,7 +115,7 @@ export const ProfileMiniCard: React.FC<ProfileMiniCardProps> = ({
       </CardContent>
       <Divider />
       <CardActions sx={{ justifyContent: "flex-end" }}>
-        <Button onClick={() => navigate(`/profile/${profile.id}`)}>
+        <Button onClick={() => navigate(`/users/${profile.id}`)}>
           view profile
         </Button>
       </CardActions>

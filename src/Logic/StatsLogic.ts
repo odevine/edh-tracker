@@ -4,6 +4,7 @@ export interface UserStats {
   totalMatches: number;
   totalWins: number;
   winRate: number;
+  deckCount: number;
 }
 
 export const getUserStats = (
@@ -11,9 +12,13 @@ export const getUserStats = (
   allDecks: Deck[],
   allMatches: Match[],
   allMatchParticipants: MatchParticipant[],
+  format?: string,
 ): UserStats => {
-  // Get all decks owned by the user
-  const userDecks = allDecks.filter((deck) => deck.deckOwnerId === userId);
+  // Get all decks owned by the user and is in the format
+  const userDecks = allDecks.filter(
+    (deck) =>
+      deck.deckOwnerId === userId && (format ? deck.deckType === format : true),
+  );
   const userDeckIds = userDecks.map((deck) => deck.id);
 
   // Get all match participants where the user's deck participated
@@ -38,6 +43,7 @@ export const getUserStats = (
     totalMatches,
     totalWins,
     winRate: totalWins / totalMatches,
+    deckCount: userDecks.length,
   };
 };
 

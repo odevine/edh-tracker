@@ -44,6 +44,12 @@ export const Toolbar = () => {
       pathMatch: /^\/$/,
     },
     {
+      label: "users",
+      action: () => navigate("/users"),
+      disabled: !authenticatedUser,
+      pathMatch: /\/users/,
+    },
+    {
       label: "decks",
       action: () => navigate("/decks"),
       disabled: !authenticatedUser,
@@ -80,18 +86,18 @@ export const Toolbar = () => {
   const loggedInOptions = [
     <MenuItem
       key="profile"
-      onClick={() => handleNavigate(`/profile/${authenticatedUser?.userId}`)}
+      onClick={() => handleNavigate(`/users/${authenticatedUser?.userId}`)}
     >
-      View Profile
+      view profile
     </MenuItem>,
     <MenuItem key="logout" onClick={handleSignOut}>
-      Log Out
+      log out
     </MenuItem>,
   ];
 
   const loggedOutOptions = [
     <MenuItem key="login" onClick={() => handleNavigate("/login")}>
-      Log In
+      log in
     </MenuItem>,
   ];
 

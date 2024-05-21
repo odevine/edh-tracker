@@ -6,7 +6,7 @@ import { Redirect, useRoutes } from "raviger";
 
 import { AppAlertList, LoadingBackdrop, Toolbar } from "@/Components";
 import { useApp, useDeck, useMatch, useUser } from "@/Context";
-import { DecksPage, HomePage, MatchesPage, Profile } from "@/Pages";
+import { DecksPage, HomePage, MatchesPage, Profile, UsersPage } from "@/Pages";
 import config from "./aws-exports";
 
 Amplify.configure(config);
@@ -27,8 +27,9 @@ const baseRoutes = {
 const protectedRoutes = {
   "/login": () => <Redirect to="/" />,
   "/decks": () => <DecksPage />,
+  "/users": () => <UsersPage />,
   "/matches": () => <MatchesPage />,
-  "/profile/:profileId": (routeParams: { profileId: string }) => (
+  "/users/:profileId": (routeParams: { profileId: string }) => (
     <Profile profileId={routeParams.profileId} />
   ),
   "*": () => <NotFoundPage />,
