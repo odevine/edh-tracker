@@ -143,11 +143,8 @@ export const MatchesPage = (): JSX.Element => {
       (participant) => participant.matchId === matchId,
     );
     return participants.map((participant) => (
-      <Typography
-        key={participant.id}
-        variant="body2"
-        sx={{ color: getDeckUserColor(participant.deckId) }}
-      >
+      <Typography key={participant.id} variant="body2">
+        •&nbsp;
         {allDecks.find((deck) => deck.id === participant.deckId)?.deckName}
       </Typography>
     ));
@@ -213,7 +210,10 @@ export const MatchesPage = (): JSX.Element => {
             <Grid item xs={12} sm={6} md={3} lg={2}>
               <TypeSelector
                 filterType={filterType}
-                setFilterType={setFilterType}
+                setFilterType={(newType: string) => {
+                  setPage(0);
+                  setFilterType(newType);
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={6} md={3} lg={4}>
@@ -221,14 +221,20 @@ export const MatchesPage = (): JSX.Element => {
                 multi
                 filterType={filterType}
                 filterDeck={filterDeck}
-                setFilterDeck={setFilterDeck}
+                setFilterDeck={(newDecks: string | string[]) => {
+                  setPage(0);
+                  setFilterDeck(newDecks);
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={6} md={3} lg={4}>
               <PlayerSelector
                 multi
                 filterUser={filterUser}
-                setFilterUser={setFilterUser}
+                setFilterUser={(newUsers: string | string[]) => {
+                  setPage(0);
+                  setFilterUser(newUsers);
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={6} md={3} lg={2}>
@@ -268,9 +274,7 @@ export const MatchesPage = (): JSX.Element => {
                         .toLocaleString(DateTime.DATE_MED)}
                     </TableCell>
                     <TableCell>{match.matchType}</TableCell>
-                    <TableCell
-                      sx={{ color: getDeckUserColor(match.winningDeckId) }}
-                    >
+                    <TableCell sx={{ fontWeight: 700 }}>
                       {
                         allDecks.find((deck) => deck.id === match.winningDeckId)
                           ?.deckName
