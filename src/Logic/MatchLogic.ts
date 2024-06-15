@@ -224,3 +224,18 @@ export const deleteMatchWithParticipantsFn = async (
     variables: { input },
   });
 };
+
+export const findOrphanedMatchParticipants = (
+  allMatches: Match[],
+  allMatchParticipants: MatchParticipant[],
+): MatchParticipant[] => {
+  // Create a set of match IDs from allMatches
+  const matchIds = new Set(allMatches.map((match) => match.id));
+
+  // Filter out MatchParticipants whose matchId is not in the matchIds set
+  const orphanedMatchParticipants = allMatchParticipants.filter(
+    (participant) => !matchIds.has(participant.matchId),
+  );
+
+  return orphanedMatchParticipants;
+};

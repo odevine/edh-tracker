@@ -165,7 +165,11 @@ export const MatchProvider = ({ children }: PropsWithChildren<{}>) => {
   const deleteMatch = async (matchId: string) => {
     setMatchesLoading(true);
     try {
-      await deleteMatchWithParticipantsFn(matchId);
+      const matchParticipants = allMatchParticipants.filter(participant => participant.matchId === matchId);
+      if (matchParticipants.length > 4) {
+        throw new Error("match participants greater than 4, please review and delete manually")
+      }
+      await deleteMatchWithParticipantsFn(matchId, matchParticipants);
       setAllMatches((prevMatches) =>
         prevMatches.filter((match) => match.id !== matchId),
       );
@@ -175,13 +179,13 @@ export const MatchProvider = ({ children }: PropsWithChildren<{}>) => {
         ),
       );
       addAppMessage({
-        content: "Match deleted successfully",
+        content: "match deleted successfully",
         severity: "success",
       });
     } catch (error) {
-      console.error("Failed to delete match:", error);
+      console.error("failed to delete match:", error);
       addAppMessage({
-        content: "Failed to delete match",
+        content: "failed to delete match",
         severity: "error",
       });
     } finally {
