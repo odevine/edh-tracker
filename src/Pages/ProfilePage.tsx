@@ -76,8 +76,8 @@ export const Profile = (props: { profileId: string }): JSX.Element => {
                       </Grid>
                       <Grid item xs={6}>
                         <Stack spacing={1} alignItems="flex-end">
-                          <Typography>{userStats.totalMatches}</Typography>
                           <Typography>{userStats.totalWins}</Typography>
+                          <Typography>{userStats.totalMatches}</Typography>
                           <Typography>
                             {(userStats.winRate * 100).toFixed(2)}%
                           </Typography>

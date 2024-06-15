@@ -8,4 +8,4 @@ export const DECK_TYPES: DeckType[] = [
   { label: "constructed", value: "constructed" },
 ];
 
-export const LOCAL_STORAGE_VERSION = 1;
+export const LOCAL_STORAGE_VERSION = 3;

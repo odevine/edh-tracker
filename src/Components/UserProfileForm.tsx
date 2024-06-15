@@ -94,10 +94,9 @@ export const UserProfileForm: React.FC = () => {
 
       setLoading(true);
       try {
-        const updatedUser = await updateUserProfile(updateData);
-        console.log("Profile updated successfully:", updatedUser);
+        await updateUserProfile(updateData);
       } catch (error) {
-        console.error("Failed to update profile:", error);
+        console.error("failed to update profile:", error);
       } finally {
         setLoading(false);
       }

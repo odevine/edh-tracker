@@ -1,4 +1,5 @@
 export * from "./AppAlerts";
+export * from "./ColorSelector";
 export * from "./CommanderColors";
 export * from "./DeckModal";
 export * from "./DeckSelector";

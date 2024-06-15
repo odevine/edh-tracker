@@ -6,6 +6,7 @@ import {
   Link,
   MenuItem,
   Paper,
+  Popover,
   Select,
   Stack,
   Table,
@@ -27,6 +28,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Deck } from "@/API";
 import {
+  ColorSelector,
   CommanderColors,
   DeckModal,
   EnhancedTableHead,
@@ -61,6 +63,7 @@ const localStorageKey = "decksPageState";
 const loadStateFromLocalStorage = () => {
   const initialState = {
     stateVersion: LOCAL_STORAGE_VERSION,
+    filterColor: [],
     filterType: "",
     filterUser: "",
     searchQuery: "",
@@ -93,6 +96,7 @@ export const DecksPage = (): JSX.Element => {
 
   const initialState = loadStateFromLocalStorage();
 
+  const [filterColor, setFilterColor] = useState(initialState.filterColor);
   const [filterType, setFilterType] = useState(initialState.filterType);
   const [filterUser, setFilterUser] = useState(initialState.filterUser);
   const [searchQuery, setSearchQuery] = useState(initialState.searchQuery);
@@ -104,9 +108,22 @@ export const DecksPage = (): JSX.Element => {
   const [rowsPerPage, setRowsPerPage] = useState(initialState.rowsPerPage);
   const [modalOpen, setModalOpen] = useState(false);
 
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+
+  const handlePopoverOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handlePopoverClose = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+
   useEffect(() => {
     const newSettings = JSON.stringify({
       stateVersion: LOCAL_STORAGE_VERSION,
+      filterColor,
       filterType,
       filterUser,
       searchQuery,
@@ -116,7 +133,16 @@ export const DecksPage = (): JSX.Element => {
       rowsPerPage,
     });
     localStorage.setItem(localStorageKey, newSettings);
-  }, [filterType, filterUser, searchQuery, order, orderBy, page, rowsPerPage]);
+  }, [
+    filterColor,
+    filterType,
+    filterUser,
+    searchQuery,
+    order,
+    orderBy,
+    page,
+    rowsPerPage,
+  ]);
 
   const handleRequestSort = (property: keyof DeckWithStats) => {
     const isAsc = orderBy === property && order === "asc";
@@ -135,17 +161,44 @@ export const DecksPage = (): JSX.Element => {
 
   const filteredDecks = useMemo(() => {
     const lowercasedQuery = searchQuery.toLowerCase();
-    return allDecks.filter(
-      (deck) =>
+
+    const matchesExactColors = (
+      deckColors: string[],
+      filterColors: string[],
+    ) => {
+      // If no color is selected, include all decks
+      if (filterColors.length === 0) return true;
+      if (filterColors.includes("C")) {
+        // If "C" (colorless) is selected, deck must be colorless
+        return deckColors.length === 0 && filterColors.length === 1;
+      }
+
+      // Check if deckColors matches filterColors exactly
+      return (
+        deckColors.length === filterColors.length &&
+        deckColors.every((color) => filterColors.includes(color))
+      );
+    };
+
+    return allDecks.filter((deck) => {
+      const commanderColors = deck.commanderColors ?? [];
+      const secondCommanderColors = (deck.secondCommanderColors ??
+        []) as string[];
+      const combinedColors = [
+        ...new Set([...commanderColors, ...secondCommanderColors]),
+      ];
+      return (
         (filterUser === "" ||
           allUserProfiles.find((profile) => profile.id === deck.deckOwnerId)
             ?.id === filterUser) &&
         (filterType === "" || deck.deckType === filterType) &&
+        matchesExactColors(combinedColors, filterColor) &&
         (deck.deckName.toLowerCase().includes(lowercasedQuery) ||
           deck.commanderName.toLowerCase().includes(lowercasedQuery) ||
-          deck.secondCommanderName?.toLowerCase().includes(lowercasedQuery)),
-    );
-  }, [allDecks, searchQuery, filterType, filterUser]);
+          deck.secondCommanderName?.toLowerCase().includes(lowercasedQuery))
+      );
+    });
+  }, [allDecks, searchQuery, filterType, filterUser, filterColor]);
 
   const userProfileMap = useMemo(() => {
     return new Map(allUserProfiles.map((profile) => [profile.id, profile]));
@@ -168,25 +221,7 @@ export const DecksPage = (): JSX.Element => {
     <Paper sx={{ m: 3 }}>
       <Toolbar sx={{ p: 2, justifyContent: "space-between" }}>
         <Grid container spacing={2}>
-          <Grid item xs={12} sm={6} md={3}>
-            <TypeSelector
-              filterType={filterType}
-              setFilterType={(newType) => {
-                setPage(0);
-                setFilterType(newType);
-              }}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <PlayerSelector
-              filterUser={filterUser}
-              setFilterUser={(newUser) => {
-                setPage(0);
-                setFilterUser(newUser);
-              }}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
+          <Grid item xs={12} md={7}>
             <TextField
               fullWidth
               size="small"
@@ -199,6 +234,53 @@ export const DecksPage = (): JSX.Element => {
             />
           </Grid>
           <Grid item xs={12} sm={6} md={2}>
+            <Button fullWidth variant="outlined" onClick={handlePopoverOpen}>
+              filters
+            </Button>
+            <Popover
+              sx={{ mt: 1 }}
+              open={open}
+              anchorEl={anchorEl}
+              onClose={handlePopoverClose}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "left",
+              }}
+            >
+              <Box sx={{ p: 2 }}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <ColorSelector
+                      filterColor={filterColor}
+                      setFilterColor={(newColor) => {
+                        setPage(0);
+                        setFilterColor(newColor);
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TypeSelector
+                      filterType={filterType}
+                      setFilterType={(newType) => {
+                        setPage(0);
+                        setFilterType(newType);
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <PlayerSelector
+                      filterUser={filterUser}
+                      setFilterUser={(newUser) => {
+                        setPage(0);
+                        setFilterUser(newUser);
+                      }}
+                    />
+                  </Grid>
+                </Grid>
+              </Box>
+            </Popover>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
             <Button
               fullWidth
               variant="contained"

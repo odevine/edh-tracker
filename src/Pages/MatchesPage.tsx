@@ -29,7 +29,11 @@ import {
 } from "@/Components";
 import { LOCAL_STORAGE_VERSION } from "@/Constants";
 import { useDeck, useMatch, useUser } from "@/Context";
-import { ColumnSortOrder, getComparator } from "@/Logic";
+import {
+  ColumnSortOrder,
+  findOrphanedMatchParticipants,
+  getComparator,
+} from "@/Logic";
 
 const localStorageKey = "matchesPageState";
 const loadStateFromLocalStorage = () => {
@@ -78,6 +82,17 @@ export const MatchesPage = (): JSX.Element => {
   const [rowsPerPage, setRowsPerPage] = useState(initialState.rowsPerPage);
   const [modalOpen, setModalOpen] = useState(false);
   const [existingMatchId, setExistingMatchId] = useState("");
+
+  const orphanedParticipants = findOrphanedMatchParticipants(
+    allMatches,
+    allMatchParticipants,
+  );
+  if (orphanedParticipants.length > 0) {
+    console.warn(
+      "orphaned match participants found, match history may be inaccurate",
+      orphanedParticipants,
+    );
+  }
 
   useEffect(() => {
     const newSettings = JSON.stringify({
