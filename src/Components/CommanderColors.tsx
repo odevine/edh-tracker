@@ -22,7 +22,12 @@ export const CommanderColors = (props: { colors: Array<string | null> }) => {
   };
 
   return (
-    <>
+    <Box
+      sx={{
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+      }}
+    >
       {sortedColors.map((color) => {
         const className = colorClassMap[color as ColorKey];
         return className ? (
@@ -34,6 +39,6 @@ export const CommanderColors = (props: { colors: Array<string | null> }) => {
           />
         ) : null;
       })}
-    </>
+    </Box>
   );
 };
