@@ -1,3 +1,8 @@
+type DeckCategory @model @auth(rules: [{allow: private}]) {
+  id: ID!
+  name: String!
+}
+
 type User @model @auth(rules: [{allow: private}, {allow: public}]) {
   id: ID!
   displayName: String!
@@ -39,3 +44,4 @@ type MatchParticipant @model @auth(rules: [{allow: private}]) {
   deckId: ID! @index(name: "byDeck")
   matchId: ID! @index(name: "byMatch")
 }
+ 

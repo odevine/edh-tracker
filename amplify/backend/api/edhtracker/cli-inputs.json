@@ -13,9 +13,8 @@
       },
       {
         "mode": "API_KEY",
-        "expirationTime": 365,
-        "apiKeyExpirationDate": "2025-05-17T13:35:55.822Z",
-        "keyDescription": "external access"
+        "keyDescription": "api key description",
+        "expirationTime": 30
       }
     ],
     "conflictResolution": {

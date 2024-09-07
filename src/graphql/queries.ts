@@ -8,6 +8,40 @@ type GeneratedQuery<InputType, OutputType> = string & {
   __generatedQueryOutput: OutputType;
 };
 
+export const getDeckCategory = /* GraphQL */ `query GetDeckCategory($id: ID!) {
+  getDeckCategory(id: $id) {
+    id
+    name
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetDeckCategoryQueryVariables,
+  APITypes.GetDeckCategoryQuery
+>;
+export const listDeckCategories = /* GraphQL */ `query ListDeckCategories(
+  $filter: ModelDeckCategoryFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listDeckCategories(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      name
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListDeckCategoriesQueryVariables,
+  APITypes.ListDeckCategoriesQuery
+>;
 export const getUser = /* GraphQL */ `query GetUser($id: ID!) {
   getUser(id: $id) {
     id
