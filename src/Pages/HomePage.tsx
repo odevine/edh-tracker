@@ -1,14 +1,4 @@
-import {
-  Avatar,
-  Card,
-  CardContent,
-  Container,
-  Grid,
-  Paper,
-  Button,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Button, Container, Paper, Stack, Typography } from "@mui/material";
 import { navigate } from "raviger";
 
 import { useUser } from "@/Context";
@@ -29,7 +19,7 @@ export const HomePage = (): JSX.Element => {
             sx={{
               width: 340,
               height: 200,
-              p: 2
+              p: 2,
             }}
           >
             <Stack
