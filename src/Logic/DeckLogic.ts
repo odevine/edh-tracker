@@ -190,3 +190,29 @@ export const useCommanderSearch = () => {
     searchResults,
   };
 };
+
+export const getCardArt = async (
+  commanderName: string,
+): Promise<string | null> => {
+  const apiUrl = `https://api.scryfall.com/cards/named?exact=${encodeURIComponent(commanderName)}`;
+
+  try {
+    const response = await fetch(apiUrl);
+    if (!response.ok) {
+      throw new Error(`Error fetching card: ${response.statusText}`);
+    }
+
+    const cardData = await response.json();
+
+    // Scryfall card objects often contain multiple images (e.g., normal, small, etc.)
+    // We will return the URL of the normal size image if available.
+    if (cardData.image_uris && cardData.image_uris.normal) {
+      return cardData.image_uris.normal;
+    } else {
+      throw new Error("Card image not found");
+    }
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
