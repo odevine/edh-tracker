@@ -7,12 +7,13 @@ import { useEffect, useRef, useState } from "react";
 import {
   CreateDeckInput,
   Deck,
+  DeckCategory,
   DecksByDeckOwnerIdQueryVariables,
   DeleteDeckInput,
   UpdateDeckInput,
 } from "@/API";
 import { createDeck, deleteDeck, updateDeck } from "@/graphql/mutations";
-import { decksByDeckOwnerId, listDecks } from "@/graphql/queries";
+import { decksByDeckOwnerId, listDecks, listDeckCategories } from "@/graphql/queries";
 
 const client = generateClient();
 
@@ -46,12 +47,42 @@ export const getAllDecksFn = async (): Promise<Deck[] | null> => {
   }
 };
 
+export const getAllDecksCategoriesFn = async (): Promise<DeckCategory[] | null> => {
+  try {
+    let allCategories: DeckCategory[] = [];
+    let nextToken: string | null = null;
+
+    do {
+      const response: any = await client.graphql({
+        query: listDeckCategories,
+        variables: { nextToken },
+      });
+
+      if (
+        response.data &&
+        response.data.listDeckCategories &&
+        response.data.listDeckCategories.items
+      ) {
+        allCategories = [...allCategories, ...response.data.listDeckCategories.items];
+        nextToken = response.data.listDeckCategories.nextToken;
+      } else {
+        nextToken = null;
+      }
+    } while (nextToken);
+
+    return allCategories;
+  } catch (error) {
+    console.error("error fetching deck categories:", error);
+    return null;
+  }
+};
+
 export const getDecksByOwnerFn = async (
   user: AuthUser,
 ): Promise<Deck[] | null> => {
   // Return early if user object is not valid
   if (!user || !user.userId) {
-    console.error("Invalid or missing user object");
+    console.error("invalid or missing user object");
     return null;
   }
 
@@ -216,3 +247,4 @@ export const getCardArt = async (
     return null;
   }
 };
+
