@@ -1,12 +1,14 @@
 import { MenuItem, TextField } from "@mui/material";
 
-import { DECK_TYPES } from "@/Constants";
+import { useDeck } from "@/Context";
 
 export const TypeSelector = (props: {
   filterType: string;
   setFilterType: (newType: string) => void;
 }) => {
   const { filterType, setFilterType } = props;
+
+  const { allDeckCategories } = useDeck();
 
   return (
     <TextField
@@ -19,9 +21,9 @@ export const TypeSelector = (props: {
       sx={{ minWidth: 140 }}
     >
       <MenuItem value="">all types</MenuItem>
-      {DECK_TYPES.map((type) => (
-        <MenuItem key={type.value} value={type.value}>
-          {type.label}
+      {allDeckCategories.map((category) => (
+        <MenuItem key={category.id} value={category.id}>
+          {category.name}
         </MenuItem>
       ))}
     </TextField>

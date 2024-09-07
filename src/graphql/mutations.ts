@@ -8,6 +8,54 @@ type GeneratedMutation<InputType, OutputType> = string & {
   __generatedMutationOutput: OutputType;
 };
 
+export const createDeckCategory = /* GraphQL */ `mutation CreateDeckCategory(
+  $input: CreateDeckCategoryInput!
+  $condition: ModelDeckCategoryConditionInput
+) {
+  createDeckCategory(input: $input, condition: $condition) {
+    id
+    name
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateDeckCategoryMutationVariables,
+  APITypes.CreateDeckCategoryMutation
+>;
+export const updateDeckCategory = /* GraphQL */ `mutation UpdateDeckCategory(
+  $input: UpdateDeckCategoryInput!
+  $condition: ModelDeckCategoryConditionInput
+) {
+  updateDeckCategory(input: $input, condition: $condition) {
+    id
+    name
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateDeckCategoryMutationVariables,
+  APITypes.UpdateDeckCategoryMutation
+>;
+export const deleteDeckCategory = /* GraphQL */ `mutation DeleteDeckCategory(
+  $input: DeleteDeckCategoryInput!
+  $condition: ModelDeckCategoryConditionInput
+) {
+  deleteDeckCategory(input: $input, condition: $condition) {
+    id
+    name
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteDeckCategoryMutationVariables,
+  APITypes.DeleteDeckCategoryMutation
+>;
 export const createUser = /* GraphQL */ `mutation CreateUser(
   $input: CreateUserInput!
   $condition: ModelUserConditionInput

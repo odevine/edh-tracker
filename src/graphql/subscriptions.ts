@@ -8,6 +8,51 @@ type GeneratedSubscription<InputType, OutputType> = string & {
   __generatedSubscriptionOutput: OutputType;
 };
 
+export const onCreateDeckCategory = /* GraphQL */ `subscription OnCreateDeckCategory(
+  $filter: ModelSubscriptionDeckCategoryFilterInput
+) {
+  onCreateDeckCategory(filter: $filter) {
+    id
+    name
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateDeckCategorySubscriptionVariables,
+  APITypes.OnCreateDeckCategorySubscription
+>;
+export const onUpdateDeckCategory = /* GraphQL */ `subscription OnUpdateDeckCategory(
+  $filter: ModelSubscriptionDeckCategoryFilterInput
+) {
+  onUpdateDeckCategory(filter: $filter) {
+    id
+    name
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateDeckCategorySubscriptionVariables,
+  APITypes.OnUpdateDeckCategorySubscription
+>;
+export const onDeleteDeckCategory = /* GraphQL */ `subscription OnDeleteDeckCategory(
+  $filter: ModelSubscriptionDeckCategoryFilterInput
+) {
+  onDeleteDeckCategory(filter: $filter) {
+    id
+    name
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteDeckCategorySubscriptionVariables,
+  APITypes.OnDeleteDeckCategorySubscription
+>;
 export const onCreateUser = /* GraphQL */ `subscription OnCreateUser($filter: ModelSubscriptionUserFilterInput) {
   onCreateUser(filter: $filter) {
     id

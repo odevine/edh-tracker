@@ -2,28 +2,16 @@
 /* eslint-disable */
 //  This file was automatically generated and should not be edited.
 
-export type CreateUserInput = {
+export type CreateDeckCategoryInput = {
   id?: string | null,
-  displayName: string,
-  description?: string | null,
-  lightThemeColor?: string | null,
-  darkThemeColor?: string | null,
-  profilePictureURL?: string | null,
-  role?: string | null,
-  lastOnline?: string | null,
+  name: string,
 };
 
-export type ModelUserConditionInput = {
-  displayName?: ModelStringInput | null,
-  description?: ModelStringInput | null,
-  lightThemeColor?: ModelStringInput | null,
-  darkThemeColor?: ModelStringInput | null,
-  profilePictureURL?: ModelStringInput | null,
-  role?: ModelStringInput | null,
-  lastOnline?: ModelStringInput | null,
-  and?: Array< ModelUserConditionInput | null > | null,
-  or?: Array< ModelUserConditionInput | null > | null,
-  not?: ModelUserConditionInput | null,
+export type ModelDeckCategoryConditionInput = {
+  name?: ModelStringInput | null,
+  and?: Array< ModelDeckCategoryConditionInput | null > | null,
+  or?: Array< ModelDeckCategoryConditionInput | null > | null,
+  not?: ModelDeckCategoryConditionInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
 };
@@ -66,6 +54,49 @@ export type ModelSizeInput = {
   ge?: number | null,
   gt?: number | null,
   between?: Array< number | null > | null,
+};
+
+export type DeckCategory = {
+  __typename: "DeckCategory",
+  id: string,
+  name: string,
+  createdAt: string,
+  updatedAt: string,
+};
+
+export type UpdateDeckCategoryInput = {
+  id: string,
+  name?: string | null,
+};
+
+export type DeleteDeckCategoryInput = {
+  id: string,
+};
+
+export type CreateUserInput = {
+  id?: string | null,
+  displayName: string,
+  description?: string | null,
+  lightThemeColor?: string | null,
+  darkThemeColor?: string | null,
+  profilePictureURL?: string | null,
+  role?: string | null,
+  lastOnline?: string | null,
+};
+
+export type ModelUserConditionInput = {
+  displayName?: ModelStringInput | null,
+  description?: ModelStringInput | null,
+  lightThemeColor?: ModelStringInput | null,
+  darkThemeColor?: ModelStringInput | null,
+  profilePictureURL?: ModelStringInput | null,
+  role?: ModelStringInput | null,
+  lastOnline?: ModelStringInput | null,
+  and?: Array< ModelUserConditionInput | null > | null,
+  or?: Array< ModelUserConditionInput | null > | null,
+  not?: ModelUserConditionInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
 };
 
 export type User = {
@@ -295,6 +326,22 @@ export type DeleteMatchParticipantInput = {
   id: string,
 };
 
+export type ModelDeckCategoryFilterInput = {
+  id?: ModelIDInput | null,
+  name?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelDeckCategoryFilterInput | null > | null,
+  or?: Array< ModelDeckCategoryFilterInput | null > | null,
+  not?: ModelDeckCategoryFilterInput | null,
+};
+
+export type ModelDeckCategoryConnection = {
+  __typename: "ModelDeckCategoryConnection",
+  items:  Array<DeckCategory | null >,
+  nextToken?: string | null,
+};
+
 export type ModelUserFilterInput = {
   id?: ModelIDInput | null,
   displayName?: ModelStringInput | null,
@@ -365,19 +412,13 @@ export type ModelMatchParticipantFilterInput = {
   not?: ModelMatchParticipantFilterInput | null,
 };
 
-export type ModelSubscriptionUserFilterInput = {
+export type ModelSubscriptionDeckCategoryFilterInput = {
   id?: ModelSubscriptionIDInput | null,
-  displayName?: ModelSubscriptionStringInput | null,
-  description?: ModelSubscriptionStringInput | null,
-  lightThemeColor?: ModelSubscriptionStringInput | null,
-  darkThemeColor?: ModelSubscriptionStringInput | null,
-  profilePictureURL?: ModelSubscriptionStringInput | null,
-  role?: ModelSubscriptionStringInput | null,
-  lastOnline?: ModelSubscriptionStringInput | null,
+  name?: ModelSubscriptionStringInput | null,
   createdAt?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
-  and?: Array< ModelSubscriptionUserFilterInput | null > | null,
-  or?: Array< ModelSubscriptionUserFilterInput | null > | null,
+  and?: Array< ModelSubscriptionDeckCategoryFilterInput | null > | null,
+  or?: Array< ModelSubscriptionDeckCategoryFilterInput | null > | null,
 };
 
 export type ModelSubscriptionIDInput = {
@@ -408,6 +449,21 @@ export type ModelSubscriptionStringInput = {
   beginsWith?: string | null,
   in?: Array< string | null > | null,
   notIn?: Array< string | null > | null,
+};
+
+export type ModelSubscriptionUserFilterInput = {
+  id?: ModelSubscriptionIDInput | null,
+  displayName?: ModelSubscriptionStringInput | null,
+  description?: ModelSubscriptionStringInput | null,
+  lightThemeColor?: ModelSubscriptionStringInput | null,
+  darkThemeColor?: ModelSubscriptionStringInput | null,
+  profilePictureURL?: ModelSubscriptionStringInput | null,
+  role?: ModelSubscriptionStringInput | null,
+  lastOnline?: ModelSubscriptionStringInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionUserFilterInput | null > | null,
+  or?: Array< ModelSubscriptionUserFilterInput | null > | null,
 };
 
 export type ModelSubscriptionDeckFilterInput = {
@@ -464,6 +520,51 @@ export type ModelSubscriptionMatchParticipantFilterInput = {
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionMatchParticipantFilterInput | null > | null,
   or?: Array< ModelSubscriptionMatchParticipantFilterInput | null > | null,
+};
+
+export type CreateDeckCategoryMutationVariables = {
+  input: CreateDeckCategoryInput,
+  condition?: ModelDeckCategoryConditionInput | null,
+};
+
+export type CreateDeckCategoryMutation = {
+  createDeckCategory?:  {
+    __typename: "DeckCategory",
+    id: string,
+    name: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type UpdateDeckCategoryMutationVariables = {
+  input: UpdateDeckCategoryInput,
+  condition?: ModelDeckCategoryConditionInput | null,
+};
+
+export type UpdateDeckCategoryMutation = {
+  updateDeckCategory?:  {
+    __typename: "DeckCategory",
+    id: string,
+    name: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type DeleteDeckCategoryMutationVariables = {
+  input: DeleteDeckCategoryInput,
+  condition?: ModelDeckCategoryConditionInput | null,
+};
+
+export type DeleteDeckCategoryMutation = {
+  deleteDeckCategory?:  {
+    __typename: "DeckCategory",
+    id: string,
+    name: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type CreateUserMutationVariables = {
@@ -745,6 +846,40 @@ export type DeleteMatchParticipantMutation = {
     matchId: string,
     createdAt: string,
     updatedAt: string,
+  } | null,
+};
+
+export type GetDeckCategoryQueryVariables = {
+  id: string,
+};
+
+export type GetDeckCategoryQuery = {
+  getDeckCategory?:  {
+    __typename: "DeckCategory",
+    id: string,
+    name: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type ListDeckCategoriesQueryVariables = {
+  filter?: ModelDeckCategoryFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListDeckCategoriesQuery = {
+  listDeckCategories?:  {
+    __typename: "ModelDeckCategoryConnection",
+    items:  Array< {
+      __typename: "DeckCategory",
+      id: string,
+      name: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
   } | null,
 };
 
@@ -1034,6 +1169,48 @@ export type MatchParticipantsByMatchIdQuery = {
       updatedAt: string,
     } | null >,
     nextToken?: string | null,
+  } | null,
+};
+
+export type OnCreateDeckCategorySubscriptionVariables = {
+  filter?: ModelSubscriptionDeckCategoryFilterInput | null,
+};
+
+export type OnCreateDeckCategorySubscription = {
+  onCreateDeckCategory?:  {
+    __typename: "DeckCategory",
+    id: string,
+    name: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnUpdateDeckCategorySubscriptionVariables = {
+  filter?: ModelSubscriptionDeckCategoryFilterInput | null,
+};
+
+export type OnUpdateDeckCategorySubscription = {
+  onUpdateDeckCategory?:  {
+    __typename: "DeckCategory",
+    id: string,
+    name: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnDeleteDeckCategorySubscriptionVariables = {
+  filter?: ModelSubscriptionDeckCategoryFilterInput | null,
+};
+
+export type OnDeleteDeckCategorySubscription = {
+  onDeleteDeckCategory?:  {
+    __typename: "DeckCategory",
+    id: string,
+    name: string,
+    createdAt: string,
+    updatedAt: string,
   } | null,
 };
 

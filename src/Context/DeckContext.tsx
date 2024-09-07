@@ -7,17 +7,25 @@ import {
   useState,
 } from "react";
 
-import { CreateDeckInput, Deck, UpdateDeckInput, User } from "@/API";
+import {
+  CreateDeckInput,
+  Deck,
+  DeckCategory,
+  UpdateDeckInput,
+  User,
+} from "@/API";
 import { useApp, useTheme, useUser } from "@/Context";
 import {
   createDeckFn,
   deleteDeckFn,
+  getAllDecksCategoriesFn,
   getAllDecksFn,
   updateDeckFn,
 } from "@/Logic";
 
 interface DecksContextType {
   allDecks: Deck[];
+  allDeckCategories: DeckCategory[];
   userDecks: Deck[];
   decksLoading: boolean;
   deckToUserMap: Map<string, User>;
@@ -35,14 +43,19 @@ export const DeckProvider = ({ children }: PropsWithChildren<{}>) => {
   const { authenticatedUser, allUserProfiles } = useUser();
 
   const [allDecks, setAllDecks] = useState<Deck[]>([]);
+  const [allDeckCategories, setAllDeckCategories] = useState<DeckCategory[]>(
+    [],
+  );
   const [userDecks, setUserDecks] = useState<Deck[]>([]);
   const [decksLoading, setDecksLoading] = useState(true);
   const [deckToUserMap, setDeckToUserMap] = useState(new Map<string, User>());
+  console.log("  ~ DeckProvider ~ allDeckCategories:", allDeckCategories);
 
   useEffect(() => {
     if (authenticatedUser) {
       setDecksLoading(true);
       fetchDecks();
+      fetchDeckCategories();
     } else {
       setDecksLoading(false);
     }
@@ -77,6 +90,23 @@ export const DeckProvider = ({ children }: PropsWithChildren<{}>) => {
       });
       setAllDecks([]);
       setUserDecks([]);
+    } finally {
+      setDecksLoading(false);
+    }
+  };
+
+  const fetchDeckCategories = async () => {
+    try {
+      const deckCategories = await getAllDecksCategoriesFn();
+      const allDeckCategoriesResponse = deckCategories ?? [];
+      setAllDeckCategories(allDeckCategoriesResponse);
+    } catch (error) {
+      addAppMessage({
+        title: "failed to fetch deck category list",
+        content: "check console for more details",
+        severity: "error",
+      });
+      setAllDeckCategories([]);
     } finally {
       setDecksLoading(false);
     }
@@ -175,6 +205,7 @@ export const DeckProvider = ({ children }: PropsWithChildren<{}>) => {
   const value = useMemo(
     () => ({
       allDecks,
+      allDeckCategories,
       getDeckUserColor,
       userDecks,
       deckToUserMap,
@@ -183,7 +214,7 @@ export const DeckProvider = ({ children }: PropsWithChildren<{}>) => {
       updateExistingDeck,
       deleteDeckById,
     }),
-    [allDecks, userDecks, decksLoading, deckToUserMap, getDeckUserColor],
+    [allDecks, allDeckCategories, userDecks, decksLoading, deckToUserMap, getDeckUserColor],
   );
 
   return (

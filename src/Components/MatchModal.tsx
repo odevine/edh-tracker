@@ -16,7 +16,6 @@ import { DateTime } from "luxon";
 import { useEffect, useMemo, useState } from "react";
 
 import { CreateMatchInput, Deck } from "@/API";
-import { DECK_TYPES } from "@/Constants";
 import { useDeck, useMatch, useUser } from "@/Context";
 
 interface NewMatchModalProps {
@@ -30,7 +29,7 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
   onClose,
   editingMatchId,
 }) => {
-  const { allDecks, getDeckUserColor, deckToUserMap } = useDeck();
+  const { allDecks, allDeckCategories, getDeckUserColor, deckToUserMap } = useDeck();
   const { authenticatedUser } = useUser();
   const {
     createNewMatch,
@@ -43,7 +42,7 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
   const editingMatch = allMatches.find((match) => match.id === editingMatchId);
 
   const [loading, setLoading] = useState(false);
-  const [matchType, setMatchType] = useState(DECK_TYPES[1].value);
+  const [matchType, setMatchType] = useState(allDeckCategories[1].id);
   const [datePlayed, setDatePlayed] = useState(DateTime.now());
   const [winningDeckId, setWinningDeckId] = useState("");
   const [participantDecks, setParticipantDecks] = useState<Deck[]>([]);
@@ -72,7 +71,7 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
       );
       setParticipantDecks(participantDecks);
     } else {
-      setMatchType(DECK_TYPES[1].value);
+      setMatchType(allDeckCategories[1].id);
       setDatePlayed(DateTime.now());
       setWinningDeckId("");
       setParticipantDecks([]);
@@ -100,7 +99,7 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
 
   const handleClose = () => {
     setDatePlayed(DateTime.now());
-    setMatchType(DECK_TYPES[0].value);
+    setMatchType(allDeckCategories[0].id);
     setParticipantDecks([]);
     setWinningDeckId("");
     onClose();
@@ -191,9 +190,9 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
                 setWinningDeckId("");
               }}
             >
-              {DECK_TYPES.map((type) => (
-                <MenuItem key={type.value} value={type.value}>
-                  {type.label}
+              {allDeckCategories.map((category) => (
+                <MenuItem key={category.id} value={category.id}>
+                  {category.name}
                 </MenuItem>
               ))}
             </TextField>

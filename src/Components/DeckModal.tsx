@@ -28,7 +28,7 @@ export const DeckModal = (props: {
 }) => {
   const { open, onClose, editingDeckId } = props;
   const { authenticatedUser } = useUser();
-  const { allDecks, createNewDeck, updateExistingDeck } = useDeck();
+  const { allDecks, allDeckCategories, createNewDeck, updateExistingDeck } = useDeck();
 
   // Find the editing deck based on the editingDeckId
   const editingDeck = allDecks.find((deck) => deck.id === editingDeckId);
@@ -308,8 +308,9 @@ export const DeckModal = (props: {
               value={deckFormat}
               onChange={(event) => setDeckFormat(event.target.value)}
             >
-              <MenuItem value="precon">precon or precon(u)</MenuItem>
-              <MenuItem value="constructed">constructed</MenuItem>
+              {allDeckCategories.map(category => <MenuItem key={category.id} value={category.id}>
+                {category.name}
+              </MenuItem>)}
             </TextField>
             <TextField
               fullWidth
