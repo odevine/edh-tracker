@@ -39,10 +39,12 @@ export const getUserStats = (
     userDeckIds.includes(match.winningDeckId),
   ).length;
 
+  const winRate = totalMatches > 0 ? totalWins / totalMatches : 0;
+
   return {
     totalMatches,
     totalWins,
-    winRate: totalWins / totalMatches,
+    winRate,
     deckCount: userDecks.length,
   };
 };
@@ -76,9 +78,11 @@ export const getDeckStats = (
     (match) => match.winningDeckId === deckId,
   ).length;
 
+  const winRate = totalMatches > 0 ? totalWins / totalMatches : 0;
+
   return {
     totalMatches,
     totalWins,
-    winRate: totalWins / totalMatches,
+    winRate,
   };
 };

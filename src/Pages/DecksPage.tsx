@@ -35,6 +35,7 @@ import {
   HeadCell,
   PlayerSelector,
   ProfileMiniCard,
+  CardImageMiniCard,
   TypeSelector,
 } from "@/Components";
 import { LOCAL_STORAGE_VERSION } from "@/Constants";
@@ -509,11 +510,55 @@ export const DecksPage = (): JSX.Element => {
                     </TableCell>
                     <TableCell>{deck.deckType}</TableCell>
                     <TableCell>
-                      {deck.commanderName}
+                      {deck.commanderName && (
+                        <PopupState variant="popover">
+                          {(popupState) => (
+                            <Box {...bindHover(popupState)}>
+                              <Box sx={{ cursor: "pointer" }}>
+                                {deck.commanderName}
+                              </Box>
+                              <HoverPopover
+                                {...bindPopover(popupState)}
+                                anchorOrigin={{
+                                  vertical: "top",
+                                  horizontal: "left",
+                                }}
+                                transformOrigin={{
+                                  vertical: "center",
+                                  horizontal: "right",
+                                }}
+                              >
+                                <CardImageMiniCard cardName={deck.commanderName} />
+                              </HoverPopover>
+                            </Box>
+                          )}
+                        </PopupState>
+                      )}
                       {deck.secondCommanderName && (
                         <>
                           <br />
-                          {deck.secondCommanderName}
+                          <PopupState variant="popover">
+                          {(popupState) => (
+                            <Box {...bindHover(popupState)}>
+                              <Box sx={{ cursor: "pointer" }}>
+                                {deck.secondCommanderName}
+                              </Box>
+                              <HoverPopover
+                                {...bindPopover(popupState)}
+                                anchorOrigin={{
+                                  vertical: "top",
+                                  horizontal: "left",
+                                }}
+                                transformOrigin={{
+                                  vertical: "center",
+                                  horizontal: "right",
+                                }}
+                              >
+                                <CardImageMiniCard cardName={deck.secondCommanderName as string} />
+                              </HoverPopover>
+                            </Box>
+                          )}
+                        </PopupState>
                         </>
                       )}
                     </TableCell>
