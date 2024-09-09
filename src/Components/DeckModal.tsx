@@ -12,7 +12,7 @@ import {
 import { useEffect, useState } from "react";
 
 import { CreateDeckInput, UpdateDeckInput } from "@/API";
-import { useDeck, useUser } from "@/Context";
+import { useDeck, useUser, useMatch } from "@/Context";
 import { sortColors, useCommanderSearch } from "@/Logic";
 
 interface ICommander {
@@ -29,9 +29,17 @@ export const DeckModal = (props: {
   const { open, onClose, editingDeckId } = props;
   const { authenticatedUser } = useUser();
   const { allDecks, allDeckCategories, createNewDeck, updateExistingDeck } = useDeck();
+  const { allMatchParticipants } = useMatch();
 
   // Find the editing deck based on the editingDeckId
   const editingDeck = allDecks.find((deck) => deck.id === editingDeckId);
+
+  let deckHasBeenPlayed = false;
+  if (editingDeck) {
+    deckHasBeenPlayed = allMatchParticipants.some(
+      (p) => p.deckId === editingDeck.id,
+    )
+  }
 
   // State for the deck fields
   const [deckName, setDeckName] = useState("");
@@ -303,6 +311,7 @@ export const DeckModal = (props: {
               fullWidth
               required
               select
+              disabled={Boolean(editingDeck && deckHasBeenPlayed)}
               label="deck format"
               placeholder="paste a moxfield or archidekt link here"
               value={deckFormat}
