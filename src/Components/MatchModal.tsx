@@ -42,7 +42,7 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
   const editingMatch = allMatches.find((match) => match.id === editingMatchId);
 
   const [loading, setLoading] = useState(false);
-  const [matchType, setMatchType] = useState(allDeckCategories[1].id);
+  const [matchType, setMatchType] = useState(allDeckCategories[0]?.id ?? "");
   const [datePlayed, setDatePlayed] = useState(DateTime.now());
   const [winningDeckId, setWinningDeckId] = useState("");
   const [participantDecks, setParticipantDecks] = useState<Deck[]>([]);
@@ -71,13 +71,13 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
       );
       setParticipantDecks(participantDecks);
     } else {
-      setMatchType(allDeckCategories[1].id);
+      setMatchType(allDeckCategories[0]?.id ?? "");
       setDatePlayed(DateTime.now());
       setWinningDeckId("");
       setParticipantDecks([]);
       setErrors([]);
     }
-  }, [editingMatch, open]);
+  }, [editingMatch, open, allDeckCategories]);
 
   const validateForm = (): boolean => {
     const localErrors: string[] = [];
@@ -141,7 +141,7 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
 
   const filteredDecks = useMemo(() => {
     return allDecks
-      .filter((deck) => deck.deckType === matchType)
+      .filter((deck) => matchType === "none" || deck.deckType === matchType)
       .sort((a, b) => a.deckOwnerId.localeCompare(b.deckOwnerId));
   }, [allDecks, matchType]);
 
