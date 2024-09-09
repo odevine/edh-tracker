@@ -17,6 +17,15 @@
       },
       "api": {
         "edhtracker": {}
+      },
+      "function": {
+        "pricecheck": {
+          "deploymentBucketName": "amplify-edhtracker-master-c66d9-deployment",
+          "s3Key": "amplify-builds/pricecheck-6d55486b466661674e38-build.zip"
+        }
+      },
+      "storage": {
+        "CardPrices": {}
       }
     }
   }

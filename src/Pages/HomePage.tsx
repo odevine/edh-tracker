@@ -1,5 +1,6 @@
 import { Button, Container, Paper, Stack, Typography } from "@mui/material";
 import { navigate } from "raviger";
+import { generateClient } from "aws-amplify/api";
 
 import { useUser } from "@/Context";
 
@@ -39,6 +40,8 @@ export const HomePage = (): JSX.Element => {
       </Container>
     );
   }
+
+
 
   return (
     <Stack
