@@ -38,7 +38,7 @@ export const Toolbar = () => {
   }
   const navItems: NavItem[] = [
     {
-      label: "overview",
+      label: "tools",
       action: () => navigate("/"),
       disabled: false,
       pathMatch: /^\/$/,

@@ -51,7 +51,7 @@ export function parseDecklist(decklist: string): string[] {
   return parsedDecklist;
 }
 
-export const HomePage = (): JSX.Element => {
+export const ToolsPage = (): JSX.Element => {
   const { authenticatedUser } = useUser();
   const [priceLoading, setPriceLoading] = useState(false);
   const [deckList, setDeckList] = useState("");
@@ -157,7 +157,10 @@ export const HomePage = (): JSX.Element => {
           1 Fabricate (40K) 181
           1 Malevolent Hermit // Benevolent Geist (MID) 61 *F*
           ...
-        `.split("\n").map(line => line.trim()).join("\n")}
+        `
+          .split("\n")
+          .map((line) => line.trim())
+          .join("\n")}
         multiline
         rows={25}
         fullWidth
