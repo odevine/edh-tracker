@@ -48,7 +48,7 @@ export function parseDecklist(decklist: string): string[] {
     }
   });
 
-  return parsedDecklist;
+  return parsedDecklist.slice(0, 100);
 }
 
 export const ToolsPage = (): JSX.Element => {
