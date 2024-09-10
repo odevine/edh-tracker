@@ -10,6 +10,16 @@
           "read"
         ]
       }
+    },
+    "/purgeCache": {
+      "name": "/purgeCache",
+      "lambdaFunction": "pricecheck",
+      "permissions": {
+        "setting": "private",
+        "auth": [
+          "delete"
+        ]
+      }
     }
   }
 }

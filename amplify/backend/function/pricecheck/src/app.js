@@ -2,6 +2,8 @@ const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const {
   GetCommand,
   PutCommand,
+  ScanCommand,
+  BatchWriteCommand,
   DynamoDBDocumentClient,
 } = require("@aws-sdk/lib-dynamodb");
 const axios = require("axios");
@@ -22,194 +24,226 @@ app.use(bodyParser.json());
 app.use(cors());
 
 const SCRYFALL_API_URL = "https://api.scryfall.com/cards/";
+const MAX_BATCH_SIZE = 25;
 
-// Basic land types and their snow-covered variants
 const BASIC_LAND_TYPES = [
-  "Plains",
-  "Island",
-  "Islands",
-  "Swamp",
-  "Swamps",
-  "Mountain",
-  "Mountains",
-  "Forest",
-  "Forests",
-  "Wastes",
-  "Snow-Covered Plains",
-  "Snow-Covered Island",
-  "Snow-Covered Islands",
-  "Snow-Covered Swamp",
-  "Snow-Covered Swamps",
-  "Snow-Covered Mountain",
-  "Snow-Covered Mountains",
-  "Snow-Covered Forest",
-  "Snow-Covered Forests",
-  "Snow-Covered Wastes",
+  "plains",
+  "island",
+  "islands",
+  "swamp",
+  "swamps",
+  "mountain",
+  "mountains",
+  "forest",
+  "forests",
+  "wastes",
+  "snow-covered plains",
+  "snow-covered island",
+  "snow-covered islands",
+  "snow-covered swamp",
+  "snow-covered swamps",
+  "snow-covered mountain",
+  "snow-covered mountains",
+  "snow-covered forest",
+  "snow-covered forests",
+  "snow-covered wastes",
 ];
 
 const LAND_CYCLES = {
   "cycle-ody-filterland": [
-    "Skycloud Expanse",
-    "Sunscorched Divide",
-    "Darkwater Catacombs",
-    "Viridescent Bog",
-    "Mossfire Valley",
-    "Ferrous Lake",
-    "Desolate Mire",
-    "Shadowblood Ridge",
-    "Sungrass Prairie",
-    "Overflowing Basin",
+    "skycloud expanse",
+    "sunscorched divide",
+    "darkwater catacombs",
+    "viridescent bog",
+    "mossfire valley",
+    "ferrous lake",
+    "desolate mire",
+    "shadowblood ridge",
+    "sungrass prairie",
+    "overflowing basin",
   ],
   "cycle-checkland": [
-    "Glacial Fortress",
-    "Clifftop Retreat",
-    "Drowned Catacomb",
-    "Woodland Cemetery",
-    "Rootbound Crag",
-    "Sulfur Falls",
-    "Isolated Chapel",
-    "Dragonskull Summit",
-    "Sunpetal Grove",
-    "Hinterland Harbor",
+    "glacial fortress",
+    "clifftop retreat",
+    "drowned catacomb",
+    "woodland cemetery",
+    "rootbound crag",
+    "sulfur falls",
+    "isolated chapel",
+    "dragonskull summit",
+    "sunpetal grove",
+    "hinterland harbor",
   ],
   "cycle-bfz-tangoland": [
-    "Prairie Stream",
-    "Sunken Hollow",
-    "Cinder Glade",
-    "Smoldering Marsh",
-    "Canopy Vista",
+    "prairie stream",
+    "sunken hollow",
+    "cinder glade",
+    "smoldering marsh",
+    "canopy vista",
   ],
   "cycle-horizon-land": [
-    "Sunbaked Canyon",
-    "Nurturing Peatland",
-    "Fiery Islet",
-    "Silent Clearing",
-    "Horizon Canopy",
-    "Waterlogged Grove",
+    "sunbaked canyon",
+    "nurturing peatland",
+    "fiery islet",
+    "silent clearing",
+    "horizon canopy",
+    "waterlogged grove",
   ],
   "cycle-fastland": [
-    "Seachrome Coast",
-    "Inspiring Vantage",
-    "Darkslick Shores",
-    "Blooming Marsh",
-    "Copperline Gorge",
-    "Spirebluff Canal",
-    "Concealed Courtyard",
-    "Blackcleave Cliffs",
-    "Razorverge Thicket",
-    "Botanical Sanctum",
+    "seachrome coast",
+    "inspiring vantage",
+    "darkslick shores",
+    "blooming marsh",
+    "copperline gorge",
+    "spirebluff canal",
+    "concealed courtyard",
+    "blackcleave cliffs",
+    "razorverge thicket",
+    "botanical sanctum",
   ],
   "cycle-fetchland": [
-    "Flooded Strand",
-    "Arid Mesa",
-    "Polluted Delta",
-    "Verdant Catacombs",
-    "Wooded Foothills",
-    "Scalding Tarn",
-    "Marsh Flats",
-    "Bloodstained Mire",
-    "Windswept Heath",
-    "Misty Rainforest",
+    "flooded strand",
+    "arid mesa",
+    "polluted delta",
+    "verdant catacombs",
+    "wooded foothills",
+    "scalding tarn",
+    "marsh flats",
+    "bloodstained mire",
+    "windswept heath",
+    "misty rainforest",
   ],
   "cycle-shm-filterland": [
-    "Mystic Gate",
-    "Rugged Prairie",
-    "Sunken Ruins",
-    "Twilight Mire",
-    "Fire-Lit Thicket",
-    "Cascade Bluffs",
-    "Fetid Heath",
-    "Graven Cairns",
-    "Wooded Bastion",
-    "Flooded Grove",
+    "mystic gate",
+    "rugged prairie",
+    "sunken ruins",
+    "twilight mire",
+    "fire-lit thicket",
+    "cascade bluffs",
+    "fetid heath",
+    "graven cairns",
+    "wooded bastion",
+    "flooded grove",
   ],
   "cycle-pathway": [
-    "Hengegate Pathway",
-    "Needleverge Pathway",
-    "Clearwater Pathway",
-    "Darkbore Pathway",
-    "Cragcrown Pathway",
-    "Riverglide Pathway",
-    "Brightclimb Pathway",
-    "Blightstep Pathway",
-    "Branchloft Pathway",
-    "Barkchannel Pathway",
+    "hengegate pathway",
+    "needleverge pathway",
+    "clearwater pathway",
+    "darkbore pathway",
+    "cragcrown pathway",
+    "riverglide pathway",
+    "brightclimb pathway",
+    "blightstep pathway",
+    "branchloft pathway",
+    "barkchannel pathway",
   ],
   "cycle-crowdland": [
-    "Sea of Clouds",
-    "Spectator Seating",
-    "Morphic Pool",
-    "Undergrowth Stadium",
-    "Spire Garden",
-    "Training Center",
-    "Vault of Champions",
-    "Luxury Suite",
-    "Bountiful Promenade",
-    "Rejuvenating Springs",
+    "sea of clouds",
+    "spectator seating",
+    "morphic pool",
+    "undergrowth stadium",
+    "spire garden",
+    "training center",
+    "vault of champions",
+    "luxury suite",
+    "bountiful promenade",
+    "rejuvenating springs",
   ],
   "cycle-painland": [
-    "Adarkar Wastes",
-    "Battlefield Forge",
-    "Underground River",
-    "Llanowar Wastes",
-    "Karplusan Forest",
-    "Shivan Reef",
-    "Caves of Koilos",
-    "Sulfurous Springs",
-    "Brushland",
-    "Yavimaya Coast",
+    "adarkar wastes",
+    "battlefield forge",
+    "underground river",
+    "llanowar wastes",
+    "karplusan forest",
+    "shivan reef",
+    "caves of koilos",
+    "sulfurous springs",
+    "brushland",
+    "yavimaya coast",
   ],
   "cycle-shockland": [
-    "Hallowed Fountain",
-    "Sacred Foundry",
-    "Watery Grave",
-    "Overgrown Tomb",
-    "Stomping Ground",
-    "Steam Vents",
-    "Godless Shrine",
-    "Blood Crypt",
-    "Temple Garden",
-    "Breeding Pool",
+    "hallowed fountain",
+    "sacred foundry",
+    "watery grave",
+    "overgrown tomb",
+    "stomping ground",
+    "steam vents",
+    "godless shrine",
+    "blood crypt",
+    "temple garden",
+    "breeding pool",
   ],
   "cycle-reveal-land": [
-    "Port Town",
-    "Furycalm Snarl",
-    "Choked Estuary",
-    "Necroblossom Snarl",
-    "Game Trail",
-    "Frostboil Snarl",
-    "Shineshadow Snarl",
-    "Foreboding Ruins",
-    "Fortified Village",
-    "Vineglimmer Snarl",
+    "port town",
+    "furycalm snarl",
+    "choked estuary",
+    "necroblossom snarl",
+    "game trail",
+    "frostboil snarl",
+    "shineshadow snarl",
+    "foreboding ruins",
+    "fortified village",
+    "vineglimmer snarl",
   ],
   "cycle-dual-surveil-land": [
-    "Meticulous Archive",
-    "Elegant Parlor",
-    "Undercity Sewers",
-    "Underground Mortuary",
-    "Commercial District",
-    "Thundering Falls",
-    "Shadowy Backstreet",
-    "Raucous Theater",
-    "Lush Portico",
-    "Hedge Maze",
+    "meticulous archive",
+    "elegant parlor",
+    "undercity sewers",
+    "underground mortuary",
+    "commercial district",
+    "thundering falls",
+    "shadowy backstreet",
+    "raucous theater",
+    "lush portico",
+    "hedge maze",
   ],
   "iko-triome": [
-    "Indatha Triome",
-    "Ketria Triome",
-    "Raugrin Triome",
-    "Savai Triome",
-    "Zagoth Triome",
+    "indatha triome",
+    "ketria triome",
+    "raugrin triome",
+    "savai triome",
+    "zagoth triome",
   ],
   "ala-shardland": [
-    "Arcane Sanctum",
-    "Crumbling Necropolis",
-    "Jungle Shrine",
-    "Savage Lands",
-    "Seaside Citadel",
+    "arcane sanctum",
+    "crumbling necropolis",
+    "jungle shrine",
+    "savage lands",
+    "seaside citadel",
+  ],
+  "cycle-abu-dual-land": [
+    "badlands",
+    "bayou",
+    "plateau",
+    "savannah",
+    "scrubland",
+    "taiga",
+    "tropical island",
+    "tundra",
+    "underground sea",
+    "volcanic island",
   ],
 };
+
+const ILLEGAL_SETS = [
+  "30a",
+  "cei",
+  "ced",
+  "wc97",
+  "wc98",
+  "wc99",
+  "wc00",
+  "wc01",
+  "wc02",
+  "wc03",
+  "wc04",
+  "hhO12",
+  "hhO13",
+  "ugl",
+  "unh",
+  "ust",
+  "unf",
+];
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -217,8 +251,12 @@ const findLowestUsdPrice = (cards) => {
   let lowestPrice = null;
 
   cards.forEach((card) => {
-    // Check if the card has a valid USD price
-    if (card.prices && card.prices.usd) {
+    // Check if the card has a valid USD price and is not included in an illegal set
+    if (
+      card.prices &&
+      card.prices.usd &&
+      !ILLEGAL_SETS.includes(card.set.toLowerCase())
+    ) {
       const cardPrice = parseFloat(card.prices.usd);
 
       // Update the lowest price if needed
@@ -250,7 +288,7 @@ const fetchCheapestCardPrice = async (cardName, delayMs = 100) => {
 };
 
 const fetchCycleCardsByOracleTag = async (oracleTag) => {
-  const apiUrl = `${SCRYFALL_API_URL}search?q=oracletag:${encodeURIComponent(oracleTag)}+type:land&order=usd&dir=asc&unique=cards`;
+  const apiUrl = `${SCRYFALL_API_URL}search?q=oracletag:${encodeURIComponent(oracleTag)}+type:land&order=usd&dir=asc&unique=prints`;
 
   try {
     const response = await fetch(apiUrl);
@@ -286,17 +324,8 @@ const getCheapestCycleLandPrice = async (cardName) => {
   // Fetch data for all lands in the cycle based on the oracle tag
   const cycleCardsData = await fetchCycleCardsByOracleTag(oracleTag);
 
-  // Sort by price.usd (ascending)
-  const sortedByPrice = cycleCardsData
-    .filter((card) => card.prices && card.prices.usd) // Only include cards with a USD price
-    .sort((a, b) => parseFloat(a.prices.usd) - parseFloat(b.prices.usd));
-
-  // Return the lowest price, if any
-  if (sortedByPrice.length > 0) {
-    return parseFloat(sortedByPrice[0].prices.usd);
-  } else {
-    return null;
-  }
+  // Return the lowest usd price of results
+  return findLowestUsdPrice(cycleCardsData);
 };
 
 // Helper function to check if data is within 24 hours
@@ -353,11 +382,94 @@ const parseCardInput = (cardInput) => {
     return { cardQty: null, cardName: null };
   }
 
-  const cardQty = parseInt(match[1], 10); // Quantity is the first capture group
-  const cardName = match[2].trim();
+  const cardQty = parseInt(match[1], 10);
+  const cardName = match[2].trim().toLowerCase();
 
   return { cardQty, cardName };
 };
+
+// Function to purge all items from the table
+const purgeCache = async () => {
+  let lastEvaluatedKey = null;
+
+  do {
+    // Scan the table to get all items
+    const scanParams = {
+      TableName: tableName,
+      ExclusiveStartKey: lastEvaluatedKey,
+    };
+
+    try {
+      const scanResult = await ddbDocClient.send(new ScanCommand(scanParams));
+      const items = scanResult.Items;
+      lastEvaluatedKey = scanResult.LastEvaluatedKey;
+
+      if (!items || items.length === 0) {
+        console.log(`Table ${tableName} is already empty.`);
+        return;
+      }
+
+      // Split items into batches for deletion
+      for (let i = 0; i < items.length; i += MAX_BATCH_SIZE) {
+        const batch = items.slice(i, i + MAX_BATCH_SIZE);
+
+        const deleteRequests = batch
+          .map((item) => {
+            if (!item.cardName) {
+              console.error(`Item missing cardName:`, item);
+              return null; // Skip this item if cardName is missing or undefined
+            }
+
+            return {
+              DeleteRequest: {
+                Key: {
+                  cardName: item.cardName,
+                },
+              },
+            };
+          })
+          .filter((request) => request !== null); // Remove any null requests
+
+        // Only proceed if there are valid delete requests
+        if (deleteRequests.length === 0) {
+          continue; // Skip if no valid delete requests
+        }
+
+        const deleteParams = {
+          RequestItems: {
+            [tableName]: deleteRequests,
+          },
+        };
+
+        // Log the requests being sent for debugging
+        console.log(
+          "Sending delete requests:",
+          JSON.stringify(deleteParams, null, 2),
+        );
+
+        // Retry unprocessed items logic
+        let unprocessedItems = null;
+        do {
+          const batchWriteResponse = await ddbDocClient.send(
+            new BatchWriteCommand(deleteParams),
+          );
+          unprocessedItems = batchWriteResponse.UnprocessedItems;
+
+          // Retry any unprocessed items with exponential backoff
+          if (unprocessedItems && Object.keys(unprocessedItems).length > 0) {
+            console.log(`Retrying unprocessed items...`);
+            await delay(1000); // Simple delay for retry; consider exponential backoff for larger sets
+            deleteParams.RequestItems = unprocessedItems;
+          }
+        } while (unprocessedItems && Object.keys(unprocessedItems).length > 0);
+      }
+    } catch (error) {
+      console.error("Error scanning or deleting items:", error);
+      throw new Error(`Failed to scan or delete items: ${error.message}`);
+    }
+  } while (lastEvaluatedKey); // Continue scanning until all items are processed
+};
+
 
 app.options("*", cors());
 
@@ -372,7 +484,8 @@ app.post("/priceCheck", async function (req, res) {
     });
   }
 
-  let apiCallCounter = 0; // Counter to track the number of API calls made
+  // Counter to track the number of API calls made
+  let apiCallCounter = 0;
 
   // Array to hold all the promises for card lookups
   const promises = cards.map(async (cardInput) => {
@@ -434,6 +547,21 @@ app.post("/priceCheck", async function (req, res) {
 
   // Return the final results
   res.json(cardResults);
+});
+
+// Route to purge all data in the DynamoDB table
+app.delete("/purgeCache", async (_req, res) => {
+  try {
+    await purgeCache();
+    res.status(200).json({
+      message: `all items successfully deleted from table ${tableName}`,
+    });
+  } catch (error) {
+    console.error("error purging table:", error);
+    res.status(500).json({
+      error: "failed to purge the table. see logs for details.",
+    });
+  }
 });
 
 // Export the app object for Lambda

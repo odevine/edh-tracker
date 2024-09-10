@@ -7,7 +7,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { post } from "aws-amplify/api";
+import { del, post } from "aws-amplify/api";
 import { navigate } from "raviger";
 import { useState } from "react";
 
@@ -20,7 +20,7 @@ interface PriceCheckCard {
 }
 
 // Function to parse the decklist and extract card names and quantities
-export function parseDecklist(decklist: string): string[] {
+function parseDecklist(decklist: string): string[] {
   const parsedDecklist: string[] = [];
 
   // Split the decklist by newlines
@@ -40,7 +40,7 @@ export function parseDecklist(decklist: string): string[] {
       // Check if the cardName contains "//" and trim anything after it
       const splitCardIndex = cardName.indexOf(" // ");
       if (splitCardIndex !== -1) {
-        cardName = cardName.substring(0, splitCardIndex).trim();
+        cardName = cardName.substring(0, splitCardIndex).trim().toLowerCase();
       }
 
       // Add to the parsed list in the format: "quantity cardName"
@@ -52,7 +52,7 @@ export function parseDecklist(decklist: string): string[] {
 }
 
 export const ToolsPage = (): JSX.Element => {
-  const { authenticatedUser } = useUser();
+  const { authenticatedUser, isAdmin } = useUser();
   const [priceLoading, setPriceLoading] = useState(false);
   const [deckList, setDeckList] = useState("");
   const [deckPrice, setDeckPrice] = useState("");
@@ -69,7 +69,7 @@ export const ToolsPage = (): JSX.Element => {
     );
   };
 
-  const handleButtonClick = async () => {
+  const handlePriceCheckClick = async () => {
     if (deckList.trim() === "") {
       setDeckPrice("deck cannot be empty");
       return;
@@ -103,6 +103,24 @@ export const ToolsPage = (): JSX.Element => {
     } catch (error) {
       console.error("Error calling Lambda:", error);
       setDeckPrice("an error occurred");
+    } finally {
+      setPriceLoading(false);
+    }
+  };
+
+  const handlePurgeCacheClick = async () => {
+    try {
+      setPriceLoading(true);
+      const restOperation = del({
+        apiName: "edhtrackerREST",
+        path: "/purgeCache",
+      });
+      const response = await restOperation.response;
+      if (response.statusCode === 200) {
+        console.log("cache purged successfully");
+      }
+    } catch (error) {
+      console.error("could not purge cache", error);
     } finally {
       setPriceLoading(false);
     }
@@ -166,13 +184,20 @@ export const ToolsPage = (): JSX.Element => {
         fullWidth
         onChange={(event) => setDeckList(event.target.value)}
       />
-      <Button
-        onClick={handleButtonClick}
-        variant="contained"
-        disabled={priceLoading} // Disable button while loading
-      >
-        {priceLoading ? "checking..." : "check price"}
-      </Button>
+      <Stack direction="row" spacing={2}>
+        <Button
+          onClick={handlePriceCheckClick}
+          variant="contained"
+          disabled={priceLoading}
+        >
+          {priceLoading ? "checking..." : "check price"}
+        </Button>
+        {isAdmin && (
+          <Button variant="contained" onClick={handlePurgeCacheClick}>
+            purge cache
+          </Button>
+        )}
+      </Stack>
       {/* Show a loading spinner when price is being calculated */}
       {priceLoading ? (
         <CircularProgress size={24} />
