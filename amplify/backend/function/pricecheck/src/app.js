@@ -5,8 +5,9 @@ const {
   DynamoDBDocumentClient,
 } = require("@aws-sdk/lib-dynamodb");
 const axios = require("axios");
-const express = require("express");
 const bodyParser = require("body-parser");
+const cors = require("cors");
+const express = require("express");
 
 const ddbClient = new DynamoDBClient({ region: process.env.TABLE_REGION });
 const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
@@ -18,6 +19,7 @@ if (process.env.ENV && process.env.ENV !== "NONE") {
 
 const app = express();
 app.use(bodyParser.json());
+app.use(cors());
 
 const SCRYFALL_API_URL = "https://api.scryfall.com/cards/";
 
@@ -201,30 +203,38 @@ const LAND_CYCLES = {
   ],
 };
 
-const findOracleTag = (cardName) => {
-  for (const oracleTag in LAND_CYCLES) {
-    if (LAND_CYCLES[oracleTag].includes(cardName)) {
-      return oracleTag;
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const findLowestUsdPrice = (cards) => {
+  let lowestPrice = null;
+
+  cards.forEach((card) => {
+    // Check if the card has a valid USD price
+    if (card.prices && card.prices.usd) {
+      const cardPrice = parseFloat(card.prices.usd);
+
+      // Update the lowest price if needed
+      if (lowestPrice === null || cardPrice < lowestPrice) {
+        lowestPrice = cardPrice;
+      }
     }
-  }
-  return null;
+  });
+
+  return lowestPrice;
 };
 
 const fetchCheapestCardPrice = async (cardName, delayMs = 100) => {
-  const apiUrl = `${SCRYFALL_API_URL}named?exact=${encodeURIComponent(cardName)}&order=usd&dir=asc&unique=prints`;
+  const apiUrl = `${SCRYFALL_API_URL}search?q=name%3A${encodeURIComponent(cardName)}&order=usd&dir=asc&unique=prints`;
 
   try {
-    // Wait for the delay before making the API call
-    await delay(delayMs);
-
     // Make the API request using axios
     const response = await axios.get(apiUrl);
 
-    if (!response.ok) {
+    if (response.status !== 200) {
       return null;
     }
 
-    return findLowestUsdPrice(response.data);
+    return findLowestUsdPrice(response.data.data);
   } catch (error) {
     console.error(error, cardName);
     return null;
@@ -249,11 +259,19 @@ const fetchCycleCardsByOracleTag = async (oracleTag) => {
   }
 };
 
+const findOracleTag = (cardName) => {
+  for (const oracleTag in LAND_CYCLES) {
+    if (LAND_CYCLES[oracleTag].includes(cardName)) {
+      return oracleTag;
+    }
+  }
+  return null;
+};
+
 const getCheapestCycleLandPrice = async (cardName) => {
   const oracleTag = findOracleTag(cardName);
 
   if (!oracleTag) {
-    console.error("Card does not belong to any known cycle.");
     return null;
   }
 
@@ -277,24 +295,6 @@ const getCheapestCycleLandPrice = async (cardName) => {
 const isWithin24Hours = (timestamp) => {
   const ONE_DAY_MS = 24 * 60 * 60 * 1000;
   return Date.now() - timestamp < ONE_DAY_MS;
-};
-
-const findLowestUsdPrice = (cards) => {
-  let lowestPrice = null;
-
-  cards.forEach((card) => {
-    // Check if the card has a valid USD price
-    if (card.prices && card.prices.usd) {
-      const cardPrice = parseFloat(card.prices.usd);
-
-      // Update the lowest price if needed
-      if (lowestPrice === null || cardPrice < lowestPrice) {
-        lowestPrice = cardPrice;
-      }
-    }
-  });
-
-  return lowestPrice;
 };
 
 // Function to get price from DynamoDB
@@ -330,7 +330,6 @@ const savePriceToDynamoDB = async (cardName, price) => {
 
   try {
     await ddbDocClient.send(new PutCommand(params));
-    console.log(`Saved price for ${cardName} to DynamoDB`);
   } catch (error) {
     console.error(`Error saving price for ${cardName} to DynamoDB:`, error);
   }
@@ -352,9 +351,12 @@ const parseCardInput = (cardInput) => {
   return { cardQty, cardName };
 };
 
+app.options("*", cors());
+
 // Main route to handle card price check
 app.post("/priceCheck", async function (req, res) {
-  const { cards } = req.body; // Expect { "cards": [ "1 CardName", "2 CardName" ] }
+  const { cards } = req.body;
+  // Expect { "cards": [ "1 CardName", "2 CardName" ] }
   if (!cards || !Array.isArray(cards)) {
     return res.status(400).json({
       error:
@@ -362,9 +364,10 @@ app.post("/priceCheck", async function (req, res) {
     });
   }
 
-  const results = [];
+  let apiCallCounter = 0; // Counter to track the number of API calls made
 
-  for (const cardInput of cards) {
+  // Array to hold all the promises for card lookups
+  const promises = cards.map(async (cardInput) => {
     const { cardQty, cardName } = parseCardInput(cardInput);
 
     if (cardName === null) {
@@ -375,45 +378,54 @@ app.post("/priceCheck", async function (req, res) {
 
     // Ignore basic lands
     if (BASIC_LAND_TYPES.includes(cardName)) {
-      results.push({
+      return {
         name: cardName,
         quantity: cardQty,
         price: 0,
-      });
-      continue;
+      };
     }
 
-    // Check price in DynamoDB
+    // Check price in DynamoDB first
     let cardPrice = await getPriceFromDynamoDB(cardName);
 
     if (cardPrice === null) {
-      // Check if it's a land that belongs to a cycle
+      // Delay only for Scryfall API calls, staggered by 100ms per API call made
+      await delay(apiCallCounter * 100);
+
+      // Check if the card belongs to a land cycle
       const isCycleLand = await getCheapestCycleLandPrice(cardName);
       if (isCycleLand !== null) {
         cardPrice = isCycleLand;
       } else {
-        // Otherwise, fetch the cheapest printing of the card
+        // Otherwise, fetch the cheapest printing of the card from Scryfall
         cardPrice = await fetchCheapestCardPrice(cardName);
       }
+
+      // Increment the API call counter only after an actual API call is made
+      apiCallCounter++;
+
+      // Save the fetched price to DynamoDB, if a valid price was found
       if (cardPrice !== null) {
-        // Save the fetched price to DynamoDB
         await savePriceToDynamoDB(cardName, cardPrice);
       } else {
         // Handle cases where price could not be fetched
-        cardPrice === null;
+        cardPrice = null;
       }
     }
 
-    // Add result to array
-    results.push({
+    // Return the result object for this card
+    return {
       name: cardName,
       quantity: cardQty,
       price: cardPrice,
-    });
-  }
+    };
+  });
+
+  // Wait for all promises to resolve
+  const cardResults = await Promise.all(promises);
 
   // Return the final results
-  res.json(results);
+  res.json(cardResults);
 });
 
 // Export the app object for Lambda

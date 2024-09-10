@@ -9,19 +9,21 @@
       "UnauthRoleName": "amplify-edhtracker-master-c66d9-unauthRole",
       "StackName": "amplify-edhtracker-master-c66d9",
       "StackId": "arn:aws:cloudformation:us-east-1:471112850924:stack/amplify-edhtracker-master-c66d9/b880d530-059d-11ef-bed2-0affd20caca5",
-      "AmplifyAppId": "da8env0pzxt6y"
+      "AmplifyAppId": "da8env0pzxt6y",
+      "APIGatewayAuthURL": "https://s3.amazonaws.com/amplify-edhtracker-master-c66d9-deployment/amplify-cfn-templates/api/APIGatewayAuthStack.json"
     },
     "categories": {
       "auth": {
         "edhtracker7b29e6af": {}
       },
       "api": {
-        "edhtracker": {}
+        "edhtracker": {},
+        "edhtrackerREST": {}
       },
       "function": {
         "pricecheck": {
           "deploymentBucketName": "amplify-edhtracker-master-c66d9-deployment",
-          "s3Key": "amplify-builds/pricecheck-6d55486b466661674e38-build.zip"
+          "s3Key": "amplify-builds/pricecheck-54465730437866706649-build.zip"
         }
       },
       "storage": {

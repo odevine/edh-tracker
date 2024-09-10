@@ -4,6 +4,11 @@ export type AmplifyDependentResourcesAttributes = {
       "GraphQLAPIEndpointOutput": "string",
       "GraphQLAPIIdOutput": "string",
       "GraphQLAPIKeyOutput": "string"
+    },
+    "edhtrackerREST": {
+      "ApiId": "string",
+      "ApiName": "string",
+      "RootUrl": "string"
     }
   },
   "auth": {
