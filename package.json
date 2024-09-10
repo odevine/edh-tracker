@@ -18,7 +18,7 @@
     "@mui/material": "^5.15.15",
     "@mui/x-date-pickers": "^7.4.0",
     "aws-amplify": "^6.1.4",
-    "axios": "^1.6.8",
+    "axios": "^1.7.7",
     "lodash": "^4.17.21",
     "luxon": "^3.4.4",
     "material-ui-popup-state": "^5.1.0",

@@ -1,0 +1,44 @@
+{
+  "resource": "/priceCheck",
+  "path": "/priceCheck",
+  "httpMethod": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "Accept": "application/json"
+  },
+  "multiValueHeaders": {
+    "Content-Type": ["application/json"]
+  },
+  "queryStringParameters": null,
+  "multiValueQueryStringParameters": null,
+  "pathParameters": null,
+  "stageVariables": null,
+  "requestContext": {
+    "resourceId": "123456",
+    "resourcePath": "/priceCheck",
+    "httpMethod": "POST",
+    "extendedRequestId": "XYZ123",
+    "requestTime": "04/Sep/2024:15:34:55 +0000",
+    "path": "/priceCheck",
+    "accountId": "123456789012",
+    "protocol": "HTTP/1.1",
+    "stage": "prod",
+    "domainPrefix": "api",
+    "requestTimeEpoch": 1609459200000,
+    "requestId": "abcdef12-1234-5678-abcd-12345678abcd",
+    "identity": {
+      "cognitoIdentityPoolId": null,
+      "accountId": null,
+      "cognitoIdentityId": null,
+      "caller": null,
+      "sourceIp": "127.0.0.1",
+      "principalOrgId": null,
+      "userAgent": "Custom User Agent String",
+      "user": null
+    },
+    "domainName": "api.example.com",
+    "apiId": "1234567890"
+  },
+  "body": "{\"cards\": [\"1 Marsh Flats\"]}",
+  "isBase64Encoded": false
+}
