@@ -388,88 +388,59 @@ const parseCardInput = (cardInput) => {
   return { cardQty, cardName };
 };
 
-// Function to purge all items from the table
 const purgeCache = async () => {
-  let lastEvaluatedKey = null;
-
-  do {
+  try {
     // Scan the table to get all items
     const scanParams = {
       TableName: tableName,
-      ExclusiveStartKey: lastEvaluatedKey,
     };
 
-    try {
-      const scanResult = await ddbDocClient.send(new ScanCommand(scanParams));
-      const items = scanResult.Items;
-      lastEvaluatedKey = scanResult.LastEvaluatedKey;
+    let items;
+    let scannedItems = [];
 
-      if (!items || items.length === 0) {
-        console.log(`Table ${tableName} is already empty.`);
-        return;
-      }
+    do {
+      const data = await ddbDocClient.send(new ScanCommand(scanParams));
+      items = data.Items;
+      scannedItems = scannedItems.concat(items);
 
-      // Split items into batches for deletion
-      for (let i = 0; i < items.length; i += MAX_BATCH_SIZE) {
-        const batch = items.slice(i, i + MAX_BATCH_SIZE);
+      // If there's more data to be retrieved (pagination), update the ExclusiveStartKey
+      scanParams.ExclusiveStartKey = data.LastEvaluatedKey;
+    } while (typeof scanParams.ExclusiveStartKey !== "undefined");
 
-        const deleteRequests = batch
-          .map((item) => {
-            if (!item.cardName) {
-              console.error(`Item missing cardName:`, item);
-              return null; // Skip this item if cardName is missing or undefined
-            }
-
-            return {
-              DeleteRequest: {
-                Key: {
-                  cardName: item.cardName,
-                },
+    // Batch delete items in chunks of 25 (max for DynamoDB batch operations)
+    const deletePromises = [];
+    for (let i = 0; i < scannedItems.length; i += MAX_BATCH_SIZE) {
+      const batchItems = scannedItems.slice(i, i + MAX_BATCH_SIZE);
+      const deleteParams = {
+        RequestItems: {
+          [tableName]: batchItems.map((item) => ({
+            DeleteRequest: {
+              Key: {
+                cardName: item.cardName, // Assuming cardName is the partition key
               },
-            };
-          })
-          .filter((request) => request !== null); // Remove any null requests
+            },
+          })),
+        },
+      };
 
-        // Only proceed if there are valid delete requests
-        if (deleteRequests.length === 0) {
-          continue; // Skip if no valid delete requests
-        }
-
-        const deleteParams = {
-          RequestItems: {
-            [tableName]: deleteRequests,
-          },
-        };
-
-        // Log the requests being sent for debugging
-        console.log(
-          "Sending delete requests:",
-          JSON.stringify(deleteParams, null, 2),
-        );
-
-        // Retry unprocessed items logic
-        let unprocessedItems = null;
-        do {
-          const batchWriteResponse = await ddbDocClient.send(
-            new BatchWriteCommand(deleteParams),
-          );
-          unprocessedItems = batchWriteResponse.UnprocessedItems;
-
-          // Retry any unprocessed items with exponential backoff
-          if (unprocessedItems && Object.keys(unprocessedItems).length > 0) {
-            console.log(`Retrying unprocessed items...`);
-            await delay(1000); // Simple delay for retry; consider exponential backoff for larger sets
-            deleteParams.RequestItems = unprocessedItems;
-          }
-        } while (unprocessedItems && Object.keys(unprocessedItems).length > 0);
-      }
-    } catch (error) {
-      console.error("Error scanning or deleting items:", error);
-      throw new Error(`Failed to scan or delete items: ${error.message}`);
+      // Add the batch write to promises
+      deletePromises.push(
+        ddbDocClient.send(new BatchWriteCommand(deleteParams)),
+      );
     }
-  } while (lastEvaluatedKey); // Continue scanning until all items are processed
-};
 
+    // Execute all batch delete promises
+    await Promise.all(deletePromises);
+
+    console.log(`Successfully deleted all items from table ${tableName}`);
+  } catch (error) {
+    console.error(
+      `Error purging cache from DynamoDB table: ${tableName}`,
+      error,
+    );
+    throw error; // Let the error bubble up for proper HTTP response handling
+  }
+};
 
 app.options("*", cors());
 

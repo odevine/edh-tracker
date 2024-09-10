@@ -5,7 +5,9 @@
       "dynamodb:PutItem",
       "dynamodb:GetItem",
       "dynamodb:UpdateItem",
-      "dynamodb:DeleteItem"
+      "dynamodb:DeleteItem",
+      "dynamodb:Scan",
+      "dynamodb:BatchWriteItem"
     ],
     "Resource": [
       "arn:aws:dynamodb:us-east-1:471112850924:table/CardPrices-master"
