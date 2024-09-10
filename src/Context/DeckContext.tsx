@@ -49,7 +49,6 @@ export const DeckProvider = ({ children }: PropsWithChildren<{}>) => {
   const [userDecks, setUserDecks] = useState<Deck[]>([]);
   const [decksLoading, setDecksLoading] = useState(true);
   const [deckToUserMap, setDeckToUserMap] = useState(new Map<string, User>());
-  console.log("  ~ DeckProvider ~ allDeckCategories:", allDeckCategories);
 
   useEffect(() => {
     if (authenticatedUser) {
@@ -214,7 +213,14 @@ export const DeckProvider = ({ children }: PropsWithChildren<{}>) => {
       updateExistingDeck,
       deleteDeckById,
     }),
-    [allDecks, allDeckCategories, userDecks, decksLoading, deckToUserMap, getDeckUserColor],
+    [
+      allDecks,
+      allDeckCategories,
+      userDecks,
+      decksLoading,
+      deckToUserMap,
+      getDeckUserColor,
+    ],
   );
 
   return (

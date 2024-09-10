@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "paths": {
+    "/priceCheck": {
+      "name": "/priceCheck",
+      "lambdaFunction": "pricecheck",
+      "permissions": {
+        "setting": "private",
+        "auth": [
+          "read"
+        ]
+      }
+    }
+  }
+}

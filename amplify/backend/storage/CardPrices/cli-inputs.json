@@ -1,0 +1,10 @@
+{
+  "resourceName": "CardPrices",
+  "tableName": "CardPrices",
+  "partitionKey": {
+    "fieldName": "cardName",
+    "fieldType": "string"
+  },
+  "gsi": [],
+  "triggerFunctions": []
+}

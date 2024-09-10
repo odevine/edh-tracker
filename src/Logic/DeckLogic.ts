@@ -13,7 +13,11 @@ import {
   UpdateDeckInput,
 } from "@/API";
 import { createDeck, deleteDeck, updateDeck } from "@/graphql/mutations";
-import { decksByDeckOwnerId, listDecks, listDeckCategories } from "@/graphql/queries";
+import {
+  decksByDeckOwnerId,
+  listDeckCategories,
+  listDecks,
+} from "@/graphql/queries";
 
 const client = generateClient();
 
@@ -47,7 +51,9 @@ export const getAllDecksFn = async (): Promise<Deck[] | null> => {
   }
 };
 
-export const getAllDecksCategoriesFn = async (): Promise<DeckCategory[] | null> => {
+export const getAllDecksCategoriesFn = async (): Promise<
+  DeckCategory[] | null
+> => {
   try {
     let allCategories: DeckCategory[] = [];
     let nextToken: string | null = null;
@@ -63,7 +69,10 @@ export const getAllDecksCategoriesFn = async (): Promise<DeckCategory[] | null> 
         response.data.listDeckCategories &&
         response.data.listDeckCategories.items
       ) {
-        allCategories = [...allCategories, ...response.data.listDeckCategories.items];
+        allCategories = [
+          ...allCategories,
+          ...response.data.listDeckCategories.items,
+        ];
         nextToken = response.data.listDeckCategories.nextToken;
       } else {
         nextToken = null;
@@ -248,3 +257,33 @@ export const getCardArt = async (
   }
 };
 
+export function parseDecklist(decklist: string): string[] {
+  const parsedDecklist: string[] = [];
+
+  // Split the decklist by newlines
+  const lines = decklist.split("\n");
+
+  // Regular expression to match lines with the format: <quantity> <card name> (optional set/collector number/foil)
+  const regex = /^\s*(\d+)\s+([^(]+)/;
+
+  lines.forEach((line) => {
+    // Use regex to extract quantity and card name
+    const match = line.match(regex);
+
+    if (match) {
+      const quantity = match[1];
+      let cardName = match[2].trim();
+
+      // Check if the cardName contains "//" and trim anything after it
+      const splitCardIndex = cardName.indexOf(" // ");
+      if (splitCardIndex !== -1) {
+        cardName = cardName.substring(0, splitCardIndex).trim();
+      }
+
+      // Add to the parsed list in the format: "quantity cardName"
+      parsedDecklist.push(`${quantity} ${cardName}`);
+    }
+  });
+
+  return parsedDecklist;
+}
