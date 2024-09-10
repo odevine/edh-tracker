@@ -27,15 +27,23 @@ const SCRYFALL_API_URL = "https://api.scryfall.com/cards/";
 const BASIC_LAND_TYPES = [
   "Plains",
   "Island",
+  "Islands",
   "Swamp",
+  "Swamps",
   "Mountain",
+  "Mountains",
   "Forest",
+  "Forests",
   "Wastes",
   "Snow-Covered Plains",
   "Snow-Covered Island",
+  "Snow-Covered Islands",
   "Snow-Covered Swamp",
+  "Snow-Covered Swamps",
   "Snow-Covered Mountain",
+  "Snow-Covered Mountains",
   "Snow-Covered Forest",
+  "Snow-Covered Forests",
   "Snow-Covered Wastes",
 ];
 
