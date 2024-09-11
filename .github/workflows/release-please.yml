@@ -3,7 +3,7 @@ name: Release Please
 on:
   push:
     branches:
-      - main  # Trigger on pushes to the main branch
+      - master
 
 jobs:
   release:
@@ -15,5 +15,5 @@ jobs:
       - name: Release Please
         uses: google-github-actions/release-please-action@v4
         with:
-          release-type: node  # or other release types as appropriate
-          package-name: my-app  # replace with your app name
+          release-type: node
+          package-name: edh-tracker
