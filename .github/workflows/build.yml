@@ -34,7 +34,7 @@ jobs:
         run: npm ci
 
       - name: Inject Exports
-        run: echo '' > ./src/aws-exports.js
+        run: echo 'const awsmobile = {}; export default awsmobile;' > ./src/aws-exports.js
 
       - name: Run Build
         run: npm run build
