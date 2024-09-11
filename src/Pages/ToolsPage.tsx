@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   CircularProgress,
   Container,
@@ -9,7 +10,7 @@ import {
 } from "@mui/material";
 import { del, post } from "aws-amplify/api";
 import { navigate } from "raviger";
-import { useState } from "react";
+import { UIEvent, useEffect, useRef, useState } from "react";
 
 import { useUser } from "@/Context";
 
@@ -55,7 +56,22 @@ export const ToolsPage = (): JSX.Element => {
   const { authenticatedUser, isAdmin } = useUser();
   const [priceLoading, setPriceLoading] = useState(false);
   const [deckList, setDeckList] = useState("");
-  const [deckPrice, setDeckPrice] = useState("");
+  const [priceCheckResponse, setPriceCheckResponse] = useState<
+    PriceCheckCard[]
+  >([]);
+  const textFieldRef = useRef<HTMLDivElement>(null);
+  const otherComponentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (
+      textFieldRef.current &&
+      otherComponentRef.current &&
+      priceCheckResponse.length > 0
+    ) {
+      // Sync scroll position after rendering
+      otherComponentRef.current.scrollTop = textFieldRef.current.scrollTop;
+    }
+  }, [priceCheckResponse]);
 
   const isPriceCheckCardArray = (data: any): data is PriceCheckCard[] => {
     return (
@@ -70,11 +86,6 @@ export const ToolsPage = (): JSX.Element => {
   };
 
   const handlePriceCheckClick = async () => {
-    if (deckList.trim() === "") {
-      setDeckPrice("deck cannot be empty");
-      return;
-    }
-
     try {
       setPriceLoading(true);
       const restOperation = post({
@@ -91,18 +102,17 @@ export const ToolsPage = (): JSX.Element => {
         const data: unknown = await response.body.json();
 
         if (isPriceCheckCardArray(data)) {
-          const cards: PriceCheckCard[] = data;
-          const total = cards.reduce((acc, card) => {
-            const quantity = card.quantity ?? 0; // Use 0 if quantity is null
-            const price = card.price ?? 0;
-            return acc + quantity * price;
-          }, 0);
-          setDeckPrice(`$${total.toFixed(2)}`);
+          setPriceCheckResponse(data);
+
+          // Sync the scroll of otherComponentRef to match textFieldRef
+          if (textFieldRef.current && otherComponentRef.current) {
+            otherComponentRef.current.scrollTop =
+              textFieldRef.current.scrollTop;
+          }
         }
       }
     } catch (error) {
-      console.error("Error calling Lambda:", error);
-      setDeckPrice("an error occurred");
+      console.error("error calling priceCheck lambda:", error);
     } finally {
       setPriceLoading(false);
     }
@@ -160,6 +170,26 @@ export const ToolsPage = (): JSX.Element => {
     );
   }
 
+  const handleScroll = (
+    e: UIEvent<HTMLInputElement | HTMLTextAreaElement, UIEvent>,
+  ) => {
+    if (textFieldRef.current && otherComponentRef.current) {
+      const target = e.target as HTMLElement;
+      if (target === textFieldRef.current) {
+        otherComponentRef.current.scrollTop = target.scrollTop;
+      } else {
+        textFieldRef.current.scrollTop = target.scrollTop;
+      }
+    }
+  };
+
+  const BOX_ROWS = 25;
+  const BOX_LINE_HEIGHT = 24;
+  const BOX_PY = 16.5;
+  const BOX_PX = 14;
+  const BOX_WIDTH = 600;
+  const BOX_HEIGHT = BOX_ROWS * BOX_LINE_HEIGHT + 2 * BOX_PY;
+
   return (
     <Stack
       sx={{ height: "100%", width: "100%", textAlign: "center" }}
@@ -168,41 +198,145 @@ export const ToolsPage = (): JSX.Element => {
       spacing={2}
     >
       <Typography variant="h5">deck price check</Typography>
-      <TextField
-        sx={{ maxWidth: 600 }}
-        placeholder={`1 Emry, Lurker of the Loch
-          28 Islands
-          1 Fabricate (40K) 181
-          1 Malevolent Hermit // Benevolent Geist (MID) 61 *F*
-          ...
-        `
-          .split("\n")
-          .map((line) => line.trim())
-          .join("\n")}
-        multiline
-        rows={25}
-        fullWidth
-        onChange={(event) => setDeckList(event.target.value)}
-      />
+
+      <Stack direction="row" spacing={2} sx={{ height: BOX_HEIGHT }}>
+        <Box
+          sx={{
+            height: BOX_HEIGHT,
+            width: BOX_WIDTH,
+            overflow: "auto",
+          }}
+        >
+          <TextField
+            placeholder={`1 Emry, Lurker of the Loch
+              28 Islands
+              1 Fabricate (40K) 181
+              1 Malevolent Hermit // Benevolent Geist (MID) 61 *F*
+              ...
+            `
+              .split("\n")
+              .map((line) => line.trim())
+              .join("\n")}
+            multiline
+            rows={BOX_ROWS}
+            fullWidth
+            onChange={(event) => setDeckList(event.target.value)}
+            inputProps={{
+              onScroll: handleScroll as any,
+              ref: textFieldRef,
+              autoCapitalize: "off",
+              autoCorrect: "off",
+              spellCheck: false,
+              style: {
+                lineHeight: "24px",
+              },
+            }}
+          />
+        </Box>
+
+        {/* Wrapper for the Other Component */}
+        <Box
+          sx={{
+            border: "1px solid #595757",
+            textAlign: "left",
+            borderRadius: "4px",
+            py: `${BOX_PY}px`,
+            px: `${BOX_PX}px`,
+            color: "#8e8d8f",
+            height: BOX_HEIGHT,
+          }}
+        >
+          <Box
+            component="div"
+            sx={{
+              overflow: "auto",
+              height: BOX_ROWS * BOX_LINE_HEIGHT,
+              width: BOX_WIDTH - 2 * BOX_PX,
+            }}
+            ref={otherComponentRef}
+            onScroll={handleScroll as any}
+          >
+            {priceCheckResponse.map((line, index) => (
+              <Stack
+                key={index}
+                direction="row"
+                justifyContent="space-between"
+                sx={{ pr: 1 }}
+              >
+                <Typography>{line.name}</Typography>
+                {line.price !== null && line.quantity !== null ? (
+                  <Typography>
+                    {line.quantity > 1
+                      ? `($${line.price.toFixed(2)} each)`
+                      : ""}
+                    &nbsp;${(line.price * line.quantity).toFixed(2)}
+                  </Typography>
+                ) : (
+                  <Typography color="error">could not find</Typography>
+                )}
+              </Stack>
+            ))}
+          </Box>
+        </Box>
+      </Stack>
       <Stack direction="row" spacing={2}>
         <Button
-          onClick={handlePriceCheckClick}
           variant="contained"
-          disabled={priceLoading}
+          disabled={priceLoading || deckList.trim() === ""}
+          onClick={handlePriceCheckClick}
         >
           {priceLoading ? "checking..." : "check price"}
         </Button>
         {isAdmin && (
-          <Button variant="contained" onClick={handlePurgeCacheClick}>
+          <Button
+            variant="contained"
+            disabled={priceLoading}
+            onClick={handlePurgeCacheClick}
+          >
             purge cache
           </Button>
         )}
       </Stack>
-      {/* Show a loading spinner when price is being calculated */}
-      {priceLoading ? (
-        <CircularProgress size={24} />
-      ) : (
-        <Typography>{deckPrice !== "" ? deckPrice : "???"}</Typography>
+
+      {!priceLoading && (
+        <Stack
+          direction="row"
+          spacing={1}
+          justifyContent="center"
+          alignItems="center"
+        >
+          <Typography>
+            {(() => {
+              const total = priceCheckResponse.reduce(
+                (acc, card) =>
+                  card.price !== null && card.quantity !== null
+                    ? acc + card.price * card.quantity
+                    : acc,
+                0,
+              );
+              return `total: $${total.toFixed(2)}`;
+            })()}
+          </Typography>
+          <Typography color="error">
+            {(() => {
+              const errorCount = priceCheckResponse.filter(
+                (card) => card.price === null || card.quantity === null,
+              ).length;
+              if (errorCount === 0) {
+                return "";
+              }
+              const errorText = errorCount === 1 ? "error" : "errors";
+              return `(${errorCount} ${errorText})`;
+            })()}
+          </Typography>
+        </Stack>
+      )}
+
+      {priceLoading && (
+        <Stack direction="row" spacing={2}>
+          <CircularProgress size={24} />
+          <Typography>this may take a bit...</Typography>
+        </Stack>
       )}
     </Stack>
   );
