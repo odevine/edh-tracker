@@ -1,0 +1,19 @@
+name: Release Please
+
+on:
+  push:
+    branches:
+      - main  # Trigger on pushes to the main branch
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Release Please
+        uses: google-github-actions/release-please-action@v4
+        with:
+          release-type: node  # or other release types as appropriate
+          package-name: my-app  # replace with your app name
