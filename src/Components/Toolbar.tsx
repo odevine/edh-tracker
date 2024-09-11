@@ -30,6 +30,8 @@ export const Toolbar = () => {
   const [userMenuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
+  const appVersion = import.meta.env.APP_VERSION;
+
   interface NavItem {
     label: string;
     action: () => void;
@@ -179,7 +181,8 @@ export const Toolbar = () => {
             ))}
           </Stack>
           <Box flexGrow={1} />
-          <Stack direction="row" spacing={1}>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Typography>v{appVersion}</Typography>
             <ThemeToggle />
             <Avatar
               onClick={handleUserMenuOpen}
