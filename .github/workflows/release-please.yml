@@ -1,19 +1,19 @@
-name: Release Please
-
 on:
   push:
     branches:
       - master
 
+name: release-please
+
 jobs:
-  release:
+  release-please:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
       - name: Release Please
-        uses: google-github-actions/release-please-action@v4
+        uses: googleapis/release-please-action@v4
         with:
-          release-type: node
-          package-name: edh-tracker
+          release-type: simple
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
