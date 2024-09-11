@@ -7,10 +7,9 @@ import { Redirect, useRoutes } from "raviger";
 import { AppAlertList, LoadingBackdrop, Toolbar } from "@/Components";
 import { useApp, useDeck, useMatch, useUser } from "@/Context";
 import { DecksPage, MatchesPage, Profile, ToolsPage, UsersPage } from "@/Pages";
+import awsmobile from "./aws-exports";
 
-const awsConfig = require("./aws-exports").default;
-
-Amplify.configure(awsConfig);
+Amplify.configure(awsmobile);
 
 const NotFoundPage = () => (
   <Stack sx={{ height: "100%" }} justifyContent="center" alignItems="center">
