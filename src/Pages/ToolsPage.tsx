@@ -227,8 +227,11 @@ export const ToolsPage = (): JSX.Element => {
               autoCapitalize: "off",
               autoCorrect: "off",
               spellCheck: false,
-              style: {
+              sx: {
                 lineHeight: "24px",
+                whiteSpace: "pre",
+                wrap: "off",
+                overflowX: "hidden",
               },
             }}
           />
