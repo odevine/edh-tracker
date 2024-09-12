@@ -223,6 +223,18 @@ const LAND_CYCLES = {
     "underground sea",
     "volcanic island",
   ],
+  "cycle-dsk-thirteenland": [
+    "abandoned campground",
+    "bleeding woods",
+    "etched cornfield",
+    "lakeside shack",
+    "murky sewer",
+    "neglected manor",
+    "peculiar lighthouse",
+    "raucous carnival",
+    "razortrap gorge",
+    "strangled cemetery",
+  ],
 };
 
 const ILLEGAL_SETS = [
@@ -270,7 +282,7 @@ const findLowestUsdPrice = (cards) => {
 };
 
 const fetchCheapestCardPrice = async (cardName, delayMs = 100) => {
-  const apiUrl = `${SCRYFALL_API_URL}search?q=name%3A${encodeURIComponent(cardName)}&order=usd&dir=asc&unique=prints`;
+  const apiUrl = `${SCRYFALL_API_URL}search?q=%21%22${encodeURIComponent(cardName)}%22&unique=prints`;
 
   try {
     // Make the API request using axios
@@ -288,7 +300,7 @@ const fetchCheapestCardPrice = async (cardName, delayMs = 100) => {
 };
 
 const fetchCycleCardsByOracleTag = async (oracleTag) => {
-  const apiUrl = `${SCRYFALL_API_URL}search?q=oracletag:${encodeURIComponent(oracleTag)}+type:land&order=usd&dir=asc&unique=prints`;
+  const apiUrl = `${SCRYFALL_API_URL}search?q=oracletag:${encodeURIComponent(oracleTag)}+type:land&unique=prints`;
 
   try {
     const response = await fetch(apiUrl);
