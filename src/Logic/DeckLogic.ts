@@ -171,7 +171,7 @@ export const deleteDeckFn = async (deckId: string): Promise<boolean> => {
       deleteDeckResponse.data.deleteDeck.id
     ) {
       console.log(
-        "Deck deleted successfully:",
+        "deck deleted successfully:",
         deleteDeckResponse.data.deleteDeck,
       );
       return true;
