@@ -89,7 +89,7 @@ const loadStateFromLocalStorage = () => {
 };
 
 export const DecksPage = (): JSX.Element => {
-  const { allDecks } = useDeck();
+  const { allDecks, allDeckCategories } = useDeck();
   const { allUserProfiles } = useUser();
   const { mode } = useTheme();
   const { allMatches, allMatchParticipants } = useMatch();
@@ -359,7 +359,7 @@ export const DecksPage = (): JSX.Element => {
                     <Typography variant="body2">type:</Typography>
                   </Grid>
                   <Grid item xs={6}>
-                    <Typography variant="body2">{deck.deckType}</Typography>
+                    <Typography variant="body2">{allDeckCategories.find(category => category.id === deck.deckType)?.name ?? "none"}</Typography>
                   </Grid>
                   <Grid item xs={6}>
                     <Typography variant="body2">commander:</Typography>
@@ -523,7 +523,7 @@ export const DecksPage = (): JSX.Element => {
                         </PopupState>
                       )}
                     </TableCell>
-                    <TableCell>{deck.deckType}</TableCell>
+                    <TableCell>{allDeckCategories.find(category => category.id === deck.deckType)?.name ?? "-"}</TableCell>
                     <TableCell>
                       {deck.commanderName && (
                         <PopupState variant="popover">

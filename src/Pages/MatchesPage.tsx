@@ -63,7 +63,7 @@ const loadStateFromLocalStorage = () => {
 };
 
 export const MatchesPage = (): JSX.Element => {
-  const { allDecks, getDeckUserColor } = useDeck();
+  const { allDecks, getDeckUserColor, allDeckCategories } = useDeck();
   const { isAdmin } = useUser();
   const { allMatches, allMatchParticipants, deleteMatch } = useMatch();
 
@@ -288,7 +288,7 @@ export const MatchesPage = (): JSX.Element => {
                         .setLocale("en-us")
                         .toLocaleString(DateTime.DATE_MED)}
                     </TableCell>
-                    <TableCell>{match.matchType}</TableCell>
+                    <TableCell>{allDeckCategories.find(category => category.id === match.matchType)?.name ?? "-"}</TableCell>
                     <TableCell sx={{ fontWeight: 700 }}>
                       {
                         allDecks.find((deck) => deck.id === match.winningDeckId)
