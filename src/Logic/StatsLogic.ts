@@ -13,6 +13,7 @@ export const getUserStats = (
   allMatches: Match[],
   allMatchParticipants: MatchParticipant[],
   format?: string,
+  includeUnranked?: boolean,
 ): UserStats => {
   // Get all decks owned by the user and is in the format
   const userDecks = allDecks.filter(
@@ -31,11 +32,19 @@ export const getUserStats = (
     (participant) => participant.matchId,
   );
 
+
+  // Filter matches based on the 'includeUnranked' flag
+  const relevantMatches = allMatches.filter((match) => {
+    const isUserInMatch = userMatchIds.includes(match.id);
+    const isRankedMatch = match.matchType !== "none";
+    return isUserInMatch && (includeUnranked ? true : isRankedMatch);
+  });
+
   // Calculate total matches
-  const totalMatches = userMatchIds.length;
+  const totalMatches = relevantMatches.length;
 
   // Calculate total wins by checking if the user's deck is the winning deck in a match
-  const totalWins = allMatches.filter((match) =>
+  const totalWins = relevantMatches.filter((match) =>
     userDeckIds.includes(match.winningDeckId),
   ).length;
 

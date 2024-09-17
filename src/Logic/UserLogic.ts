@@ -42,7 +42,7 @@ export async function getCurrentUserProfileFn(
       return userProfileResponse.data.getUser as User;
     } else {
       console.log(
-        `No user profile found for ${user.userId}, creating new user profile`,
+        `no user profile found for ${user.userId}, creating new user profile`,
       );
       return await createUserFn(user);
     }
@@ -92,7 +92,7 @@ export async function updateUserFn(
       return updatedUserProfileResponse.data.updateUser as User;
     } else {
       console.log(
-        `No user profile found for ${updateData.id}, or update failed`,
+        `no user profile found for ${updateData.id}, or update failed`,
       );
       return null;
     }

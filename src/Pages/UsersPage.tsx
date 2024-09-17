@@ -1,6 +1,8 @@
 import {
   Box,
+  Checkbox,
   Divider,
+  FormControlLabel,
   Grid,
   MenuItem,
   Paper,
@@ -43,6 +45,7 @@ const localStorageKey = "usersPageState";
 const loadStateFromLocalStorage = () => {
   const initialState = {
     stateVersion: LOCAL_STORAGE_VERSION,
+    includeUnranked: false,
     filterType: "",
     order: "desc" as ColumnSortOrder,
     orderBy: "matches" as keyof UserWithStats,
@@ -71,6 +74,9 @@ export const UsersPage = (): JSX.Element => {
 
   const initialState = loadStateFromLocalStorage();
 
+  const [includeUnranked, setIncludeUnranked] = useState(
+    initialState.includeUnranked,
+  );
   const [filterType, setFilterType] = useState(initialState.filterType);
   const [order, setOrder] = useState<ColumnSortOrder>(initialState.order);
   const [orderBy, setOrderBy] = useState<keyof UserWithStats>(
@@ -81,13 +87,14 @@ export const UsersPage = (): JSX.Element => {
   useEffect(() => {
     const newSettings = JSON.stringify({
       stateVersion: LOCAL_STORAGE_VERSION,
+      includeUnranked,
       filterType,
       order,
       orderBy,
       page,
     });
     localStorage.setItem(localStorageKey, newSettings);
-  }, [order, orderBy]);
+  }, [order, orderBy, page, filterType, includeUnranked]);
 
   const handleRequestSort = (property: keyof UserWithStats) => {
     const isAsc = orderBy === property && order === "asc";
@@ -107,10 +114,11 @@ export const UsersPage = (): JSX.Element => {
         allMatches,
         allMatchParticipants,
         filterType,
+        includeUnranked,
       );
       return { ...user, ...userStats };
     });
-  }, [allMatches, allMatchParticipants, filterType]);
+  }, [allMatches, allMatchParticipants, filterType, includeUnranked]);
 
   const visibleRows = useMemo(() => {
     return [...userWithStats].sort(
@@ -122,13 +130,30 @@ export const UsersPage = (): JSX.Element => {
     <Paper sx={{ m: 3 }}>
       <Toolbar sx={{ p: 2, justifyContent: "space-between" }}>
         <Grid container spacing={2}>
-          <Grid item xs={0} sm={6} md={8} lg={10} />
-          <Grid item xs={12} sm={6} md={4} lg={2}>
+          <Grid item xs={0} sm={0} md={4} lg={6} />
+          <Grid item xs={12} sm={6} md={4} lg={3}>
+            {filterType !== "none" && <FormControlLabel
+              labelPlacement="start"
+              label="include unranked?"
+              sx={{ width: "100%" }}
+              control={
+                <Checkbox
+                  sx={{ mr: 2, ml: 1 }}
+                  checked={includeUnranked}
+                  onChange={() => setIncludeUnranked(!includeUnranked)}
+                />
+              }
+            />}
+          </Grid>
+          <Grid item xs={12} sm={6} md={4} lg={3}>
             <TypeSelector
               filterType={filterType}
               setFilterType={(newType) => {
                 setPage(0);
                 setFilterType(newType);
+                if (newType === "none") {
+                  setIncludeUnranked(true);
+                }
               }}
             />
           </Grid>
@@ -265,7 +290,7 @@ export const UsersPage = (): JSX.Element => {
                     <TableCell align="right">{user.totalWins}</TableCell>
                     <TableCell align="right">{user.totalMatches}</TableCell>
                     <TableCell align="right">
-                      {(user.winRate * 100).toFixed(2)}%
+                      {user.winRate ? (user.winRate * 100).toFixed(2) + "%" : "-"}
                     </TableCell>
                   </TableRow>
                 );

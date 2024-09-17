@@ -28,6 +28,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Deck } from "@/API";
 import {
+  CardImageMiniCard,
   ColorSelector,
   CommanderColors,
   DeckModal,
@@ -35,7 +36,6 @@ import {
   HeadCell,
   PlayerSelector,
   ProfileMiniCard,
-  CardImageMiniCard,
   TypeSelector,
 } from "@/Components";
 import { LOCAL_STORAGE_VERSION } from "@/Constants";
@@ -57,6 +57,7 @@ const headCells: HeadCell<DeckWithStats>[] = [
   { id: "commanderColors", label: "colors" },
   { id: "totalWins", label: "wins", alignment: "right", sortable: true },
   { id: "totalMatches", label: "matches", alignment: "right", sortable: true },
+  { id: "winRate", label: "win rate", alignment: "right", sortable: true },
   { id: "cost", label: "cost", alignment: "right", sortable: true },
 ];
 
@@ -88,7 +89,7 @@ const loadStateFromLocalStorage = () => {
 };
 
 export const DecksPage = (): JSX.Element => {
-  const { allDecks } = useDeck();
+  const { allDecks, allDeckCategories } = useDeck();
   const { allUserProfiles } = useUser();
   const { mode } = useTheme();
   const { allMatches, allMatchParticipants } = useMatch();
@@ -358,7 +359,7 @@ export const DecksPage = (): JSX.Element => {
                     <Typography variant="body2">type:</Typography>
                   </Grid>
                   <Grid item xs={6}>
-                    <Typography variant="body2">{deck.deckType}</Typography>
+                    <Typography variant="body2">{allDeckCategories.find(category => category.id === deck.deckType)?.name ?? "none"}</Typography>
                   </Grid>
                   <Grid item xs={6}>
                     <Typography variant="body2">commander:</Typography>
@@ -388,13 +389,27 @@ export const DecksPage = (): JSX.Element => {
                     <Typography variant="body2">wins:</Typography>
                   </Grid>
                   <Grid item xs={6}>
-                    <Typography variant="body2">{deck.totalWins}</Typography>
+                    <Typography variant="body2">
+                      {deck.totalWins ? deck.totalWins : "-"}
+                    </Typography>
                   </Grid>
                   <Grid item xs={6}>
                     <Typography variant="body2">matches:</Typography>
                   </Grid>
                   <Grid item xs={6}>
-                    <Typography variant="body2">{deck.totalMatches}</Typography>
+                    <Typography variant="body2">
+                      {deck.totalMatches ? deck.totalMatches : "-"}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2">win rate:</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2">
+                      {deck.winRate
+                        ? (deck.winRate * 100).toFixed(2) + "%"
+                        : "-"}
+                    </Typography>
                   </Grid>
                   <Grid item xs={6}>
                     <Typography variant="body2">cost:</Typography>
@@ -508,7 +523,7 @@ export const DecksPage = (): JSX.Element => {
                         </PopupState>
                       )}
                     </TableCell>
-                    <TableCell>{deck.deckType}</TableCell>
+                    <TableCell>{allDeckCategories.find(category => category.id === deck.deckType)?.name ?? "-"}</TableCell>
                     <TableCell>
                       {deck.commanderName && (
                         <PopupState variant="popover">
@@ -528,7 +543,9 @@ export const DecksPage = (): JSX.Element => {
                                   horizontal: "right",
                                 }}
                               >
-                                <CardImageMiniCard cardName={deck.commanderName} />
+                                <CardImageMiniCard
+                                  cardName={deck.commanderName}
+                                />
                               </HoverPopover>
                             </Box>
                           )}
@@ -538,27 +555,31 @@ export const DecksPage = (): JSX.Element => {
                         <>
                           <br />
                           <PopupState variant="popover">
-                          {(popupState) => (
-                            <Box {...bindHover(popupState)}>
-                              <Box sx={{ cursor: "pointer" }}>
-                                {deck.secondCommanderName}
+                            {(popupState) => (
+                              <Box {...bindHover(popupState)}>
+                                <Box sx={{ cursor: "pointer" }}>
+                                  {deck.secondCommanderName}
+                                </Box>
+                                <HoverPopover
+                                  {...bindPopover(popupState)}
+                                  anchorOrigin={{
+                                    vertical: "top",
+                                    horizontal: "left",
+                                  }}
+                                  transformOrigin={{
+                                    vertical: "center",
+                                    horizontal: "right",
+                                  }}
+                                >
+                                  <CardImageMiniCard
+                                    cardName={
+                                      deck.secondCommanderName as string
+                                    }
+                                  />
+                                </HoverPopover>
                               </Box>
-                              <HoverPopover
-                                {...bindPopover(popupState)}
-                                anchorOrigin={{
-                                  vertical: "top",
-                                  horizontal: "left",
-                                }}
-                                transformOrigin={{
-                                  vertical: "center",
-                                  horizontal: "right",
-                                }}
-                              >
-                                <CardImageMiniCard cardName={deck.secondCommanderName as string} />
-                              </HoverPopover>
-                            </Box>
-                          )}
-                        </PopupState>
+                            )}
+                          </PopupState>
                         </>
                       )}
                     </TableCell>
@@ -572,6 +593,11 @@ export const DecksPage = (): JSX.Element => {
                     </TableCell>
                     <TableCell align="right">{deck.totalWins}</TableCell>
                     <TableCell align="right">{deck.totalMatches}</TableCell>
+                    <TableCell align="right">
+                      {deck.winRate
+                        ? (deck.winRate * 100).toFixed(2) + "%"
+                        : "-"}
+                    </TableCell>
                     <TableCell align="right">
                       {deck.cost
                         ? deck.cost.toLocaleString("en-US", {

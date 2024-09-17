@@ -29,7 +29,7 @@ export const UserDecksCard = (props: {
   userProfile: User;
 }) => {
   const { ownUser, userProfile } = props;
-  const { allDecks, deleteDeckById } = useDeck();
+  const { allDecks, deleteDeckById, allDeckCategories } = useDeck();
   const { allMatchParticipants } = useMatch();
   const { mode } = useTheme();
 
@@ -120,7 +120,7 @@ export const UserDecksCard = (props: {
                         </>
                       )}
                     </TableCell>
-                    <TableCell>{deck.deckType}</TableCell>
+                    <TableCell>{allDeckCategories.find(category => category.id === deck.deckType)?.name ?? "-"}</TableCell>
                     <TableCell>
                       <CommanderColors
                         colors={[
