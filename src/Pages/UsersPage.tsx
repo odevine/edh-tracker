@@ -35,7 +35,7 @@ interface UserWithStats extends User, UserStats {}
 
 const headCells: HeadCell<UserWithStats>[] = [
   { id: "displayName", label: "name", sortable: true },
-  { id: "deckCount", label: "decks", alignment: "right", sortable: true },
+  { id: "deckCount", label: "active decks", alignment: "right", sortable: true },
   { id: "totalWins", label: "wins", alignment: "right", sortable: true },
   { id: "totalMatches", label: "matches", alignment: "right", sortable: true },
   { id: "winRate", label: "win rate", alignment: "right", sortable: true },
@@ -217,7 +217,7 @@ export const UsersPage = (): JSX.Element => {
                     </Typography>
                   </Grid>
                   <Grid item xs={6}>
-                    <Typography variant="body2">decks:</Typography>
+                    <Typography variant="body2">active decks:</Typography>
                   </Grid>
                   <Grid item xs={6}>
                     <Typography variant="body2">{user.deckCount}</Typography>

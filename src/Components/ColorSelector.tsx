@@ -45,7 +45,6 @@ export const ColorSelector = ({
       const containsC = newValue.some((option) => option.id === "C");
 
       if (newValue.length > filterColor.length) {
-        console.log("adding option");
         const newestValue = newValue[newValue.length - 1];
 
         if (newestValue.id === "C" || containsC) {

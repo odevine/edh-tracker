@@ -132,6 +132,7 @@ export type Deck = {
   deckType: string,
   link?: string | null,
   cost?: number | null,
+  isInactive?: boolean | null,
   winningMatches?: ModelMatchConnection | null,
   matchParticipants?: ModelMatchParticipantConnection | null,
   createdAt: string,
@@ -197,6 +198,7 @@ export type CreateDeckInput = {
   deckType: string,
   link?: string | null,
   cost?: number | null,
+  isInactive?: boolean | null,
 };
 
 export type ModelDeckConditionInput = {
@@ -209,6 +211,7 @@ export type ModelDeckConditionInput = {
   deckType?: ModelStringInput | null,
   link?: ModelStringInput | null,
   cost?: ModelFloatInput | null,
+  isInactive?: ModelBooleanInput | null,
   and?: Array< ModelDeckConditionInput | null > | null,
   or?: Array< ModelDeckConditionInput | null > | null,
   not?: ModelDeckConditionInput | null,
@@ -244,6 +247,13 @@ export type ModelFloatInput = {
   attributeType?: ModelAttributeTypes | null,
 };
 
+export type ModelBooleanInput = {
+  ne?: boolean | null,
+  eq?: boolean | null,
+  attributeExists?: boolean | null,
+  attributeType?: ModelAttributeTypes | null,
+};
+
 export type UpdateDeckInput = {
   id: string,
   deckOwnerId?: string | null,
@@ -255,6 +265,7 @@ export type UpdateDeckInput = {
   deckType?: string | null,
   link?: string | null,
   cost?: number | null,
+  isInactive?: boolean | null,
 };
 
 export type DeleteDeckInput = {
@@ -279,13 +290,6 @@ export type ModelMatchConditionInput = {
   not?: ModelMatchConditionInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
-};
-
-export type ModelBooleanInput = {
-  ne?: boolean | null,
-  eq?: boolean | null,
-  attributeExists?: boolean | null,
-  attributeType?: ModelAttributeTypes | null,
 };
 
 export type UpdateMatchInput = {
@@ -375,6 +379,7 @@ export type ModelDeckFilterInput = {
   deckType?: ModelStringInput | null,
   link?: ModelStringInput | null,
   cost?: ModelFloatInput | null,
+  isInactive?: ModelBooleanInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
   and?: Array< ModelDeckFilterInput | null > | null,
@@ -477,6 +482,7 @@ export type ModelSubscriptionDeckFilterInput = {
   deckType?: ModelSubscriptionStringInput | null,
   link?: ModelSubscriptionStringInput | null,
   cost?: ModelSubscriptionFloatInput | null,
+  isInactive?: ModelSubscriptionBooleanInput | null,
   createdAt?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionDeckFilterInput | null > | null,
@@ -495,6 +501,11 @@ export type ModelSubscriptionFloatInput = {
   notIn?: Array< number | null > | null,
 };
 
+export type ModelSubscriptionBooleanInput = {
+  ne?: boolean | null,
+  eq?: boolean | null,
+};
+
 export type ModelSubscriptionMatchFilterInput = {
   id?: ModelSubscriptionIDInput | null,
   winningDeckId?: ModelSubscriptionIDInput | null,
@@ -505,11 +516,6 @@ export type ModelSubscriptionMatchFilterInput = {
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionMatchFilterInput | null > | null,
   or?: Array< ModelSubscriptionMatchFilterInput | null > | null,
-};
-
-export type ModelSubscriptionBooleanInput = {
-  ne?: boolean | null,
-  eq?: boolean | null,
 };
 
 export type ModelSubscriptionMatchParticipantFilterInput = {
@@ -660,6 +666,7 @@ export type CreateDeckMutation = {
     deckType: string,
     link?: string | null,
     cost?: number | null,
+    isInactive?: boolean | null,
     winningMatches?:  {
       __typename: "ModelMatchConnection",
       nextToken?: string | null,
@@ -691,6 +698,7 @@ export type UpdateDeckMutation = {
     deckType: string,
     link?: string | null,
     cost?: number | null,
+    isInactive?: boolean | null,
     winningMatches?:  {
       __typename: "ModelMatchConnection",
       nextToken?: string | null,
@@ -722,6 +730,7 @@ export type DeleteDeckMutation = {
     deckType: string,
     link?: string | null,
     cost?: number | null,
+    isInactive?: boolean | null,
     winningMatches?:  {
       __typename: "ModelMatchConnection",
       nextToken?: string | null,
@@ -950,6 +959,7 @@ export type GetDeckQuery = {
     deckType: string,
     link?: string | null,
     cost?: number | null,
+    isInactive?: boolean | null,
     winningMatches?:  {
       __typename: "ModelMatchConnection",
       nextToken?: string | null,
@@ -984,6 +994,7 @@ export type ListDecksQuery = {
       deckType: string,
       link?: string | null,
       cost?: number | null,
+      isInactive?: boolean | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -1014,6 +1025,7 @@ export type DecksByDeckOwnerIdQuery = {
       deckType: string,
       link?: string | null,
       cost?: number | null,
+      isInactive?: boolean | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -1303,6 +1315,7 @@ export type OnCreateDeckSubscription = {
     deckType: string,
     link?: string | null,
     cost?: number | null,
+    isInactive?: boolean | null,
     winningMatches?:  {
       __typename: "ModelMatchConnection",
       nextToken?: string | null,
@@ -1333,6 +1346,7 @@ export type OnUpdateDeckSubscription = {
     deckType: string,
     link?: string | null,
     cost?: number | null,
+    isInactive?: boolean | null,
     winningMatches?:  {
       __typename: "ModelMatchConnection",
       nextToken?: string | null,
@@ -1363,6 +1377,7 @@ export type OnDeleteDeckSubscription = {
     deckType: string,
     link?: string | null,
     cost?: number | null,
+    isInactive?: boolean | null,
     winningMatches?:  {
       __typename: "ModelMatchConnection",
       nextToken?: string | null,

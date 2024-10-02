@@ -98,6 +98,7 @@ export const getDeck = /* GraphQL */ `query GetDeck($id: ID!) {
     deckType
     link
     cost
+    isInactive
     winningMatches {
       nextToken
       __typename
@@ -129,6 +130,7 @@ export const listDecks = /* GraphQL */ `query ListDecks(
       deckType
       link
       cost
+      isInactive
       createdAt
       updatedAt
       __typename
@@ -163,6 +165,7 @@ export const decksByDeckOwnerId = /* GraphQL */ `query DecksByDeckOwnerId(
       deckType
       link
       cost
+      isInactive
       createdAt
       updatedAt
       __typename

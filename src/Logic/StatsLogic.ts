@@ -54,7 +54,7 @@ export const getUserStats = (
     totalMatches,
     totalWins,
     winRate,
-    deckCount: userDecks.length,
+    deckCount: userDecks.filter(deck => !deck.isInactive).length,
   };
 };
 

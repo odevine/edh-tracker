@@ -141,7 +141,7 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
 
   const filteredDecks = useMemo(() => {
     return allDecks
-      .filter((deck) => matchType === "none" || deck.deckType === matchType)
+      .filter((deck) => !deck.isInactive && (matchType === "none" || deck.deckType === matchType))
       .sort((a, b) => a.deckOwnerId.localeCompare(b.deckOwnerId));
   }, [allDecks, matchType]);
 
