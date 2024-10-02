@@ -149,6 +149,7 @@ export const createDeck = /* GraphQL */ `mutation CreateDeck(
     deckType
     link
     cost
+    isInactive
     winningMatches {
       nextToken
       __typename
@@ -181,6 +182,7 @@ export const updateDeck = /* GraphQL */ `mutation UpdateDeck(
     deckType
     link
     cost
+    isInactive
     winningMatches {
       nextToken
       __typename
@@ -213,6 +215,7 @@ export const deleteDeck = /* GraphQL */ `mutation DeleteDeck(
     deckType
     link
     cost
+    isInactive
     winningMatches {
       nextToken
       __typename

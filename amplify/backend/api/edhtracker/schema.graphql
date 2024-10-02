@@ -26,6 +26,7 @@ type Deck @model @auth(rules: [{allow: private}]) {
   deckType: String!
   link: String
   cost: Float
+  isInactive: Boolean
   winningMatches: [Match] @hasMany(indexName: "byWinningDeck", fields: ["id"])
   matchParticipants: [MatchParticipant] @hasMany(indexName: "byDeck", fields: ["id"])
 }

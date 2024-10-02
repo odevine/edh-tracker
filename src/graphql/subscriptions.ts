@@ -134,6 +134,7 @@ export const onCreateDeck = /* GraphQL */ `subscription OnCreateDeck($filter: Mo
     deckType
     link
     cost
+    isInactive
     winningMatches {
       nextToken
       __typename
@@ -163,6 +164,7 @@ export const onUpdateDeck = /* GraphQL */ `subscription OnUpdateDeck($filter: Mo
     deckType
     link
     cost
+    isInactive
     winningMatches {
       nextToken
       __typename
@@ -192,6 +194,7 @@ export const onDeleteDeck = /* GraphQL */ `subscription OnDeleteDeck($filter: Mo
     deckType
     link
     cost
+    isInactive
     winningMatches {
       nextToken
       __typename

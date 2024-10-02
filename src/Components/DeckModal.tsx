@@ -2,17 +2,17 @@ import {
   Autocomplete,
   Box,
   Button,
-  Checkbox,
   MenuItem,
   Modal,
   Stack,
+  Checkbox,
   TextField,
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 
 import { CreateDeckInput, UpdateDeckInput } from "@/API";
-import { useDeck, useUser, useMatch } from "@/Context";
+import { useDeck, useMatch, useUser } from "@/Context";
 import { sortColors, useCommanderSearch } from "@/Logic";
 
 interface ICommander {
@@ -28,7 +28,8 @@ export const DeckModal = (props: {
 }) => {
   const { open, onClose, editingDeckId } = props;
   const { authenticatedUser } = useUser();
-  const { allDecks, allDeckCategories, createNewDeck, updateExistingDeck } = useDeck();
+  const { allDecks, allDeckCategories, createNewDeck, updateExistingDeck } =
+    useDeck();
   const { allMatchParticipants } = useMatch();
 
   // Find the editing deck based on the editingDeckId
@@ -38,7 +39,7 @@ export const DeckModal = (props: {
   if (editingDeck) {
     deckHasBeenPlayed = allMatchParticipants.some(
       (p) => p.deckId === editingDeck.id,
-    )
+    );
   }
 
   // State for the deck fields
@@ -58,6 +59,7 @@ export const DeckModal = (props: {
   const [deckFormat, setDeckFormat] = useState("");
   const [deckLink, setDeckLink] = useState("");
   const [deckCost, setDeckCost] = useState("");
+  const [deckIsInactive, setDeckIsInactive] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
 
   // Update state when editingDeck changes
@@ -74,6 +76,7 @@ export const DeckModal = (props: {
       setDeckFormat(editingDeck.deckType);
       setDeckLink(editingDeck?.link ?? "");
       setDeckCost(String(editingDeck?.cost) ?? "");
+      setDeckIsInactive(editingDeck?.isInactive ?? false);
 
       let existingSecondCommander: ICommander | null = null;
       if (editingDeck.secondCommanderName) {
@@ -94,6 +97,7 @@ export const DeckModal = (props: {
       setDeckFormat("");
       setDeckLink("");
       setDeckCost("");
+      setDeckIsInactive(false);
       setErrors([]);
       setMultiCommander(false);
       setSecondCommander(null);
@@ -159,6 +163,7 @@ export const DeckModal = (props: {
         deckType: deckFormat,
         cost: deckCost !== "" ? Number(deckCost) : undefined,
         link: deckLink !== "" ? deckLink : undefined,
+        isInactive: deckIsInactive ?? undefined,
       };
 
       if (editingDeck) {
@@ -219,7 +224,7 @@ export const DeckModal = (props: {
           },
         }}
       >
-        <Typography variant="h4" sx={{ mb: 2 }}>
+        <Typography variant="h4" gutterBottom>
           {editingDeck ? "update" : "new"} deck
         </Typography>
         <Stack height={"100%"} justifyContent="space-between" spacing={3}>
@@ -317,9 +322,11 @@ export const DeckModal = (props: {
               value={deckFormat}
               onChange={(event) => setDeckFormat(event.target.value)}
             >
-              {allDeckCategories.map(category => <MenuItem key={category.id} value={category.id}>
-                {category.name}
-              </MenuItem>)}
+              {allDeckCategories.map((category) => (
+                <MenuItem key={category.id} value={category.id}>
+                  {category.name}
+                </MenuItem>
+              ))}
             </TextField>
             <TextField
               fullWidth
@@ -343,7 +350,14 @@ export const DeckModal = (props: {
                 ))}
             </Stack>
           </Stack>
-          <Stack alignItems="flex-end">
+          <Stack justifyContent="space-between" direction="row">
+            <Stack direction="row" alignItems="center">
+              <Checkbox
+                checked={deckIsInactive}
+                onChange={(event) => setDeckIsInactive(event.target.checked)}
+              />
+              <Typography component="span">inactive?</Typography>
+            </Stack>
             <Button
               onClick={handleSubmit}
               variant="contained"

@@ -10,6 +10,7 @@ import {
   IconButton,
   Link,
   Stack,
+  Switch,
   Table,
   TableBody,
   TableCell,
@@ -35,6 +36,7 @@ export const UserDecksCard = (props: {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingDeckId, setEditingDeckId] = useState("");
+  const [includeInactive, setIncludeInactive] = useState(false);
 
   const userColor =
     mode === "light"
@@ -42,15 +44,30 @@ export const UserDecksCard = (props: {
       : userProfile?.darkThemeColor;
 
   const userDecks = allDecks.filter(
-    (deck) => deck.deckOwnerId === userProfile.id,
+    (deck) =>
+      deck.deckOwnerId === userProfile.id &&
+      (includeInactive || !deck.isInactive),
   );
 
   return (
     <>
       <Card>
-        <CardHeader
-          title={`${ownUser ? "your" : `${userProfile.displayName}'${userProfile.displayName.slice(-1) !== "s" ? "s" : ""}`} decks`}
-        />
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          <CardHeader
+            title={`${ownUser ? "your" : `${userProfile.displayName}'${userProfile.displayName.slice(-1) !== "s" ? "s" : ""}`} decks (${userDecks.length})`}
+          />
+          <Stack direction="row" alignItems="center" sx={{ mr: 2 }}>
+            <Switch
+              checked={includeInactive}
+              onChange={(event) => setIncludeInactive(event.target.checked)}
+            />
+            <Typography>include inactive?</Typography>
+          </Stack>
+        </Stack>
         <Divider />
         <CardContent sx={{ minHeight: 154, overflowX: "auto" }}>
           {userDecks.length === 0 ? (
@@ -120,7 +137,11 @@ export const UserDecksCard = (props: {
                         </>
                       )}
                     </TableCell>
-                    <TableCell>{allDeckCategories.find(category => category.id === deck.deckType)?.name ?? "-"}</TableCell>
+                    <TableCell>
+                      {allDeckCategories.find(
+                        (category) => category.id === deck.deckType,
+                      )?.name ?? "-"}
+                    </TableCell>
                     <TableCell>
                       <CommanderColors
                         colors={[

@@ -9,6 +9,7 @@ import {
   Popover,
   Select,
   Stack,
+  Switch,
   Table,
   TableBody,
   TableCell,
@@ -69,6 +70,7 @@ const loadStateFromLocalStorage = () => {
     filterType: "",
     filterUser: "",
     searchQuery: "",
+    includeInactive: false,
     order: "desc" as ColumnSortOrder,
     orderBy: "updatedAt" as keyof DeckWithStats,
     page: 0,
@@ -102,6 +104,9 @@ export const DecksPage = (): JSX.Element => {
   const [filterType, setFilterType] = useState(initialState.filterType);
   const [filterUser, setFilterUser] = useState(initialState.filterUser);
   const [searchQuery, setSearchQuery] = useState(initialState.searchQuery);
+  const [includeInactive, setIncludeInactive] = useState(
+    initialState.includeInactive,
+  );
   const [order, setOrder] = useState<ColumnSortOrder>(initialState.order);
   const [orderBy, setOrderBy] = useState<keyof DeckWithStats>(
     initialState.orderBy,
@@ -129,6 +134,7 @@ export const DecksPage = (): JSX.Element => {
       filterType,
       filterUser,
       searchQuery,
+      includeInactive,
       order,
       orderBy,
       page,
@@ -140,6 +146,7 @@ export const DecksPage = (): JSX.Element => {
     filterType,
     filterUser,
     searchQuery,
+    includeInactive,
     order,
     orderBy,
     page,
@@ -190,6 +197,7 @@ export const DecksPage = (): JSX.Element => {
         ...new Set([...commanderColors, ...secondCommanderColors]),
       ];
       return (
+        (includeInactive || !deck.isInactive) &&
         (filterUser === "" ||
           allUserProfiles.find((profile) => profile.id === deck.deckOwnerId)
             ?.id === filterUser) &&
@@ -200,7 +208,14 @@ export const DecksPage = (): JSX.Element => {
           deck.secondCommanderName?.toLowerCase().includes(lowercasedQuery))
       );
     });
-  }, [allDecks, searchQuery, filterType, filterUser, filterColor]);
+  }, [
+    allDecks,
+    searchQuery,
+    includeInactive,
+    filterType,
+    filterUser,
+    filterColor,
+  ]);
 
   const userProfileMap = useMemo(() => {
     return new Map(allUserProfiles.map((profile) => [profile.id, profile]));
@@ -277,6 +292,19 @@ export const DecksPage = (): JSX.Element => {
                         setFilterUser(newUser);
                       }}
                     />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Stack direction="row" alignItems="center">
+                      <Switch
+                        checked={includeInactive}
+                        onChange={(event) =>
+                          setIncludeInactive(event.target.checked)
+                        }
+                      />
+                      <Typography component="span">
+                        include inactive decks?
+                      </Typography>
+                    </Stack>
                   </Grid>
                 </Grid>
               </Box>
@@ -359,7 +387,11 @@ export const DecksPage = (): JSX.Element => {
                     <Typography variant="body2">type:</Typography>
                   </Grid>
                   <Grid item xs={6}>
-                    <Typography variant="body2">{allDeckCategories.find(category => category.id === deck.deckType)?.name ?? "none"}</Typography>
+                    <Typography variant="body2">
+                      {allDeckCategories.find(
+                        (category) => category.id === deck.deckType,
+                      )?.name ?? "none"}
+                    </Typography>
                   </Grid>
                   <Grid item xs={6}>
                     <Typography variant="body2">commander:</Typography>
@@ -523,7 +555,11 @@ export const DecksPage = (): JSX.Element => {
                         </PopupState>
                       )}
                     </TableCell>
-                    <TableCell>{allDeckCategories.find(category => category.id === deck.deckType)?.name ?? "-"}</TableCell>
+                    <TableCell>
+                      {allDeckCategories.find(
+                        (category) => category.id === deck.deckType,
+                      )?.name ?? "-"}
+                    </TableCell>
                     <TableCell>
                       {deck.commanderName && (
                         <PopupState variant="popover">
