@@ -9,46 +9,70 @@ App is currently live at: [edh.devine.dev](https://edh.devine.dev)
 ### Deck Management
 
 - **Add Deck**: Create a new deck by providing details like name, format, etc.
-  <img src="./assets/add-deck-1.png" alt="adding a new deck" width="400"/>
-  <img src="./assets/add-deck-2.png" alt="setting commander while adding deck" width="400"/>
+
+  ![adding a new deck](./assets/add-deck-1.png)
+
+  ![setting commander while adding deck](./assets/add-deck-2.png)
+
 - **Edit Deck**: Modify existing deck details.
-- **Mark Inactive**: Mark decks as inactive to hide them from active use.
-  <img src="./assets/update-deck.png" alt="updating an existing deck" width="400"/>
+
+- **Mark Inactive**: Mark decks as inactive to hide them from the decks table and when adding decks to matches.
+
+  ![updating an existing deck](./assets/update-deck.png)
+
 - **Remove Deck**: Delete a deck from your collection (only available if the deck has not participated in a match).
-  <img src="./assets/profile-decks.png" alt="list of decks in profile" width="600"/>
-- **View Other Decks**: View and filter other player's decks, as well as see generated statistics based on their match history
-  <img src="./assets/decks-table.png" alt="list of decks with stats" width="600"/>
-  <img src="./assets/decks-table-2.png" alt="filtering list of decks" width="600"/>
-  <img src="./assets/commander-card.png" alt="commander card previews on hover" width="600"/>
+
+  ![list of decks in profile](./assets/profile-decks.png)
+
+- **View Other Decks**: View and filter other player's decks, as well as see generated statistics based on their match history.
+
+  ![list of decks with stats](./assets/decks-table.png)
+
+  ![filtering list of decks](./assets/decks-table-2.png)
+
+  ![commander card previews on hover](./assets/commander-card.png)
 
 ### Match Management
 
 - **Add Match**: Log a new match with players, decks, and results.
-  <img src="./assets/add-match-1.png" alt="adding a new match" width="400"/>
-  <img src="./assets/add-match-2.png" alt="adding participant decks in a new match" width="400"/>
-  <img src="./assets/add-match-3.png" alt="setting a winner in a new match" width="400"/>
+
+  ![adding a new match](./assets/add-match-1.png)
+
+  ![adding participant decks in a new match](./assets/add-match-2.png)
+
+  ![setting a winner in a new match](./assets/add-match-3.png)
+
 - **Edit Match**: Modify the details of an existing match (**DANGEROUS**: only available to admins).
-  <img src="./assets/edit-match.png" alt="updating an existing match" width="400"/>
-- **Remove Match**: Delete a match from the history (**DANGEROUS**: only available to admins) .
-- **View Match History**: View and filter match history based on player, deck, and format
-  <img src="./assets/match-table.png" alt="viewing match history table" width="600"/>
+
+  ![updating an existing match](./assets/edit-match.png)
+
+- **Remove Match**: Delete a match from the history (**DANGEROUS**: only available to admins).
+
+- **View Match History**: View and filter match history based on player, deck, and format.
+
+  ![viewing match history table](./assets/match-table.png)
 
 ### User Statistics
 
 Customize your profile to reflect your play style, manage your decks, and track your game history. You can update personal information, set profile images, and configure preferences for a more personalized experience within the app.
-<img src="./assets/users-table.png" alt="viewing users table" width="600"/>
+
+![viewing users table](./assets/users-table.png)
 
 ### User Profiles
 
 Customize your profile to reflect your play style, manage your decks, and track your game history. You can update personal information, set profile images, and configure preferences for a more personalized experience within the app.
-<img src="./assets/user-profile.png" alt="view user profiles" width="600"/>
-<img src="./assets/profile-mini-card.png" alt="user profile previews on hover" width="600"/>
+
+![view user profiles](./assets/user-profile.png)
+
+![user profile previews on hover](./assets/profile-mini-card.png)
 
 ### Light and Dark Themes
 
 EDH Tracker supports both light and dark themes to enhance user experience. Users can toggle between these modes based on their preferences, ensuring optimal visibility and comfort. Highlight colors can be set in individual user profiles.
-<img src="./assets/dark-theme.png" alt="user profile previews on hover" width="600"/>
-<img src="./assets/light-theme.png" alt="user profile previews on hover" width="600"/>
+
+![dark theme](./assets/dark-theme.png)
+
+![light theme](./assets/light-theme.png)
 
 ## Setup Instructions
 
