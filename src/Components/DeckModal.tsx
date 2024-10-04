@@ -351,13 +351,13 @@ export const DeckModal = (props: {
             </Stack>
           </Stack>
           <Stack justifyContent="space-between" direction="row">
-            <Stack direction="row" alignItems="center">
+            {editingDeck ? <Stack direction="row" alignItems="center">
               <Checkbox
                 checked={deckIsInactive}
                 onChange={(event) => setDeckIsInactive(event.target.checked)}
               />
               <Typography component="span">inactive?</Typography>
-            </Stack>
+            </Stack> : <Box />}
             <Button
               onClick={handleSubmit}
               variant="contained"

@@ -6,7 +6,14 @@ import { Redirect, useRoutes } from "raviger";
 
 import { AppAlertList, LoadingBackdrop, Toolbar } from "@/Components";
 import { useApp, useDeck, useMatch, useUser } from "@/Context";
-import { DecksPage, MatchesPage, Profile, ToolsPage, UsersPage } from "@/Pages";
+import {
+  DecksPage,
+  LandingPage,
+  MatchesPage,
+  Profile,
+  ToolsPage,
+  UsersPage,
+} from "@/Pages";
 import awsmobile from "./aws-exports";
 
 Amplify.configure(awsmobile);
@@ -19,13 +26,14 @@ const NotFoundPage = () => (
 );
 
 const baseRoutes = {
-  "/": () => <ToolsPage />,
+  "/": () => <LandingPage />,
   "/*": () => <ProtectedRoutes />,
   "*": () => <NotFoundPage />,
 };
 
 const protectedRoutes = {
-  "/login": () => <Redirect to="/" />,
+  "/login": () => <Redirect to="/users" />,
+  "/tools": () => <ToolsPage />,
   "/decks": () => <DecksPage />,
   "/users": () => <UsersPage />,
   "/matches": () => <MatchesPage />,
