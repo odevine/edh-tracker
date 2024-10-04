@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.2](https://github.com/odevine/edh-tracker/compare/v1.0.0...v1.2.2) (2024-10-04)
+
+
+### Miscellaneous Chores
+
+* release 1.2.2 ([a075040](https://github.com/odevine/edh-tracker/commit/a075040ea7340a042926f32e8d8fb13a0eecc346))
+
 ## 1.0.0 (2024-10-02)
 
 
