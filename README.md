@@ -4,6 +4,18 @@ EDH Tracker is a tool for managing Magic: The Gathering Commander decks and trac
 
 App is currently live at: [edh.devine.dev](https://edh.devine.dev)
 
+## Table of Contents
+
+- [Features](#features)
+  - [Deck Management](#deck-management)
+  - [Match Management](#match-management)
+  - [User Statistics](#user-statistics)
+  - [User Profiles](#user-profiles)
+  - [Light and Dark Themes](#light-and-dark-themes)
+- [Setup Instructions](#setup-instructions)
+  - [Frontend Setup (Vite/React/Typescript)](#frontend-setup)
+  - [Backend Setup (AWS Amplify)](#backend-setup-aws-amplify)
+
 ## Features
 
 ### Deck Management
