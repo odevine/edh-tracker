@@ -40,7 +40,7 @@ export const Toolbar = () => {
   }
   const navItems: NavItem[] = [
     {
-      label: "tools",
+      label: "home",
       action: () => navigate("/"),
       disabled: false,
       pathMatch: /^\/$/,
@@ -62,6 +62,12 @@ export const Toolbar = () => {
       action: () => navigate("/matches"),
       disabled: !authenticatedUser,
       pathMatch: /\/matches/,
+    },
+    {
+      label: "tools",
+      action: () => navigate("/tools"),
+      disabled: !authenticatedUser,
+      pathMatch: /^\/tools$/,
     },
   ];
 
