@@ -2,6 +2,8 @@
 
 EDH Tracker is a tool for managing Magic: The Gathering Commander decks and tracking matches. This project includes both a frontend and a backend. The frontend is built using Vite, React, and TypeScript, while the backend leverages AWS Amplify.
 
+App is currently live at: [edh.devine.dev](https://edh.devine.dev)
+
 ## Features
 
 ### Deck Management
