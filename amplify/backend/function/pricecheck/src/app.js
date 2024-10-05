@@ -11,6 +11,13 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const express = require("express");
 
+const {
+  BASIC_LAND_TYPES,
+  LAND_CYCLES,
+  ILLEGAL_SETS,
+  CYCLE_LAND_LOOKUP,
+} = require("./cardConstants");
+
 const ddbClient = new DynamoDBClient({ region: process.env.TABLE_REGION });
 const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
 
@@ -26,241 +33,10 @@ app.use(cors());
 const SCRYFALL_API_URL = "https://api.scryfall.com/cards/";
 const MAX_BATCH_SIZE = 25;
 
-const BASIC_LAND_TYPES = [
-  "plains",
-  "island",
-  "islands",
-  "swamp",
-  "swamps",
-  "mountain",
-  "mountains",
-  "forest",
-  "forests",
-  "wastes",
-  "snow-covered plains",
-  "snow-covered island",
-  "snow-covered islands",
-  "snow-covered swamp",
-  "snow-covered swamps",
-  "snow-covered mountain",
-  "snow-covered mountains",
-  "snow-covered forest",
-  "snow-covered forests",
-  "snow-covered wastes",
-];
-
-const LAND_CYCLES = {
-  "cycle-ody-filterland": [
-    "skycloud expanse",
-    "sunscorched divide",
-    "darkwater catacombs",
-    "viridescent bog",
-    "mossfire valley",
-    "ferrous lake",
-    "desolate mire",
-    "shadowblood ridge",
-    "sungrass prairie",
-    "overflowing basin",
-  ],
-  "cycle-checkland": [
-    "glacial fortress",
-    "clifftop retreat",
-    "drowned catacomb",
-    "woodland cemetery",
-    "rootbound crag",
-    "sulfur falls",
-    "isolated chapel",
-    "dragonskull summit",
-    "sunpetal grove",
-    "hinterland harbor",
-  ],
-  "cycle-bfz-tangoland": [
-    "prairie stream",
-    "sunken hollow",
-    "cinder glade",
-    "smoldering marsh",
-    "canopy vista",
-  ],
-  "cycle-horizon-land": [
-    "sunbaked canyon",
-    "nurturing peatland",
-    "fiery islet",
-    "silent clearing",
-    "horizon canopy",
-    "waterlogged grove",
-  ],
-  "cycle-fastland": [
-    "seachrome coast",
-    "inspiring vantage",
-    "darkslick shores",
-    "blooming marsh",
-    "copperline gorge",
-    "spirebluff canal",
-    "concealed courtyard",
-    "blackcleave cliffs",
-    "razorverge thicket",
-    "botanical sanctum",
-  ],
-  "cycle-fetchland": [
-    "flooded strand",
-    "arid mesa",
-    "polluted delta",
-    "verdant catacombs",
-    "wooded foothills",
-    "scalding tarn",
-    "marsh flats",
-    "bloodstained mire",
-    "windswept heath",
-    "misty rainforest",
-  ],
-  "cycle-shm-filterland": [
-    "mystic gate",
-    "rugged prairie",
-    "sunken ruins",
-    "twilight mire",
-    "fire-lit thicket",
-    "cascade bluffs",
-    "fetid heath",
-    "graven cairns",
-    "wooded bastion",
-    "flooded grove",
-  ],
-  "cycle-pathway": [
-    "hengegate pathway",
-    "needleverge pathway",
-    "clearwater pathway",
-    "darkbore pathway",
-    "cragcrown pathway",
-    "riverglide pathway",
-    "brightclimb pathway",
-    "blightstep pathway",
-    "branchloft pathway",
-    "barkchannel pathway",
-  ],
-  "cycle-crowdland": [
-    "sea of clouds",
-    "spectator seating",
-    "morphic pool",
-    "undergrowth stadium",
-    "spire garden",
-    "training center",
-    "vault of champions",
-    "luxury suite",
-    "bountiful promenade",
-    "rejuvenating springs",
-  ],
-  "cycle-painland": [
-    "adarkar wastes",
-    "battlefield forge",
-    "underground river",
-    "llanowar wastes",
-    "karplusan forest",
-    "shivan reef",
-    "caves of koilos",
-    "sulfurous springs",
-    "brushland",
-    "yavimaya coast",
-  ],
-  "cycle-shockland": [
-    "hallowed fountain",
-    "sacred foundry",
-    "watery grave",
-    "overgrown tomb",
-    "stomping ground",
-    "steam vents",
-    "godless shrine",
-    "blood crypt",
-    "temple garden",
-    "breeding pool",
-  ],
-  "cycle-reveal-land": [
-    "port town",
-    "furycalm snarl",
-    "choked estuary",
-    "necroblossom snarl",
-    "game trail",
-    "frostboil snarl",
-    "shineshadow snarl",
-    "foreboding ruins",
-    "fortified village",
-    "vineglimmer snarl",
-  ],
-  "cycle-dual-surveil-land": [
-    "meticulous archive",
-    "elegant parlor",
-    "undercity sewers",
-    "underground mortuary",
-    "commercial district",
-    "thundering falls",
-    "shadowy backstreet",
-    "raucous theater",
-    "lush portico",
-    "hedge maze",
-  ],
-  "iko-triome": [
-    "indatha triome",
-    "ketria triome",
-    "raugrin triome",
-    "savai triome",
-    "zagoth triome",
-  ],
-  "ala-shardland": [
-    "arcane sanctum",
-    "crumbling necropolis",
-    "jungle shrine",
-    "savage lands",
-    "seaside citadel",
-  ],
-  "cycle-abu-dual-land": [
-    "badlands",
-    "bayou",
-    "plateau",
-    "savannah",
-    "scrubland",
-    "taiga",
-    "tropical island",
-    "tundra",
-    "underground sea",
-    "volcanic island",
-  ],
-  "cycle-dsk-thirteenland": [
-    "abandoned campground",
-    "bleeding woods",
-    "etched cornfield",
-    "lakeside shack",
-    "murky sewer",
-    "neglected manor",
-    "peculiar lighthouse",
-    "raucous carnival",
-    "razortrap gorge",
-    "strangled cemetery",
-  ],
-};
-
-const ILLEGAL_SETS = [
-  "30a",
-  "cei",
-  "ced",
-  "wc97",
-  "wc98",
-  "wc99",
-  "wc00",
-  "wc01",
-  "wc02",
-  "wc03",
-  "wc04",
-  "hhO12",
-  "hhO13",
-  "ugl",
-  "unh",
-  "ust",
-  "unf",
-];
-
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const findLowestUsdPrice = (cards) => {
-  let lowestPrice = null;
+  let lowestPriceData = null;
 
   cards.forEach((card) => {
     // Check if the card has a valid USD price and is not included in an illegal set
@@ -271,23 +47,26 @@ const findLowestUsdPrice = (cards) => {
     ) {
       const cardPrice = parseFloat(card.prices.usd);
 
-      // Update the lowest price if needed
-      if (lowestPrice === null || cardPrice < lowestPrice) {
-        lowestPrice = cardPrice;
+      // Update the lowest price data if needed
+      if (lowestPriceData === null || cardPrice < lowestPriceData.price) {
+        lowestPriceData = {
+          name: card.name,
+          price: cardPrice,
+          setCode: card.set.toLowerCase(),
+          collectorNumber: card.collector_number.toLowerCase(),
+        };
       }
     }
   });
 
-  return lowestPrice;
+  return lowestPriceData;
 };
 
-const fetchCheapestCardPrice = async (cardName, delayMs = 100) => {
+const fetchCheapestCardPrice = async (cardName) => {
   const apiUrl = `${SCRYFALL_API_URL}search?q=%21%22${encodeURIComponent(cardName)}%22&unique=prints`;
 
   try {
-    // Make the API request using axios
     const response = await axios.get(apiUrl);
-
     if (response.status !== 200) {
       return null;
     }
@@ -318,12 +97,7 @@ const fetchCycleCardsByOracleTag = async (oracleTag) => {
 };
 
 const findOracleTag = (cardName) => {
-  for (const oracleTag in LAND_CYCLES) {
-    if (LAND_CYCLES[oracleTag].includes(cardName)) {
-      return oracleTag;
-    }
-  }
-  return null;
+  return CYCLE_LAND_LOOKUP[cardName.toLowerCase()] || null;
 };
 
 const getCheapestCycleLandPrice = async (cardName) => {
@@ -337,7 +111,10 @@ const getCheapestCycleLandPrice = async (cardName) => {
   const cycleCardsData = await fetchCycleCardsByOracleTag(oracleTag);
 
   // Return the lowest usd price of results
-  return findLowestUsdPrice(cycleCardsData);
+  return {
+    tag: oracleTag,
+    ...findLowestUsdPrice(cycleCardsData),
+  };
 };
 
 // Helper function to check if data is within 24 hours
@@ -358,7 +135,13 @@ const getPriceFromDynamoDB = async (cardName) => {
   try {
     const data = await ddbDocClient.send(new GetCommand(params));
     if (data.Item && isWithin24Hours(data.Item.timestamp)) {
-      return data.Item.price;
+      return {
+        price: data.Item.price,
+        setCode: data.Item.setCode,
+        collectorNumber: data.Item.collectorNumber,
+        altName: data.Item.altName,
+        priceNote: data.Item.priceNote,
+      };
     }
   } catch (error) {
     console.error(`Error querying DynamoDB for ${cardName}:`, error);
@@ -367,13 +150,20 @@ const getPriceFromDynamoDB = async (cardName) => {
 };
 
 // Function to save price to DynamoDB
-const savePriceToDynamoDB = async (cardName, price) => {
+const savePriceToDynamoDB = async (cardName, priceData) => {
+  // 24hr expiry
+  const expirationTime = Math.floor(Date.now() / 1000) + 24 * 60 * 60;
   const params = {
     TableName: tableName,
     Item: {
       cardName,
-      price,
+      altName: priceData.altName ?? priceData.name,
+      price: priceData.price,
+      setCode: priceData.setCode,
+      collectorNumber: priceData.collectorNumber,
+      priceNote: priceData.priceNote,
       timestamp: Date.now(),
+      expiry: expirationTime,
     },
   };
 
@@ -459,7 +249,6 @@ app.options("*", cors());
 // Main route to handle card price check
 app.post("/priceCheck", async function (req, res) {
   const { cards } = req.body;
-  // Expect { "cards": [ "1 CardName", "2 CardName" ] }
   if (!cards || !Array.isArray(cards)) {
     return res.status(400).json({
       error:
@@ -467,10 +256,7 @@ app.post("/priceCheck", async function (req, res) {
     });
   }
 
-  // Counter to track the number of API calls made
   let apiCallCounter = 0;
-
-  // Array to hold all the promises for card lookups
   const promises = cards.map(async (cardInput) => {
     const { cardQty, cardName } = parseCardInput(cardInput);
 
@@ -486,49 +272,52 @@ app.post("/priceCheck", async function (req, res) {
         name: cardName,
         quantity: cardQty,
         price: 0,
+        setCode: null,
+        collectorNumber: null,
+        priceNote: "basic land",
       };
     }
 
-    // Check price in DynamoDB first
-    let cardPrice = await getPriceFromDynamoDB(cardName);
+    // Check if price is already cached in DynamoDB
+    let cardData = await getPriceFromDynamoDB(cardName);
+    let alternateCardName = null;
 
-    if (cardPrice === null) {
-      // Delay only for Scryfall API calls, staggered by 100ms per API call made
+    if (cardData === null) {
+      // Add delay to prevent rate limiting when calling the API
       await delay(apiCallCounter * 100);
 
-      // Check if the card belongs to a land cycle
+      // Check if the card is part of a land cycle
       const isCycleLand = await getCheapestCycleLandPrice(cardName);
       if (isCycleLand !== null) {
-        cardPrice = isCycleLand;
+        const { tag, name, ...rest } = isCycleLand;
+        cardData = {
+          ...rest,
+          priceNote: `cheapest land in cycle '${tag}'`,
+        };
+
+        alternateCardName = name.toLowerCase();
+        if (alternateCardName !== cardName) {
+          cardData.altName = alternateCardName;
+        }
       } else {
-        // Otherwise, fetch the cheapest printing of the card from Scryfall
-        cardPrice = await fetchCheapestCardPrice(cardName);
+        // If it's not part of a cycle, fetch the cheapest version of the card itself
+        cardData = await fetchCheapestCardPrice(cardName);
       }
 
-      // Increment the API call counter only after an actual API call is made
       apiCallCounter++;
-
-      // Save the fetched price to DynamoDB, if a valid price was found
-      if (cardPrice !== null) {
-        await savePriceToDynamoDB(cardName, cardPrice);
-      } else {
-        // Handle cases where price could not be fetched
-        cardPrice = null;
+      if (cardData !== null) {
+        await savePriceToDynamoDB(cardName, cardData);
       }
     }
 
-    // Return the result object for this card
     return {
       name: cardName,
       quantity: cardQty,
-      price: cardPrice,
+      ...cardData,
     };
   });
 
-  // Wait for all promises to resolve
   const cardResults = await Promise.all(promises);
-
-  // Return the final results
   res.json(cardResults);
 });
 

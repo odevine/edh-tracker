@@ -6,6 +6,7 @@ import {
   Paper,
   Stack,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { del, post } from "aws-amplify/api";
@@ -17,7 +18,11 @@ import { useUser } from "@/Context";
 interface PriceCheckCard {
   name: string;
   quantity: number | null;
+  altName: string;
   price: number | null;
+  setCode: string | null;
+  collectorNumber: string | null;
+  priceNote?: string;
 }
 
 // Function to parse the decklist and extract card names and quantities
@@ -63,6 +68,7 @@ export const ToolsPage = (): JSX.Element => {
   const otherComponentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    console.log(priceCheckResponse);
     if (
       textFieldRef.current &&
       otherComponentRef.current &&
@@ -72,18 +78,6 @@ export const ToolsPage = (): JSX.Element => {
       otherComponentRef.current.scrollTop = textFieldRef.current.scrollTop;
     }
   }, [priceCheckResponse]);
-
-  const isPriceCheckCardArray = (data: any): data is PriceCheckCard[] => {
-    return (
-      Array.isArray(data) &&
-      data.every(
-        (item) =>
-          typeof item.name === "string" &&
-          (typeof item.quantity === "number" || item.quantity === null) &&
-          (typeof item.price === "number" || item.price === null),
-      )
-    );
-  };
 
   const handlePriceCheckClick = async () => {
     try {
@@ -100,15 +94,11 @@ export const ToolsPage = (): JSX.Element => {
       const response = await restOperation.response;
       if (response.statusCode === 200) {
         const data: unknown = await response.body.json();
+        setPriceCheckResponse(data as PriceCheckCard[]);
 
-        if (isPriceCheckCardArray(data)) {
-          setPriceCheckResponse(data);
-
-          // Sync the scroll of otherComponentRef to match textFieldRef
-          if (textFieldRef.current && otherComponentRef.current) {
-            otherComponentRef.current.scrollTop =
-              textFieldRef.current.scrollTop;
-          }
+        // Sync the scroll of otherComponentRef to match textFieldRef
+        if (textFieldRef.current && otherComponentRef.current) {
+          otherComponentRef.current.scrollTop = textFieldRef.current.scrollTop;
         }
       }
     } catch (error) {
@@ -192,7 +182,12 @@ export const ToolsPage = (): JSX.Element => {
 
   return (
     <Stack
-      sx={{ height: "100%", width: "100%", textAlign: "center" }}
+      sx={{
+        height: "100%",
+        width: "100%",
+        minWidth: 1248,
+        textAlign: "center",
+      }}
       justifyContent="center"
       alignItems="center"
       spacing={2}
@@ -259,26 +254,64 @@ export const ToolsPage = (): JSX.Element => {
             ref={otherComponentRef}
             onScroll={handleScroll as any}
           >
-            {priceCheckResponse.map((line, index) => (
-              <Stack
-                key={index}
-                direction="row"
-                justifyContent="space-between"
-                sx={{ pr: 1 }}
-              >
-                <Typography>{line.name}</Typography>
-                {line.price !== null && line.quantity !== null ? (
-                  <Typography>
-                    {line.quantity > 1
-                      ? `($${line.price.toFixed(2)} each)`
-                      : ""}
-                    &nbsp;${(line.price * line.quantity).toFixed(2)}
-                  </Typography>
-                ) : (
-                  <Typography color="error">could not find</Typography>
-                )}
-              </Stack>
-            ))}
+            {priceCheckResponse.map((line, index) => {
+              let cardTextStr = line.name;
+              if (line.altName && line.altName.toLowerCase() !== line.name) {
+                cardTextStr = line.altName.toLowerCase();
+              }
+
+              const cardNameLength = 25;
+              if (cardTextStr.length > cardNameLength) {
+                cardTextStr = `${cardTextStr.substring(0, cardNameLength - 3)}...`;
+              } else {
+                cardTextStr = cardTextStr.padEnd(cardNameLength, "\u00A0");
+              }
+
+              const cardSetCodeLength = 7;
+              let cardSetCode = "";
+              if (line.setCode) {
+                // If setCode exists, include it and pad to the right
+                cardSetCode = ` [${line.setCode}]`;
+                cardSetCode = cardSetCode.padEnd(cardSetCodeLength, "\u00A0"); // Pad the result to the specified length
+              } else {
+                // No setCode, just pad with non-breaking spaces
+                cardSetCode = cardSetCode.padEnd(cardSetCodeLength, "\u00A0");
+              }
+
+              let cardCollectorNumber = "";
+              if (line.collectorNumber) {
+                cardCollectorNumber = ` {${line.collectorNumber}}`;
+              }
+
+              return (
+                <Stack
+                  key={index}
+                  direction="row"
+                  justifyContent="space-between"
+                  sx={{ pr: 1 }}
+                >
+                  <Tooltip
+                    title={line.priceNote ?? undefined}
+                    placement="left"
+                    arrow
+                  >
+                    <Typography
+                      color={line.priceNote ? "primary" : "text.secondary"}
+                    >
+                      {`${cardTextStr}${cardSetCode}${cardCollectorNumber}`.toLowerCase()}
+                    </Typography>
+                  </Tooltip>
+                  {line.price !== null && line.quantity !== null ? (
+                    <Typography>
+                      {line.quantity > 1 ? `($${line.price.toFixed(2)})` : ""}
+                      &nbsp;${(line.price * line.quantity).toFixed(2)}
+                    </Typography>
+                  ) : (
+                    <Typography color="error">could not find</Typography>
+                  )}
+                </Stack>
+              );
+            })}
           </Box>
         </Box>
       </Stack>
