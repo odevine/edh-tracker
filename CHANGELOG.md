@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.4](https://github.com/odevine/edh-tracker/compare/v1.2.3...v1.2.4) (2024-10-05)
+
+
+### Bug Fixes
+
+* allow for usd_foil and usd_etched prices to supersede regular usd prices ([e1376c0](https://github.com/odevine/edh-tracker/commit/e1376c086a92d42270bfd44a0e72b2a5a7896fa0))
+
 ## [1.2.3](https://github.com/odevine/edh-tracker/compare/v1.2.2...v1.2.3) (2024-10-05)
 
 
