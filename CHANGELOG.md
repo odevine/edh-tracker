@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.2.3](https://github.com/odevine/edh-tracker/compare/v1.2.2...v1.2.3) (2024-10-05)
+
+
+### Features
+
+* more clearly display additional price check data ([217b9e9](https://github.com/odevine/edh-tracker/commit/217b9e9ca6799c626b386a4793b299bbffd10708))
+* return additional context from price check lambda ([aad7179](https://github.com/odevine/edh-tracker/commit/aad717975494a2ab92a5efb1f18ca1a86e8c6f41))
+
+
+### Miscellaneous Chores
+
+* release 1.2.3 ([62e2b72](https://github.com/odevine/edh-tracker/commit/62e2b72159b028997996d68dd5edd26fe7eded24))
+
 ## [1.2.2](https://github.com/odevine/edh-tracker/compare/v1.0.0...v1.2.2) (2024-10-04)
 
 ### Features
