@@ -23,7 +23,7 @@
       "function": {
         "pricecheck": {
           "deploymentBucketName": "amplify-edhtracker-master-c66d9-deployment",
-          "s3Key": "amplify-builds/pricecheck-2f774c50742b56706d4a-build.zip"
+          "s3Key": "amplify-builds/pricecheck-44777346324557716875-build.zip"
         }
       },
       "storage": {
