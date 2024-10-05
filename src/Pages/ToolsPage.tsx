@@ -301,7 +301,7 @@ export const ToolsPage = (): JSX.Element => {
                       {`${cardTextStr}${cardSetCode}${cardCollectorNumber}`.toLowerCase()}
                     </Typography>
                   </Tooltip>
-                  {line.price !== null && line.quantity !== null ? (
+                  {line.price && line.quantity ? (
                     <Typography>
                       {line.quantity > 1 ? `($${line.price.toFixed(2)})` : ""}
                       &nbsp;${(line.price * line.quantity).toFixed(2)}
@@ -345,7 +345,7 @@ export const ToolsPage = (): JSX.Element => {
             {(() => {
               const total = priceCheckResponse.reduce(
                 (acc, card) =>
-                  card.price !== null && card.quantity !== null
+                  card.price && card.quantity
                     ? acc + card.price * card.quantity
                     : acc,
                 0,

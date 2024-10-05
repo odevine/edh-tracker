@@ -39,19 +39,20 @@ const findLowestUsdPrice = (cards) => {
   let lowestPriceData = null;
 
   cards.forEach((card) => {
-    // Check if the card has a valid USD price and is not included in an illegal set
-    if (
-      card.prices &&
-      card.prices.usd &&
-      !ILLEGAL_SETS.includes(card.set.toLowerCase())
-    ) {
-      const cardPrice = parseFloat(card.prices.usd);
+    // Parse the available prices and find the lowest
+    const usdPrice = card.prices.usd ? parseFloat(card.prices.usd) : null;
+    const usdFoilPrice = card.prices.usd_foil ? parseFloat(card.prices.usd_foil) : null;
+    const usdEtchedPrice = card.prices.usd_etched ? parseFloat(card.prices.usd_etched) : null;
+    const availablePrices = [usdPrice, usdFoilPrice, usdEtchedPrice].filter(price => price !== null);
+
+    if (!ILLEGAL_SETS.includes(card.set.toLowerCase()) && availablePrices.length > 0) {
+      const lowestPrice = Math.min(...availablePrices);
 
       // Update the lowest price data if needed
-      if (lowestPriceData === null || cardPrice < lowestPriceData.price) {
+      if (lowestPriceData === null || lowestPrice < lowestPriceData.price) {
         lowestPriceData = {
           name: card.name,
-          price: cardPrice,
+          price: lowestPrice,
           setCode: card.set.toLowerCase(),
           collectorNumber: card.collector_number.toLowerCase(),
         };
@@ -292,7 +293,7 @@ app.post("/priceCheck", async function (req, res) {
         const { tag, name, ...rest } = isCycleLand;
         cardData = {
           ...rest,
-          priceNote: `cheapest land in cycle '${tag}'`,
+          priceNote: `cheapest land in '${tag}'`,
         };
 
         alternateCardName = name.toLowerCase();
