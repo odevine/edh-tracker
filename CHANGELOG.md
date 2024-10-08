@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/odevine/edh-tracker/compare/v1.2.4...v1.3.0) (2024-10-08)
+
+
+### Features
+
+* add quick "mark as inactive" button in profile ([0cae94f](https://github.com/odevine/edh-tracker/commit/0cae94f2c6992b8c887688d8f9cb71125ec0ef8a))
+
 ## [1.2.4](https://github.com/odevine/edh-tracker/compare/v1.2.3...v1.2.4) (2024-10-05)
 
 
