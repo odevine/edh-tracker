@@ -1,4 +1,4 @@
-import { Delete, Edit } from "@mui/icons-material";
+import { Delete, Edit, SingleBed } from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -30,7 +30,8 @@ export const UserDecksCard = (props: {
   userProfile: User;
 }) => {
   const { ownUser, userProfile } = props;
-  const { allDecks, deleteDeckById, allDeckCategories } = useDeck();
+  const { allDecks, deleteDeckById, allDeckCategories, updateExistingDeck } =
+    useDeck();
   const { allMatchParticipants } = useMatch();
   const { mode } = useTheme();
 
@@ -170,6 +171,42 @@ export const UserDecksCard = (props: {
                               <Edit fontSize="small" />
                             </IconButton>
                           </Tooltip>
+                          {!deck.isInactive && (
+                            <Tooltip arrow title="mark inactive">
+                              <IconButton
+                                size="small"
+                                onClick={() => {
+                                  const {
+                                    id,
+                                    deckOwnerId,
+                                    deckName,
+                                    commanderName,
+                                    commanderColors,
+                                    secondCommanderName,
+                                    secondCommanderColors,
+                                    deckType,
+                                    link,
+                                    cost,
+                                  } = deck;
+                                  updateExistingDeck({
+                                    id,
+                                    deckOwnerId,
+                                    deckName,
+                                    commanderName,
+                                    commanderColors,
+                                    secondCommanderName,
+                                    secondCommanderColors,
+                                    deckType,
+                                    link,
+                                    cost,
+                                    isInactive: true,
+                                  });
+                                }}
+                              >
+                                <SingleBed fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          )}
                           {
                             <Tooltip
                               arrow

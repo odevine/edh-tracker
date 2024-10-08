@@ -77,6 +77,7 @@ export const CardImageMiniCard: React.FC<CardImageMiniCardProps> = ({
         component="img"
         alt={cardName}
         height={PREVIEW_HEIGHT}
+        width={PREVIEW_WIDTH}
         image={imgUrl || ""}
       />
     </Card>

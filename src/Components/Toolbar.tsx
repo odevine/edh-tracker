@@ -6,6 +6,7 @@ import {
   Divider,
   Drawer,
   IconButton,
+  Link,
   List,
   ListItem,
   ListItemButton,
@@ -15,6 +16,7 @@ import {
   MenuItemProps,
   Toolbar as MuiToolbar,
   Stack,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { navigate, usePath } from "raviger";
@@ -188,7 +190,17 @@ export const Toolbar = () => {
           </Stack>
           <Box flexGrow={1} />
           <Stack direction="row" spacing={1} alignItems="center">
-            <Typography>v{appVersion}</Typography>
+            <Tooltip arrow title="view changelog" placement="bottom">
+              <Link
+                href="https://github.com/odevine/edh-tracker/blob/master/CHANGELOG.md"
+                target="_blank"
+                sx={{ textDecoration: "none" }}
+                color="inherit"
+              >
+                <Typography>v{appVersion}</Typography>
+              </Link>
+            </Tooltip>
+
             <ThemeToggle />
             <Avatar
               onClick={handleUserMenuOpen}
