@@ -301,7 +301,7 @@ export const ToolsPage = (): JSX.Element => {
                       {`${cardTextStr}${cardSetCode}${cardCollectorNumber}`.toLowerCase()}
                     </Typography>
                   </Tooltip>
-                  {line.price && line.quantity ? (
+                  {typeof line.price === "number" && typeof line.quantity === "number" ? (
                     <Typography>
                       {line.quantity > 1 ? `($${line.price.toFixed(2)})` : ""}
                       &nbsp;${(line.price * line.quantity).toFixed(2)}
