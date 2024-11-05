@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.3.1](https://github.com/odevine/edh-tracker/compare/v1.3.0...v1.3.1) (2024-11-05)
+
+
+### Features
+
+* add "include unranked" ([86804b2](https://github.com/odevine/edh-tracker/commit/86804b27bf267406a5ed9291179ab03bd5e623b3))
+
+
+### Miscellaneous Chores
+
+* release 1.3.1 ([3aa0eda](https://github.com/odevine/edh-tracker/commit/3aa0eda0eeb86f860a2226a89a0f1cd4aca8579b))
+
 ## [1.3.0](https://github.com/odevine/edh-tracker/compare/v1.2.4...v1.3.0) (2024-10-08)
 
 
