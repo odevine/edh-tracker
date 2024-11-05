@@ -1,7 +1,9 @@
 import {
   Box,
   Button,
+  Checkbox,
   Divider,
+  FormControlLabel,
   Grid,
   Link,
   MenuItem,
@@ -71,6 +73,7 @@ const loadStateFromLocalStorage = () => {
     filterUser: "",
     searchQuery: "",
     includeInactive: false,
+    includeUnranked: false,
     order: "desc" as ColumnSortOrder,
     orderBy: "updatedAt" as keyof DeckWithStats,
     page: 0,
@@ -107,6 +110,9 @@ export const DecksPage = (): JSX.Element => {
   const [includeInactive, setIncludeInactive] = useState(
     initialState.includeInactive,
   );
+  const [includeUnranked, setIncludeUnranked] = useState(
+    initialState.includeUnranked,
+  );
   const [order, setOrder] = useState<ColumnSortOrder>(initialState.order);
   const [orderBy, setOrderBy] = useState<keyof DeckWithStats>(
     initialState.orderBy,
@@ -135,6 +141,7 @@ export const DecksPage = (): JSX.Element => {
       filterUser,
       searchQuery,
       includeInactive,
+      includeUnranked,
       order,
       orderBy,
       page,
@@ -147,6 +154,7 @@ export const DecksPage = (): JSX.Element => {
     filterUser,
     searchQuery,
     includeInactive,
+    includeUnranked,
     order,
     orderBy,
     page,
@@ -223,10 +231,15 @@ export const DecksPage = (): JSX.Element => {
 
   const decksWithStats = useMemo(() => {
     return filteredDecks.map((deck) => {
-      const deckStats = getDeckStats(deck.id, allMatches, allMatchParticipants);
+      const deckStats = getDeckStats(
+        deck.id,
+        allMatches,
+        allMatchParticipants,
+        includeUnranked,
+      );
       return { ...deck, ...deckStats };
     });
-  }, [filteredDecks, allMatches, allMatchParticipants]);
+  }, [includeUnranked, filteredDecks, allMatches, allMatchParticipants]);
 
   const visibleRows = useMemo(() => {
     return [...decksWithStats]
@@ -238,18 +251,32 @@ export const DecksPage = (): JSX.Element => {
     <Paper sx={{ m: 3 }}>
       <Toolbar sx={{ p: 2, justifyContent: "space-between" }}>
         <Grid container spacing={2}>
-          <Grid item xs={12} md={7}>
-            <TextField
-              fullWidth
-              size="small"
-              label="search decks"
-              value={searchQuery}
-              onChange={(e) => {
-                setPage(0);
-                setSearchQuery(e.target.value);
-              }}
+          <Grid item xs={12} sm={6} md={3}>
+            <FormControlLabel
+              labelPlacement="start"
+              label="include unranked?"
+              sx={{ width: "100%" }}
+              control={
+                <Checkbox
+                  sx={{ mr: 2, ml: 1 }}
+                  checked={includeUnranked}
+                  onChange={() => setIncludeUnranked(!includeUnranked)}
+                />
+              }
             />
           </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+              <TextField
+                fullWidth
+                size="small"
+                label="search decks"
+                value={searchQuery}
+                onChange={(e) => {
+                  setPage(0);
+                  setSearchQuery(e.target.value);
+                }}
+              />
+            </Grid>
           <Grid item xs={12} sm={6} md={2}>
             <Button fullWidth variant="outlined" onClick={handlePopoverOpen}>
               filters
