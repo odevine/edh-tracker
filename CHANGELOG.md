@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.4.0](https://github.com/odevine/edh-tracker/compare/v1.3.1...v1.4.0) (2025-01-25)
+
+
+### Features
+
+* migrate decks table to mui datagrid ([390bdb1](https://github.com/odevine/edh-tracker/commit/390bdb1de4a45565d7833ed2544608c6f15b5c6c))
+
+
+### Bug Fixes
+
+* deck links not being validated correctly ([f216249](https://github.com/odevine/edh-tracker/commit/f216249ac61ebd5f5f858c268048671763558408))
+
 ## [1.3.1](https://github.com/odevine/edh-tracker/compare/v1.3.0...v1.3.1) (2024-11-05)
 
 
