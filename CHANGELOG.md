@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.1](https://github.com/odevine/edh-tracker/compare/v1.4.0...v1.4.1) (2025-01-25)
+
+
+### Bug Fixes
+
+* update match editing logic to not add additional participants ([baa1d81](https://github.com/odevine/edh-tracker/commit/baa1d810f8fa40be5888edfc9b4add6d5c9b2d7d))
+
 ## [1.4.0](https://github.com/odevine/edh-tracker/compare/v1.3.1...v1.4.0) (2025-01-25)
 
 
