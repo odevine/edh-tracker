@@ -21,6 +21,30 @@ import {
 
 const client = generateClient();
 
+export const colorMap: Record<string, string> = {
+  W: "white",
+  U: "blue",
+  B: "black",
+  R: "red",
+  G: "green",
+  C: "colorless",
+};
+
+export const getFullColorNames = (colors: string[]): string => {
+  const fullColorNames = colors.map((color) => colorMap[color] || color);
+
+  if (fullColorNames.length === 0) {
+    return "";
+  }
+
+  if (fullColorNames.length === 1) {
+    return fullColorNames[0];
+  }
+
+  // Join all but the last color with a comma, then append "and" before the last color
+  return `${fullColorNames.slice(0, -1).join(", ")} and ${fullColorNames.slice(-1)}`;
+};
+
 export const getAllDecksFn = async (): Promise<Deck[] | null> => {
   try {
     let allDecks: Deck[] = [];
