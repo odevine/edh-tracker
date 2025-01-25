@@ -165,10 +165,9 @@ export const MatchProvider = ({ children }: PropsWithChildren<{}>) => {
   const deleteMatch = async (matchId: string) => {
     setMatchesLoading(true);
     try {
-      const matchParticipants = allMatchParticipants.filter(participant => participant.matchId === matchId);
-      if (matchParticipants.length > 4) {
-        throw new Error("match participants greater than 4, please review and delete manually")
-      }
+      const matchParticipants = allMatchParticipants.filter(
+        (participant) => participant.matchId === matchId,
+      );
       await deleteMatchWithParticipantsFn(matchId, matchParticipants);
       setAllMatches((prevMatches) =>
         prevMatches.filter((match) => match.id !== matchId),
