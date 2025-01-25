@@ -2,10 +2,10 @@ import {
   Autocomplete,
   Box,
   Button,
+  Checkbox,
   MenuItem,
   Modal,
   Stack,
-  Checkbox,
   TextField,
   Typography,
 } from "@mui/material";
@@ -121,6 +121,7 @@ export const DeckModal = (props: {
 
   const validateDeckDetails = () => {
     const newErrors = [];
+    // Check for deck name not being blank
     if (deckName === "") {
       newErrors.push("deck name is required.");
     }
@@ -139,11 +140,22 @@ export const DeckModal = (props: {
       // If there's no editingDeckId, just check for any match
       newErrors.push("deck name must be unique.");
     }
+    // Check for presence of commander
     if (!commander) {
       newErrors.push("at least one commander is required");
     }
+    // Check for deck format
     if (deckFormat === "") {
       newErrors.push("deck format is required");
+    }
+    if (
+      !/^https:\/\/(www\.)?(moxfield\.com|archidekt\.com)\/decks\/[a-zA-Z0-9\-_/]+$/.test(
+        deckLink,
+      )
+    ) {
+      newErrors.push(
+        "deck link must be a full and valid moxfield/archidekt link",
+      );
     }
     setErrors(newErrors);
     return newErrors.length === 0;
@@ -186,15 +198,6 @@ export const DeckModal = (props: {
     setSecondCommanderSearchTerm(searchTerm);
     if (searchTerm.length >= 3) {
       secondCommanderSearch(searchTerm);
-    }
-  };
-
-  const handleLinkChange = (newValue: string) => {
-    if (
-      /^https:\/\/(www\.moxfield\.com\/|archidekt\.com\/).*/.test(newValue) ||
-      newValue === ""
-    ) {
-      setDeckLink(newValue);
     }
   };
 
@@ -333,7 +336,7 @@ export const DeckModal = (props: {
               label="deck link"
               placeholder="paste a moxfield or archidekt link here"
               value={deckLink}
-              onChange={(event) => handleLinkChange(event?.target.value)}
+              onChange={(event) => setDeckLink(event?.target.value)}
             />
             <TextField
               fullWidth
@@ -351,13 +354,17 @@ export const DeckModal = (props: {
             </Stack>
           </Stack>
           <Stack justifyContent="space-between" direction="row">
-            {editingDeck ? <Stack direction="row" alignItems="center">
-              <Checkbox
-                checked={deckIsInactive}
-                onChange={(event) => setDeckIsInactive(event.target.checked)}
-              />
-              <Typography component="span">inactive?</Typography>
-            </Stack> : <Box />}
+            {editingDeck ? (
+              <Stack direction="row" alignItems="center">
+                <Checkbox
+                  checked={deckIsInactive}
+                  onChange={(event) => setDeckIsInactive(event.target.checked)}
+                />
+                <Typography component="span">inactive?</Typography>
+              </Stack>
+            ) : (
+              <Box />
+            )}
             <Button
               onClick={handleSubmit}
               variant="contained"
