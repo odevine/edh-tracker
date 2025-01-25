@@ -14,7 +14,11 @@ import {
   deleteMatchParticipant,
   updateMatch,
 } from "@/graphql/mutations";
-import { listMatchParticipants, listMatches } from "@/graphql/queries";
+import {
+  listMatchParticipants,
+  listMatches,
+  matchParticipantsByMatchId,
+} from "@/graphql/queries";
 import { generateClient } from "aws-amplify/data";
 
 const client = generateClient();
@@ -124,12 +128,12 @@ export const updateMatchWithParticipantsFn = async (
 
     // Fetch current participants of the match
     const participantsResponse = await client.graphql({
-      query: listMatchParticipants,
-      variables: { filter: { matchId: { eq: updatedMatch.id } } },
+      query: matchParticipantsByMatchId,
+      variables: { matchId: updatedMatch.id },
     });
 
-    const currentParticipants = participantsResponse.data.listMatchParticipants
-      .items as MatchParticipant[];
+    const currentParticipants = participantsResponse.data
+      .matchParticipantsByMatchId.items as MatchParticipant[];
 
     // Find participants to remove
     const participantsToRemove = currentParticipants.filter(
