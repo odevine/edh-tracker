@@ -53,7 +53,7 @@ export const getUserStats = (
     totalMatches,
     totalWins,
     winRate,
-    deckCount: userDecks.filter(deck => !deck.isInactive).length,
+    deckCount: userDecks.filter((deck) => !deck.isInactive).length,
   };
 };
 
@@ -62,6 +62,8 @@ export interface DeckStats {
   totalWins: number;
   winRate: number;
 }
+
+export interface DeckWithStats extends DeckStats, Deck {}
 
 export const getDeckStats = (
   deckId: string,

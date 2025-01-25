@@ -126,6 +126,13 @@ export const ThemeProvider = (props: PropsWithChildren) => {
           MuiCssBaseline: {
             styleOverrides: scrollbarStyles(mode),
           },
+          MuiButton: {
+            styleOverrides: {
+              root: {
+                textTransform: "lowercase",
+              },
+            },
+          },
         },
       }),
     [mode, lightThemeColor, darkThemeColor],

@@ -57,19 +57,20 @@ export const App = () => {
   const showLoading = usersLoading || matchesLoading || decksLoading;
 
   return (
-    <>
+    <Stack flexDirection="column" height="100vh" overflow="hidden">
       <Toolbar />
       <Box
         sx={{
-          height: "calc(100% - 64px)",
+          flex: 1,
           overflowY: "auto",
-          scrollbarGutter: 8,
+          scrollbarGutter: "stable",
+          p: 3,
         }}
       >
         {routeResult || <h1>404 Not Found</h1>}
       </Box>
       {showLoading && <LoadingBackdrop />}
       <AppAlertList messages={appMessages} onDelete={deleteAppMessage} />
-    </>
+    </Stack>
   );
 };

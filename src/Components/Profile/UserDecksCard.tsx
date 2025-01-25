@@ -176,29 +176,8 @@ export const UserDecksCard = (props: {
                               <IconButton
                                 size="small"
                                 onClick={() => {
-                                  const {
-                                    id,
-                                    deckOwnerId,
-                                    deckName,
-                                    commanderName,
-                                    commanderColors,
-                                    secondCommanderName,
-                                    secondCommanderColors,
-                                    deckType,
-                                    link,
-                                    cost,
-                                  } = deck;
                                   updateExistingDeck({
-                                    id,
-                                    deckOwnerId,
-                                    deckName,
-                                    commanderName,
-                                    commanderColors,
-                                    secondCommanderName,
-                                    secondCommanderColors,
-                                    deckType,
-                                    link,
-                                    cost,
+                                    ...deck,
                                     isInactive: true,
                                   });
                                 }}

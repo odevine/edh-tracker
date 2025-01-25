@@ -18,16 +18,14 @@ import { useDeck, useMatch } from "@/Context";
 import { getUserStats } from "@/Logic";
 
 interface ProfileMiniCardProps {
-  profile?: User;
+  profile: User;
+  showActions?: boolean;
 }
 
 export const ProfileMiniCard: React.FC<ProfileMiniCardProps> = ({
   profile,
+  showActions,
 }) => {
-  if (!profile) {
-    return;
-  }
-
   const { allDecks } = useDeck();
   const { allMatches, allMatchParticipants } = useMatch();
   const userStats = getUserStats(
@@ -113,12 +111,16 @@ export const ProfileMiniCard: React.FC<ProfileMiniCardProps> = ({
           </Grid>
         </Grid>
       </CardContent>
-      <Divider />
-      <CardActions sx={{ justifyContent: "flex-end" }}>
-        <Button onClick={() => navigate(`/users/${profile.id}`)}>
-          view profile
-        </Button>
-      </CardActions>
+      {showActions && (
+        <>
+          <Divider />
+          <CardActions sx={{ justifyContent: "flex-end" }}>
+            <Button onClick={() => navigate(`/users/${profile.id}`)}>
+              view profile
+            </Button>
+          </CardActions>
+        </>
+      )}
     </Card>
   );
 };
