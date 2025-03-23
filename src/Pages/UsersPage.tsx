@@ -35,7 +35,12 @@ interface UserWithStats extends User, UserStats {}
 
 const headCells: HeadCell<UserWithStats>[] = [
   { id: "displayName", label: "name", sortable: true },
-  { id: "deckCount", label: "active decks", alignment: "right", sortable: true },
+  {
+    id: "deckCount",
+    label: "active decks",
+    alignment: "right",
+    sortable: true,
+  },
   { id: "totalWins", label: "wins", alignment: "right", sortable: true },
   { id: "totalMatches", label: "matches", alignment: "right", sortable: true },
   { id: "winRate", label: "win rate", alignment: "right", sortable: true },
@@ -46,6 +51,7 @@ const loadStateFromLocalStorage = () => {
   const initialState = {
     stateVersion: LOCAL_STORAGE_VERSION,
     includeUnranked: false,
+    includeInactive: false,
     filterType: "",
     order: "desc" as ColumnSortOrder,
     orderBy: "matches" as keyof UserWithStats,
@@ -77,6 +83,9 @@ export const UsersPage = (): JSX.Element => {
   const [includeUnranked, setIncludeUnranked] = useState(
     initialState.includeUnranked,
   );
+  const [includeInactive, setIncludeInactive] = useState(
+    initialState.includeInactive,
+  );
   const [filterType, setFilterType] = useState(initialState.filterType);
   const [order, setOrder] = useState<ColumnSortOrder>(initialState.order);
   const [orderBy, setOrderBy] = useState<keyof UserWithStats>(
@@ -88,13 +97,14 @@ export const UsersPage = (): JSX.Element => {
     const newSettings = JSON.stringify({
       stateVersion: LOCAL_STORAGE_VERSION,
       includeUnranked,
+      includeInactive,
       filterType,
       order,
       orderBy,
       page,
     });
     localStorage.setItem(localStorageKey, newSettings);
-  }, [order, orderBy, page, filterType, includeUnranked]);
+  }, [order, orderBy, page, filterType, includeUnranked, includeInactive]);
 
   const handleRequestSort = (property: keyof UserWithStats) => {
     const isAsc = orderBy === property && order === "asc";
@@ -103,8 +113,24 @@ export const UsersPage = (): JSX.Element => {
   };
 
   const userProfileMap = useMemo(() => {
-    return new Map(allUserProfiles.map((profile) => [profile.id, profile]));
-  }, [allUserProfiles]);
+    let usersArray = allUserProfiles;
+    if (!includeInactive) {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      usersArray = usersArray.filter((user) => {
+        if (!user.lastOnline) {
+          return false;
+        }
+        const lastOnlineDate = new Date(user.lastOnline);
+        if (isNaN(lastOnlineDate.getTime())) {
+          return false;
+        }
+        return lastOnlineDate >= thirtyDaysAgo;
+      });
+    }
+    return new Map(usersArray.map((profile) => [profile.id, profile]));
+  }, [allUserProfiles, includeInactive]);
+  console.log("  ~ userProfileMap ~ userProfileMap:", userProfileMap);
 
   const userWithStats = useMemo(() => {
     return allUserProfiles.map((user) => {
@@ -118,32 +144,61 @@ export const UsersPage = (): JSX.Element => {
       );
       return { ...user, ...userStats };
     });
-  }, [allMatches, allMatchParticipants, filterType, includeUnranked]);
+  }, [
+    allMatches,
+    allMatchParticipants,
+    filterType,
+    includeUnranked,
+    includeInactive,
+  ]);
 
   const visibleRows = useMemo(() => {
     return [...userWithStats].sort(
       getComparator<UserWithStats>(order, orderBy, userProfileMap),
     );
-  }, [order, orderBy, userWithStats, userProfileMap, filterType]);
+  }, [
+    order,
+    orderBy,
+    userWithStats,
+    userProfileMap,
+    filterType,
+    includeInactive,
+  ]);
 
   return (
     <Paper sx={{ m: 3 }}>
       <Toolbar sx={{ p: 2, justifyContent: "space-between" }}>
         <Grid container spacing={2}>
-          <Grid item xs={0} sm={0} md={4} lg={6} />
+          <Grid item xs={0} lg={3} />
           <Grid item xs={12} sm={6} md={4} lg={3}>
-            {filterType !== "none" && <FormControlLabel
+            {filterType !== "none" && (
+              <FormControlLabel
+                labelPlacement="start"
+                label="include unranked matches?"
+                sx={{ width: "100%" }}
+                control={
+                  <Checkbox
+                    sx={{ mr: 2, ml: 1 }}
+                    checked={includeUnranked}
+                    onChange={() => setIncludeUnranked(!includeUnranked)}
+                  />
+                }
+              />
+            )}
+          </Grid>
+          <Grid item xs={12} sm={6} md={4} lg={3}>
+            <FormControlLabel
               labelPlacement="start"
-              label="include unranked?"
+              label="show inactive users?"
               sx={{ width: "100%" }}
               control={
                 <Checkbox
                   sx={{ mr: 2, ml: 1 }}
-                  checked={includeUnranked}
-                  onChange={() => setIncludeUnranked(!includeUnranked)}
+                  checked={includeInactive}
+                  onChange={() => setIncludeInactive(!includeInactive)}
                 />
               }
-            />}
+            />
           </Grid>
           <Grid item xs={12} sm={6} md={4} lg={3}>
             <TypeSelector
@@ -290,7 +345,9 @@ export const UsersPage = (): JSX.Element => {
                     <TableCell align="right">{user.totalWins}</TableCell>
                     <TableCell align="right">{user.totalMatches}</TableCell>
                     <TableCell align="right">
-                      {user.winRate ? (user.winRate * 100).toFixed(2) + "%" : "-"}
+                      {user.winRate
+                        ? (user.winRate * 100).toFixed(2) + "%"
+                        : "-"}
                     </TableCell>
                   </TableRow>
                 );
