@@ -1,0 +1,66 @@
+import { randomUUID } from "crypto";
+
+import { CreateFormatInput, Format, UpdateFormatInput } from "@/Types";
+import { dynamo } from "../Common/Db";
+import { requireEnv } from "../Common/Env";
+import { buildUpdateExpression } from "../Common/Update";
+
+const FORMAT_TABLE = requireEnv("FORMAT_TABLE");
+
+// fetches all formats from the database
+export const listFormats = async (): Promise<Format[]> => {
+  const result = await dynamo.scan({ TableName: FORMAT_TABLE });
+  return (result.Items as Format[]) || [];
+};
+
+// fetches a single format by its id
+export const getFormat = async (id: string): Promise<Format | null> => {
+  const result = await dynamo.get({
+    TableName: FORMAT_TABLE,
+    Key: { id },
+  });
+  return (result.Item as Format) || null;
+};
+
+// creates a new format in the database
+export const createFormat = async (
+  input: CreateFormatInput,
+): Promise<Format> => {
+  const format: Format = {
+    ...input,
+    id: input.id || randomUUID(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  await dynamo.put({ TableName: FORMAT_TABLE, Item: format });
+  return format;
+};
+
+// updates an existing format
+export const updateFormat = async (
+  id: string,
+  updates: UpdateFormatInput,
+): Promise<Format> => {
+  const {
+    UpdateExpression,
+    ExpressionAttributeNames,
+    ExpressionAttributeValues,
+  } = buildUpdateExpression<Format>(updates);
+
+  const result = await dynamo.update({
+    TableName: FORMAT_TABLE,
+    Key: { id },
+    UpdateExpression,
+    ExpressionAttributeNames,
+    ExpressionAttributeValues,
+    ReturnValues: "ALL_NEW",
+  });
+
+  return result.Attributes as Format;
+};
+
+// deletes a format by its id
+export const deleteFormat = async (id: string): Promise<void> => {
+  await dynamo.delete({ TableName: FORMAT_TABLE, Key: { id } });
+};

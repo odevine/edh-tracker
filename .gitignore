@@ -12,6 +12,7 @@ dist
 dist-ssr
 *.local
 ui-components
+.aws-sam
 
 # Editor directories and files
 .vscode/*

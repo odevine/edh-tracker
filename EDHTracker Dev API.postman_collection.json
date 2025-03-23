@@ -1,0 +1,347 @@
+{
+  "info": {
+    "_postman_id": "e6edbc75-efa9-4229-b7f7-951bbf8b1c37",
+    "name": "EDHTracker Dev API",
+    "description": "API endpoints for user CRUD operations",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "11322345",
+    "_collection_link": "https://hehe-services.postman.co/workspace/dfa79322-42fd-4ee0-8641-7b63419a5b9b/collection/11322345-e6edbc75-efa9-4229-b7f7-951bbf8b1c37?action=share&source=collection_link&creator=11322345"
+  },
+  "item": [
+    {
+      "name": "users",
+      "item": [
+        {
+          "name": "GET /users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{idToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiUrl}}/users",
+              "host": ["{{apiUrl}}"],
+              "path": ["users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /users/:id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{idToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiUrl}}/users/123",
+              "host": ["{{apiUrl}}"],
+              "path": ["users", "123"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /users",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{idToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"user-123\",\n  \"displayName\": \"Owen\",\n  \"email\": \"owen@example.com\",\n  \"createdAt\": \"2024-01-01T00:00:00Z\",\n  \"updatedAt\": \"2024-01-01T00:00:00Z\"\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/users",
+              "host": ["{{apiUrl}}"],
+              "path": ["users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT /users/:id",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{idToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"displayName\": \"Updated Name\",\n  \"email\": \"updated@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/users/user-123",
+              "host": ["{{apiUrl}}"],
+              "path": ["users", "user-123"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "formats",
+      "item": [
+        {
+          "name": "GET /formats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{idToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiUrl}}/formats",
+              "host": ["{{apiUrl}}"],
+              "path": ["formats"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /formats/:id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{idToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiUrl}}/formats/format-123",
+              "host": ["{{apiUrl}}"],
+              "path": ["formats", "123"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /formats",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{idToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"New Bracket\",\n  \"inactive\": false\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/formats",
+              "host": ["{{apiUrl}}"],
+              "path": ["formats"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT /formats/:id",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{idToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Cool New Name\"\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/formats/format-123",
+              "host": ["{{apiUrl}}"],
+              "path": ["formats", "format-123"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE /formats/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{idToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiUrl}}/formats/format-123",
+              "host": ["{{apiUrl}}"],
+              "path": ["formats", "format-123"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "decks",
+      "item": [
+        {
+          "name": "GET /decks",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{idToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiUrl}}/decks",
+              "host": ["{{apiUrl}}"],
+              "path": ["decks"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /decks/:id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{idToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiUrl}}/decks/deck-123",
+              "host": ["{{apiUrl}}"],
+              "path": ["decks", "deck-123"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /decks",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{idToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiUrl}}/decks",
+              "host": ["{{apiUrl}}"],
+              "path": ["decks"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"deck-123\",\n  \"userId\": \"user-123\",\n  \"name\": \"Atraxa Infect\",\n  \"colorIdentity\": [\"G\", \"U\", \"B\"],\n  \"createdAt\": \"2024-01-01T00:00:00Z\",\n  \"updatedAt\": \"2024-01-01T00:00:00Z\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT /decks/:id",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{idToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiUrl}}/decks/deck-123",
+              "host": ["{{apiUrl}}"],
+              "path": ["decks", "deck-123"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Atraxa Superfriends\",\n  \"colorIdentity\": [\"W\", \"U\", \"B\", \"G\"]\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE /decks/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{idToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiUrl}}/decks",
+              "host": ["{{apiUrl}}"],
+              "path": ["decks"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "apiUrl",
+      "value": "https://abmjoogvgc.execute-api.us-east-1.amazonaws.com/dev"
+    },
+    {
+      "key": "idToken",
+      "value": ""
+    }
+  ]
+}
