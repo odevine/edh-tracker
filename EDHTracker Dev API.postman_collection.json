@@ -332,6 +332,105 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "matches",
+      "item": [
+        {
+          "name": "GET /matches",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{idToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiUrl}}/matches",
+              "host": ["{{apiUrl}}"],
+              "path": ["matches"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /matches/:id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{idToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiUrl}}/matches/match-123",
+              "host": ["{{apiUrl}}"],
+              "path": ["matches", "match-123"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /matches",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{idToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiUrl}}/matches",
+              "host": ["{{apiUrl}}"],
+              "path": ["matches"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"winningDeckId\": \"deck-123\",\n  \"formatId\": \"format-456\",\n  \"archived\": false,\n  \"datePlayed\": \"2024-03-22\",\n  \"matchParticipants\": [\n    { \"deckId\": \"deck-123\", \"userId\": \"user-123\" },\n    { \"deckId\": \"deck-456\", \"userId\": \"user-456\" }\n  ]\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT /matches/:id",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{idToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiUrl}}/matches/match-123",
+              "host": ["{{apiUrl}}"],
+              "path": ["matches", "match-123"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"matchUpdates\": {\n    \"archived\": true\n  },\n  \"addParticipants\": [\n    { \"deckId\": \"deck-789\", \"userId\": \"user-789\" }\n  ],\n  \"removeParticipantIds\": [\"participant-1\"]\n}"
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [

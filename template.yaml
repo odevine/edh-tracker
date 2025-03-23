@@ -371,7 +371,7 @@ Outputs:
     Value: !Sub "https://${TrackerApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/"
 
   UserFunctionName:
-    Description: "Name of the deployed user Lambda function."
+    Description: "User Lambda Function Name"
     Value: !Ref UserFunction
 
   FormatFunctionName:
@@ -381,3 +381,7 @@ Outputs:
   DeckFunctionName:
     Description: "Deck Lambda Function Name"
     Value: !Ref DeckFunction
+
+  MatchFunctionName:
+    Description: "Match Lambda Function Name"
+    Value: !Ref MatchFunction
