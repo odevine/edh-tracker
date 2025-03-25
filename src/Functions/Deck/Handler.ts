@@ -1,11 +1,12 @@
 import {
-  APIGatewayProxyEventV2,
-  APIGatewayProxyHandlerV2,
+  APIGatewayProxyEventV2WithJWTAuthorizer,
+  APIGatewayProxyHandlerV2WithJWTAuthorizer,
   APIGatewayProxyResultV2,
 } from "aws-lambda";
 
+import { getAuthContext } from "@/Functions/Common/Auth";
+import { createResponse } from "@/Functions/Common/Response";
 import { CreateDeckInput, UpdateDeckInput } from "@/Types/Deck";
-import { createResponse } from "../Common/Response";
 import {
   createDeck,
   deleteDeck,
@@ -14,8 +15,8 @@ import {
   updateDeck,
 } from "./Service";
 
-export const handler: APIGatewayProxyHandlerV2 = async (
-  event: APIGatewayProxyEventV2,
+export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
+  event: APIGatewayProxyEventV2WithJWTAuthorizer,
 ): Promise<APIGatewayProxyResultV2> => {
   const { routeKey, pathParameters, body } = event;
   const id = pathParameters?.id ?? "";
@@ -47,6 +48,21 @@ export const handler: APIGatewayProxyHandlerV2 = async (
         if (!id || !body) {
           return createResponse(400, { message: "missing deck id or body" });
         }
+
+        const updateAuthContext = getAuthContext(event);
+        const deckToUpdate = await getDeck(id);
+
+        if (!deckToUpdate) {
+          return createResponse(404, { message: "deck not found" });
+        }
+
+        if (
+          !updateAuthContext.isAdmin &&
+          deckToUpdate?.userId !== updateAuthContext.userId
+        ) {
+          return createResponse(403, { message: "forbidden" });
+        }
+
         const updates: UpdateDeckInput = JSON.parse(body);
         const updated = await updateDeck(id, updates);
         return createResponse(200, updated);
@@ -55,6 +71,21 @@ export const handler: APIGatewayProxyHandlerV2 = async (
         if (!id) {
           return createResponse(400, { message: "missing deck id" });
         }
+
+        const deleteContext = getAuthContext(event);
+        const deckToDelete = await getDeck(id);
+
+        if (!deckToDelete) {
+          return createResponse(404, { message: "deck not found" });
+        }
+
+        if (
+          !deleteContext.isAdmin &&
+          deckToDelete?.userId !== deleteContext.userId
+        ) {
+          return createResponse(403, { message: "forbidden" });
+        }
+
         await deleteDeck(id);
         return createResponse(204, null);
 

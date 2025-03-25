@@ -1,5 +1,10 @@
 import type { FormatStats } from "@/Types";
 
+export type AuthContext = {
+  userId: string;
+  isAdmin: boolean;
+};
+
 export interface User {
   id: string;
   displayName: string;
