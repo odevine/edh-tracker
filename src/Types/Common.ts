@@ -10,3 +10,10 @@ export interface ApiResponse<T> {
 export interface ErrorResponse {
   message: string;
 }
+
+export type FormatStats = {
+  [formatId: string]: {
+    gamesPlayed: number;
+    gamesWon: number;
+  };
+};

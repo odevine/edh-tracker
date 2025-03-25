@@ -7,6 +7,10 @@ import {
 import { randomUUID } from "crypto";
 import { dynamo } from "../Common/Db";
 import { requireEnv } from "../Common/Env";
+import {
+  reverseStatsFromMatch,
+  updateStatsFromMatch,
+} from "../Common/StatUtils";
 import { buildUpdateExpression } from "../Common/Update";
 
 const MATCH_TABLE = requireEnv("MATCH_TABLE");
@@ -112,7 +116,12 @@ export const createMatch = async (input: CreateMatchInput): Promise<Match> => {
     });
   }
 
-  return getMatch(matchId) as Promise<Match>;
+  const fullMatch = await getMatch(matchId);
+  if (fullMatch) {
+    await updateStatsFromMatch(fullMatch);
+  }
+
+  return fullMatch as Match;
 };
 
 export const updateMatch = async (
@@ -120,6 +129,11 @@ export const updateMatch = async (
   updates: UpdateMatchInput,
 ): Promise<Match> => {
   const timestamp = new Date().toISOString();
+
+  const originalMatch = await getMatch(id);
+  if (originalMatch) {
+    await reverseStatsFromMatch(originalMatch);
+  }
 
   // update metadata
   if (updates.matchUpdates) {
@@ -180,5 +194,10 @@ export const updateMatch = async (
     }
   }
 
-  return getMatch(id) as Promise<Match>;
+  const updatedMatch = await getMatch(id);
+  if (updatedMatch) {
+    await updateStatsFromMatch(updatedMatch);
+  }
+
+  return updatedMatch as Match;
 };

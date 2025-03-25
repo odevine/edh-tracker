@@ -1,5 +1,9 @@
 "id","__typename","createdAt","name","updatedAt","inactive"
-"05e144bc-397d-4033-80c0-420c6719d84c","Format","2024-12-04T02:03:33.486Z","dollar menu","2024-12-04T02:03:33.486Z",true
-"none","Format","2024-09-07T23:06:12.350Z","unranked","2024-09-07T23:06:12.350Z",false
-"constructed","Format","2024-09-07T23:04:10.750Z","$300","2024-12-22T21:45:11.321Z",true
-"precon","Format","2024-09-07T23:03:51.465Z","precons","2024-12-22T21:45:26.387Z",true
+"0b3e4926-9890-4fd5-95a4-f811dea4e9ef","Format","2025-03-23T17:19:55.867Z","bracket 2","2025-03-23T17:30:48.271Z",false
+"0d3b0604-fbbd-4c9e-b758-c71b6da9423e","Format","2025-03-23T17:20:15.221Z","bracket 3","2025-03-23T17:31:30.580Z",false
+"f6a56a79-144d-4152-92b6-f4516224b2f6","Format","2025-03-23T17:20:20.619Z","bracket 4","2025-03-23T17:31:16.021Z",false
+"05e144bc-397d-4033-80c0-420c6719d84c","Format","2024-12-04T02:03:33.486Z","dollar menu","2025-03-23T18:11:03.298Z",false
+"e104387a-c7ff-4277-b5bb-26d4bc75482d","Format","2025-03-23T17:30:26.755Z","canadian highlander","2025-03-23T17:30:26.755Z",false
+"0719aa40-07f3-4b3d-b588-82da8605ffbb","Format","2025-03-23T18:05:47.251Z","constructed","2025-03-23T18:05:47.251Z",false
+"e692a8b9-5e99-460b-b810-59b06254eaa9","Format","2025-03-23T18:08:05.041Z","precons","2025-03-23T18:08:05.041Z",false
+"unranked","Format","2024-09-07T23:06:12.350Z","unranked","2024-09-07T23:06:12.350Z",false

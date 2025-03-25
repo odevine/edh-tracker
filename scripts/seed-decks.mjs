@@ -1,7 +1,8 @@
-// scripts/seed-decks.mjs
 import {
   BatchWriteItemCommand,
+  DeleteItemCommand,
   DynamoDBClient,
+  ScanCommand,
 } from "@aws-sdk/client-dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
 import csv from "csv-parser";
@@ -21,6 +22,40 @@ function parseColorArray(jsonStr) {
   }
 }
 
+async function deleteAllDecks() {
+  console.log("🧹 Deleting all existing decks...");
+
+  let lastKey;
+  let deleted = 0;
+
+  do {
+    const result = await client.send(
+      new ScanCommand({
+        TableName: TABLE_NAME,
+        ExclusiveStartKey: lastKey,
+        ProjectionExpression: "id",
+      }),
+    );
+
+    for (const item of result.Items || []) {
+      await client.send(
+        new DeleteItemCommand({
+          TableName: TABLE_NAME,
+          Key: { id: item.id },
+        }),
+      );
+      deleted++;
+      if (deleted % 50 === 0) {
+        console.log(`🗑️  Deleted ${deleted} decks...`);
+      }
+    }
+
+    lastKey = result.LastEvaluatedKey;
+  } while (lastKey);
+
+  console.log(`✅ Deleted a total of ${deleted} decks`);
+}
+
 function parseCSV(filePath) {
   return new Promise((resolve, reject) => {
     const items = [];
@@ -29,8 +64,8 @@ function parseCSV(filePath) {
       .on("data", (row) => {
         const item = {
           id: row.id,
-          userId: row.deckOwnerId, // renamed
-          formatId: row.deckType, // renamed
+          userId: row.userId,
+          formatId: row.formatId,
           deckName: row.deckName,
           commanderName: row.commanderName,
           createdAt: row.createdAt,
@@ -70,7 +105,7 @@ async function batchWrite(items) {
       RequestItems: {
         [TABLE_NAME]: chunk.map((item) => ({
           PutRequest: {
-            Item: marshall(item),
+            Item: marshall(item, { removeUndefinedValues: true }),
           },
         })),
       },
@@ -87,6 +122,7 @@ async function batchWrite(items) {
 
 (async () => {
   try {
+    await deleteAllDecks();
     const decks = await parseCSV("./scripts/seed-data/decks.csv");
     await batchWrite(decks);
     console.log("🎉 Deck table seeded successfully.");
