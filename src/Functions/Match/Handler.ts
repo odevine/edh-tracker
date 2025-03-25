@@ -6,7 +6,13 @@ import {
 
 import { CreateMatchInput, UpdateMatchInput } from "@/Types/Match";
 import { createResponse } from "../Common/Response";
-import { createMatch, getMatch, listMatches, updateMatch } from "./Service";
+import {
+  createMatch,
+  deleteMatch,
+  getMatch,
+  listMatches,
+  updateMatch,
+} from "./Service";
 
 export const handler: APIGatewayProxyHandlerV2 = async (
   event: APIGatewayProxyEventV2,
@@ -41,6 +47,13 @@ export const handler: APIGatewayProxyHandlerV2 = async (
         }
         const updates: UpdateMatchInput = JSON.parse(body);
         return createResponse(200, await updateMatch(id, updates));
+
+      case "DELETE /matches/{id}":
+        if (!id) {
+          return createResponse(400, { message: "missing match id" });
+        }
+        await deleteMatch(id);
+        return createResponse(204, null);
 
       default:
         return createResponse(400, { message: "unsupported route or method" });

@@ -205,3 +205,28 @@ export const updateMatch = async (
 
   return updatedMatch as Match;
 };
+
+export const deleteMatch = async (id: string): Promise<void> => {
+  const match = await getMatch(id);
+  if (match) {
+    await reverseStatsFromMatch(match);
+  }
+
+  const result = await dynamo.query({
+    TableName: MATCH_TABLE,
+    KeyConditionExpression: "PK = :pk",
+    ExpressionAttributeValues: {
+      ":pk": `MATCH#${id}`,
+    },
+  });
+
+  for (const item of result.Items || []) {
+    await dynamo.delete({
+      TableName: MATCH_TABLE,
+      Key: {
+        PK: item.PK,
+        SK: item.SK,
+      },
+    });
+  }
+};

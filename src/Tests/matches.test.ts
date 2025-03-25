@@ -1,9 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { dynamo } from "@/Functions/Common/Db";
 import { reverseStatsFromMatch } from "@/Functions/Common/StatUtils";
 import { createDeck, deleteDeck, getDeck } from "@/Functions/Deck/Service";
-import { createMatch, getMatch, updateMatch } from "@/Functions/Match/Service";
+import {
+  createMatch,
+  deleteMatch,
+  getMatch,
+  updateMatch,
+} from "@/Functions/Match/Service";
 import { createUser, deleteUser, getUser } from "@/Functions/User/Service";
 import {
   createMatchInput,
@@ -27,26 +31,6 @@ const deckIds = [
 ];
 const initialWinner = "match-test-deck-2";
 const updatedWinner = "match-test-deck-4";
-
-async function deleteMatch(id: string) {
-  const result = await dynamo.query({
-    TableName: process.env.MATCH_TABLE!,
-    KeyConditionExpression: "PK = :pk",
-    ExpressionAttributeValues: {
-      ":pk": `MATCH#${id}`,
-    },
-  });
-
-  for (const item of result.Items || []) {
-    await dynamo.delete({
-      TableName: process.env.MATCH_TABLE!,
-      Key: {
-        PK: item.PK,
-        SK: item.SK,
-      },
-    });
-  }
-}
 
 async function seedPlayersAndDecks() {
   for (let i = 0; i < 4; i++) {
@@ -198,6 +182,35 @@ describe("match service + stat propagation (dynamo integration)", () => {
 
     expect(user?.formatStats?.[formatId]?.gamesPlayed ?? 0).toBe(0);
     expect(deck?.formatStats?.[formatId]?.gamesPlayed ?? 0).toBe(0);
+  });
+
+  it("deletes a match and reverts all stats", async () => {
+    const matchInput = createMatchInput(
+      testMatchId,
+      formatId,
+      playerIds,
+      deckIds,
+      initialWinner,
+    );
+
+    await createMatch(matchInput);
+    await new Promise((res) => setTimeout(res, 1000));
+
+    const created = await getMatch(testMatchId);
+    expect(created).not.toBeNull();
+
+    await deleteMatch(testMatchId);
+
+    const deleted = await getMatch(testMatchId);
+    expect(deleted).toBeNull();
+
+    for (let i = 0; i < 4; i++) {
+      const user = await getUser(playerIds[i]);
+      const deck = await getDeck(deckIds[i]);
+
+      expect(user?.formatStats?.[formatId]?.gamesPlayed ?? 0).toBe(0);
+      expect(deck?.formatStats?.[formatId]?.gamesPlayed ?? 0).toBe(0);
+    }
   });
 
   it("manually reverses match stats", async () => {
