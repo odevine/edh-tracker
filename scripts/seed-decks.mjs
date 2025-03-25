@@ -66,7 +66,7 @@ function parseCSV(filePath) {
           id: row.id,
           userId: row.userId,
           formatId: row.formatId,
-          deckName: row.deckName,
+          displayName: row.displayName,
           commanderName: row.commanderName,
           createdAt: row.createdAt,
           updatedAt: row.updatedAt,
@@ -87,7 +87,7 @@ function parseCSV(filePath) {
 
         if (row.link) item.link = row.link;
         if (row.cost) item.cost = parseFloat(row.cost);
-        if (row.isInactive) item.inactive = row.isInactive === "True"; // renamed
+        if (row.inactive) item.inactive = row.inactive === "True";
 
         items.push(item);
       })

@@ -78,6 +78,11 @@ export const createMatch = async (input: CreateMatchInput): Promise<Match> => {
 
   const { matchParticipants, ...matchData } = input;
 
+  const participantDeckIds = matchParticipants.map((p) => p.deckId);
+  if (!participantDeckIds.includes(input.winningDeckId)) {
+    throw new Error("winning deck must belong to a match participant");
+  }
+
   const match: Match = {
     id: matchId,
     ...matchData,
@@ -135,7 +140,6 @@ export const updateMatch = async (
     await reverseStatsFromMatch(originalMatch);
   }
 
-  // update metadata
   if (updates.matchUpdates) {
     const {
       UpdateExpression,

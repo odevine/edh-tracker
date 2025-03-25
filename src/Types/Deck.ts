@@ -2,9 +2,9 @@ import type { FormatStats } from "@/Types";
 
 export interface Deck {
   id: string;
-  deckOwnerId: string;
-  deckType: string;
-  deckName: string;
+  userId: string;
+  formatId: string;
+  displayName: string;
   formatStats: FormatStats;
   commanderName: string;
   commanderColors?: string[];
@@ -12,7 +12,7 @@ export interface Deck {
   secondCommanderColors?: (string | null)[];
   link?: string;
   cost?: number;
-  isInactive?: boolean;
+  inactive?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -21,6 +21,6 @@ export type CreateDeckInput = Omit<Deck, "id" | "createdAt" | "updatedAt"> & {
   id?: string;
 };
 
-export type UpdateDeckInput = Partial<Omit<Deck, "createdAt" | "updatedAt">> & {
-  id: string;
-};
+export type UpdateDeckInput = Partial<
+  Omit<Deck, "id" | "createdAt" | "updatedAt">
+>;

@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 
-import { CreateFormatInput, Format, UpdateFormatInput } from "@/Types";
+import { CreateFormatInput, Format } from "@/Types";
 import { dynamo } from "../Common/Db";
 import { requireEnv } from "../Common/Env";
 import { buildUpdateExpression } from "../Common/Update";
@@ -19,7 +19,12 @@ export const getFormat = async (id: string): Promise<Format | null> => {
     TableName: FORMAT_TABLE,
     Key: { id },
   });
-  return (result.Item as Format) || null;
+
+  if (!result.Item) {
+    return null;
+  }
+
+  return result.Item as Format;
 };
 
 // creates a new format in the database
@@ -40,13 +45,18 @@ export const createFormat = async (
 // updates an existing format
 export const updateFormat = async (
   id: string,
-  updates: UpdateFormatInput,
+  updates: Partial<Format>,
 ): Promise<Format> => {
+  const existing = await getFormat(id);
+  if (!existing) {
+    throw new Error(`format with id "${id}" does not exist`);
+  }
+
   const {
     UpdateExpression,
     ExpressionAttributeNames,
     ExpressionAttributeValues,
-  } = buildUpdateExpression<Format>(updates);
+  } = buildUpdateExpression<Partial<Format>>(updates);
 
   const result = await dynamo.update({
     TableName: FORMAT_TABLE,
