@@ -1,6 +1,9 @@
+import type { FormatStats } from "@/Types";
+
 export interface User {
   id: string;
   displayName: string;
+  formatStats: FormatStats;
   description?: string;
   lightThemeColor?: string;
   darkThemeColor?: string;

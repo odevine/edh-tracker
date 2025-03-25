@@ -1,7 +1,8 @@
-// scripts/seed-users.mjs
 import {
   BatchWriteItemCommand,
+  DeleteItemCommand,
   DynamoDBClient,
+  ScanCommand,
 } from "@aws-sdk/client-dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
 import csv from "csv-parser";
@@ -39,6 +40,40 @@ function parseCSV(filePath) {
   });
 }
 
+async function deleteAllUsers() {
+  console.log("🧹 Deleting all existing users...");
+
+  let lastKey;
+  let deleted = 0;
+
+  do {
+    const result = await client.send(
+      new ScanCommand({
+        TableName: TABLE_NAME,
+        ExclusiveStartKey: lastKey,
+        ProjectionExpression: "id",
+      }),
+    );
+
+    for (const item of result.Items || []) {
+      await client.send(
+        new DeleteItemCommand({
+          TableName: TABLE_NAME,
+          Key: { id: item.id },
+        }),
+      );
+      deleted++;
+      if (deleted % 50 === 0) {
+        console.log(`🗑️  Deleted ${deleted} users...`);
+      }
+    }
+
+    lastKey = result.LastEvaluatedKey;
+  } while (lastKey);
+
+  console.log(`✅ Deleted a total of ${deleted} users`);
+}
+
 async function batchWrite(items) {
   const chunks = [];
   while (items.length) chunks.push(items.splice(0, 25));
@@ -65,6 +100,7 @@ async function batchWrite(items) {
 
 (async () => {
   try {
+    await deleteAllUsers();
     const users = await parseCSV("./scripts/seed-data/users.csv");
     await batchWrite(users);
     console.log("🎉 User table seeded successfully.");

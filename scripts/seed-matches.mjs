@@ -4,7 +4,7 @@ import {
   PutItemCommand,
   ScanCommand,
 } from "@aws-sdk/client-dynamodb";
-import { marshall } from "@aws-sdk/util-dynamodb";
+import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import csv from "csv-parser";
 import fs from "fs";
 
@@ -62,7 +62,7 @@ async function loadDeckOwnershipMap() {
 async function deleteAllItems() {
   console.log("🧹 Deleting all existing match items...");
   let lastKey;
-
+  let deletedCount = 0;
   do {
     const result = await client.send(
       new ScanCommand({
@@ -82,10 +82,125 @@ async function deleteAllItems() {
           },
         }),
       );
+      deletedCount++;
+      if (deletedCount % 50 === 0) {
+        console.log(`🗑️  Deleted ${deletedCount} items...`);
+      }
     }
 
     lastKey = result.LastEvaluatedKey;
   } while (lastKey);
+
+  console.log(`✅ Deleted a total of ${deletedCount} items`);
+}
+
+async function updateStatsFromMatch(match) {
+  const formatId = match.formatId;
+  const winningDeckId = match.winningDeckId;
+  const participants = match.matchParticipants || [];
+
+  for (const p of participants) {
+    const isWinner = p.deckId === winningDeckId;
+
+    // update deck formatStats
+    const deckResult = await client.send(
+      new ScanCommand({
+        TableName: DECKS_TABLE,
+        FilterExpression: "#id = :deckId",
+        ExpressionAttributeNames: { "#id": "id" },
+        ExpressionAttributeValues: { ":deckId": { S: p.deckId } },
+      }),
+    );
+
+    const deckItem = deckResult.Items?.[0];
+    if (deckItem) {
+      const deck = unmarshall(deckItem);
+      deck.formatStats ??= {};
+      deck.formatStats[formatId] ??= { gamesPlayed: 0, gamesWon: 0 };
+
+      deck.formatStats[formatId].gamesPlayed += 1;
+      if (isWinner) {
+        deck.formatStats[formatId].gamesWon += 1;
+      }
+
+      await client.send(
+        new PutItemCommand({
+          TableName: DECKS_TABLE,
+          Item: marshall(deck, { removeUndefinedValues: true }),
+        }),
+      );
+    }
+
+    // update user formatStats
+    if (p.userId && p.userId !== "unknown") {
+      const userResult = await client.send(
+        new ScanCommand({
+          TableName: "EDH-User-dev",
+          FilterExpression: "#id = :userId",
+          ExpressionAttributeNames: { "#id": "id" },
+          ExpressionAttributeValues: { ":userId": { S: p.userId } },
+        }),
+      );
+
+      const userItem = userResult.Items?.[0];
+      if (userItem) {
+        const user = unmarshall(userItem);
+        user.formatStats ??= {};
+        user.formatStats[formatId] ??= { gamesPlayed: 0, gamesWon: 0 };
+
+        user.formatStats[formatId].gamesPlayed += 1;
+        if (isWinner) {
+          user.formatStats[formatId].gamesWon += 1;
+        }
+
+        await client.send(
+          new PutItemCommand({
+            TableName: "EDH-User-dev",
+            Item: marshall(user, { removeUndefinedValues: true }),
+          }),
+        );
+      }
+    }
+  }
+}
+
+async function runStatsBackfill() {
+  console.log("📊 Running stats backfill...");
+
+  const result = await client.send(new ScanCommand({ TableName: MATCH_TABLE }));
+  const grouped = {};
+
+  for (const item of result.Items || []) {
+    const unmarshalled = Object.fromEntries(
+      Object.entries(item).map(([k, v]) => [k, Object.values(v)[0]]),
+    );
+
+    const pk = unmarshalled.PK;
+    const matchId = pk.split("#")[1];
+
+    if (!grouped[matchId]) {
+      grouped[matchId] = { matchParticipants: [] };
+    }
+
+    if (unmarshalled.SK === "METADATA") {
+      grouped[matchId] = { ...grouped[matchId], ...unmarshalled };
+    } else if (unmarshalled.SK.startsWith("PARTICIPANT#")) {
+      grouped[matchId].matchParticipants.push(unmarshalled);
+    }
+  }
+
+  let count = 0;
+  const total = Object.keys(grouped).length;
+
+  for (const match of Object.values(grouped)) {
+    await updateStatsFromMatch(match);
+    count++;
+    if (count % 25 === 0 || count === total) {
+      console.log(`📈 Processed ${count} / ${total} matches for stats`);
+    }
+  }
+
+  console.log("✅ Stats backfill complete");
 }
 
 async function seed() {
@@ -170,6 +285,7 @@ async function seed() {
   }
 
   console.log("🎉 Match seed complete");
+  await runStatsBackfill();
 }
 
 seed().catch((err) => {

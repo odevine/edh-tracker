@@ -1,8 +1,11 @@
+import type { FormatStats } from "@/Types";
+
 export interface Deck {
   id: string;
-  deckOwnerId: string; // should be userId in the new table
-  deckType: string; // should be "formatId" in the new table
+  deckOwnerId: string;
+  deckType: string;
   deckName: string;
+  formatStats: FormatStats;
   commanderName: string;
   commanderColors?: string[];
   secondCommanderName?: string;
