@@ -17,6 +17,6 @@ export type CreateUserInput = Omit<User, "id" | "createdAt" | "updatedAt"> & {
   id?: string;
 };
 
-export type UpdateUserInput = Partial<Omit<User, "createdAt" | "updatedAt">> & {
-  id: string;
-};
+export type UpdateUserInput = Partial<
+  Omit<User, "id" | "createdAt" | "updatedAt">
+>;

@@ -22,6 +22,11 @@ export const getUser = async (id: string): Promise<User | null> => {
 
 // creates a new user in the database
 export const createUser = async (user: User): Promise<void> => {
+  const existing = await getUser(user.id);
+  if (existing) {
+    throw new Error(`user with id "${user.id}" already exists`);
+  }
+
   await dynamo.put({
     TableName: USER_TABLE,
     Item: user,

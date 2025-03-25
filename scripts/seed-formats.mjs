@@ -21,7 +21,7 @@ function parseCSV(filePath) {
       .on("data", (row) => {
         const item = {
           id: row.id === "none" ? "unranked" : row.id,
-          name: row.name,
+          displayName: row.displayName,
           createdAt: row.createdAt,
           updatedAt: row.updatedAt,
           inactive: row.inactive,

@@ -1,6 +1,6 @@
 export interface Format {
   id: string;
-  name: string;
+  displayName: string;
   inactive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -14,7 +14,5 @@ export type CreateFormatInput = Omit<
 };
 
 export type UpdateFormatInput = Partial<
-  Omit<Format, "createdAt" | "updatedAt">
-> & {
-  id: string;
-};
+  Omit<Format, "id" | "createdAt" | "updatedAt">
+>;

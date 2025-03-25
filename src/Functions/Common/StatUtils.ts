@@ -24,7 +24,7 @@ export const updateStatsFromMatch = async (match: Match) => {
         deck.formatStats[formatId].gamesWon += 1;
       }
 
-      await updateDeck(deck.id, { id: deck.id, formatStats: deck.formatStats });
+      await updateDeck(deck.id, { formatStats: deck.formatStats });
     }
 
     // update user stats
@@ -68,7 +68,7 @@ export const reverseStatsFromMatch = async (match: Match) => {
         );
       }
 
-      await updateDeck(deck.id, { id: deck.id, formatStats: deck.formatStats });
+      await updateDeck(deck.id, { formatStats: deck.formatStats });
     }
 
     // reverse user stats
