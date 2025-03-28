@@ -4,7 +4,11 @@ import {
   APIGatewayProxyResultV2,
 } from "aws-lambda";
 
-import { createResponse, getAuthContext } from "@/Functions/Common";
+import {
+  createResponse,
+  getAuthContext,
+  parseJsonBody,
+} from "@/Functions/Common";
 import { CreateFormatInput, UpdateFormatInput } from "@/Types";
 import {
   createFormat,
@@ -24,11 +28,15 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
 
   try {
     switch (routeKey) {
-      case "GET /formats":
+      // returns a list of all formats
+      case "GET /formats": {
         const formats = await listFormats();
         return createResponse(200, formats);
+      }
 
-      case "GET /formats/{id}":
+      // returns a format by id
+      // probably won't ever be needed, but figured it should exist for completeness
+      case "GET /formats/{id}": {
         if (!id) {
           return createResponse(400, { message: "missing format id" });
         }
@@ -37,19 +45,32 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
         return format
           ? createResponse(200, format)
           : createResponse(404, { message: "format not found" });
+      }
 
-      case "POST /formats":
-        if (!body) {
-          return createResponse(400, { message: "missing request body" });
+      // creates and returns a new format
+      // requires admin privileges
+      case "POST /formats": {
+        const postContext = getAuthContext(event);
+        if (!postContext.isAdmin) {
+          return createResponse(403, { message: "forbidden" });
         }
 
-        const newformat: CreateFormatInput = JSON.parse(body);
-        const created = await createFormat(newformat);
-        return createResponse(201, created);
+        const createInput = parseJsonBody<CreateFormatInput>(body ?? null);
+        if (!createInput) {
+          return createResponse(400, {
+            message: "missing or invalid request body",
+          });
+        }
 
-      case "PUT /formats/{id}":
-        if (!id || !body) {
-          return createResponse(400, { message: "missing format id or body" });
+        const createdFormat = await createFormat(createInput);
+        return createResponse(201, createdFormat);
+      }
+
+      // updates a format by id
+      // requires admin privileges
+      case "PUT /formats/{id}": {
+        if (!id) {
+          return createResponse(400, { message: "missing format id" });
         }
 
         const putContext = getAuthContext(event);
@@ -57,15 +78,25 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
           return createResponse(403, { message: "forbidden" });
         }
 
-        const formatToUpdate = await getFormat(id);
-        if (!formatToUpdate) {
-          return createResponse(404, { message: "match not found" });
+        const updateInput = parseJsonBody<UpdateFormatInput>(body ?? null);
+        if (!updateInput) {
+          return createResponse(400, {
+            message: "missing or invalid request body",
+          });
         }
 
-        const updates: UpdateFormatInput = JSON.parse(body);
-        return createResponse(200, await updateFormat(id, updates));
+        const formatToUpdate = await getFormat(id);
+        if (!formatToUpdate) {
+          return createResponse(404, { message: "format not found" });
+        }
 
-      case "DELETE /formats/{id}":
+        const updatedFormat = await updateFormat(id, updateInput);
+        return createResponse(200, updatedFormat);
+      }
+
+      // deletes a format by id
+      // not accessible through gateway, just for testing api
+      case "DELETE /formats/{id}": {
         if (!id) {
           return createResponse(400, { message: "missing format id" });
         }
@@ -82,9 +113,12 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
 
         await deleteFormat(id);
         return createResponse(204, null);
+      }
 
-      default:
+      // any unsupported route/method
+      default: {
         return createResponse(400, { message: "unsupported route or method" });
+      }
     }
   } catch (error: any) {
     console.error("format handler error:", error);

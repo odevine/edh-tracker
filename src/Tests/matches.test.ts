@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { reverseStatsFromMatch } from "@/Functions/Common/StatUtils";
+import { reverseStatsFromMatch } from "@/Functions/Common";
 import { createDeck, deleteDeck, getDeck } from "@/Functions/Deck/Service";
 import {
   createMatch,

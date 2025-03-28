@@ -4,15 +4,13 @@ import {
   APIGatewayProxyResultV2,
 } from "aws-lambda";
 
-import { createResponse, getAuthContext } from "@/Functions/Common";
-import { User } from "@/Types";
 import {
-  createUser,
-  deleteUser,
-  getUser,
-  listUsers,
-  updateUser,
-} from "./Service";
+  createResponse,
+  getAuthContext,
+  parseJsonBody,
+} from "@/Functions/Common";
+import { CreateUserInput, UpdateUserInput } from "@/Types";
+import { createUser, getUser, listUsers, updateUser } from "./Service";
 
 export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
   event: APIGatewayProxyEventV2WithJWTAuthorizer,
@@ -22,13 +20,14 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
 
   try {
     switch (routeKey) {
-      case "GET /users":
-        // list all users
+      // returns a list of all users
+      case "GET /users": {
         const users = await listUsers();
         return createResponse(200, users);
+      }
 
-      case "GET /users/{id}":
-        // get user by id
+      // returns a user by id
+      case "GET /users/{id}": {
         if (!id) {
           return createResponse(400, { message: "missing user id" });
         }
@@ -37,58 +36,61 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
         return user
           ? createResponse(200, user)
           : createResponse(404, { message: "user not found" });
+      }
 
-      case "POST /users":
-        // create a new user
-        if (!body) {
-          return createResponse(400, { message: "missing request body" });
-        }
-
+      // creates and returns a new user
+      // should be handled by postauth trigger
+      // requires admin privileges
+      case "POST /users": {
         const postContext = getAuthContext(event);
         if (!postContext.isAdmin) {
           return createResponse(403, { message: "forbidden" });
         }
 
-        const newUser: User = JSON.parse(body);
-        const createdUser = await createUser(newUser);
+        const createInput = parseJsonBody<CreateUserInput>(body ?? null);
+        if (!createInput) {
+          return createResponse(400, {
+            message: "missing or invalid request body",
+          });
+        }
+
+        const createdUser = await createUser(createInput);
         return createResponse(201, createdUser);
+      }
 
-      case "PUT /users/{id}":
-        // update user
-        if (!id || !body) {
-          return createResponse(400, { message: "missing user id or body" });
-        }
-
-        const userToUpdate = await getUser(id);
-        if (!userToUpdate) {
-          return createResponse(404, { message: "user not found" });
-        }
-
-        const putContext = getAuthContext(event);
-        if (!putContext.isAdmin && userToUpdate?.id !== putContext.userId) {
-          return createResponse(403, { message: "forbidden" });
-        }
-
-        const updates = JSON.parse(body);
-        const updatedUser = await updateUser(id, updates);
-        return createResponse(200, updatedUser);
-
-      case "DELETE /users/{id}":
-        // delete user
+      // updates a user by id
+      // requires admin or self
+      case "PUT /users/{id}": {
         if (!id) {
           return createResponse(400, { message: "missing user id" });
         }
 
-        const deleteContext = getAuthContext(event);
-        if (!deleteContext.isAdmin) {
+        const updateInput = parseJsonBody<UpdateUserInput>(body ?? null);
+        if (!updateInput) {
+          return createResponse(400, {
+            message: "missing or invalid request body",
+          });
+        }
+
+        const putContext = getAuthContext(event);
+        const userToUpdate = await getUser(id);
+
+        if (!putContext.isAdmin && userToUpdate?.id !== putContext.userId) {
           return createResponse(403, { message: "forbidden" });
         }
 
-        await deleteUser(id);
-        return createResponse(204, null);
+        if (!userToUpdate) {
+          return createResponse(404, { message: "user not found" });
+        }
 
-      default:
+        const updatedUser = await updateUser(id, updateInput);
+        return createResponse(200, updatedUser);
+      }
+
+      // any unsupported route/method
+      default: {
         return createResponse(400, { message: "unsupported route or method" });
+      }
     }
   } catch (error: any) {
     console.error("user handler error:", error);

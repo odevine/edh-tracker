@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
 
 import { buildUpdateExpression, dynamo, requireEnv } from "@/Functions/Common";
-import { CreateDeckInput, Deck, UpdateDeckInput } from "@/Types/Deck";
+import { CreateDeckInput, Deck, UpdateDeckInput } from "@/Types";
 
 const DECK_TABLE = requireEnv("DECK_TABLE");
 
@@ -11,7 +11,7 @@ export const listDecks = async (): Promise<Deck[]> => {
   return (result.Items as Deck[]) || [];
 };
 
-// fetches a single deck by its id
+// fetches a single deck by id
 export const getDeck = async (id: string): Promise<Deck | null> => {
   const result = await dynamo.get({
     TableName: DECK_TABLE,
@@ -20,11 +20,18 @@ export const getDeck = async (id: string): Promise<Deck | null> => {
   return (result.Item as Deck) || null;
 };
 
-// creates a new deck
+// creates a new deck in the database
 export const createDeck = async (input: CreateDeckInput): Promise<Deck> => {
+  if (input.id) {
+    const existing = await getDeck(input.id);
+    if (existing) {
+      throw new Error(`deck with id "${input.id}" already exists`);
+    }
+  }
+
   const deck: Deck = {
     ...input,
-    id: input.id || randomUUID(),
+    id: input.id ?? randomUUID(),
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -33,7 +40,7 @@ export const createDeck = async (input: CreateDeckInput): Promise<Deck> => {
   return deck;
 };
 
-// updates an existing deck
+// updates an existing deck with partial input fields
 export const updateDeck = async (
   id: string,
   updates: UpdateDeckInput,
