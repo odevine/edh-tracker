@@ -1,17 +1,18 @@
+import { randomUUID } from "crypto";
+
+import {
+  buildUpdateExpression,
+  dynamo,
+  requireEnv,
+  reverseStatsFromMatch,
+  updateStatsFromMatch,
+} from "@/Functions/Common";
 import {
   CreateMatchInput,
   Match,
   MatchParticipant,
   UpdateMatchInput,
-} from "@/Types/Match";
-import { randomUUID } from "crypto";
-import { dynamo } from "../Common/Db";
-import { requireEnv } from "../Common/Env";
-import {
-  reverseStatsFromMatch,
-  updateStatsFromMatch,
-} from "../Common/StatUtils";
-import { buildUpdateExpression } from "../Common/Update";
+} from "@/Types";
 
 const MATCH_TABLE = requireEnv("MATCH_TABLE");
 
