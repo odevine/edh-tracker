@@ -4,9 +4,8 @@ import {
   APIGatewayProxyResultV2,
 } from "aws-lambda";
 
-import { getAuthContext } from "@/Functions/Common/Auth";
-import { createResponse } from "@/Functions/Common/Response";
-import { CreateMatchInput, UpdateMatchInput } from "@/Types/Match";
+import { createResponse, getAuthContext } from "@/Functions/Common";
+import { CreateMatchInput, UpdateMatchInput } from "@/Types";
 import {
   createMatch,
   deleteMatch,
@@ -30,6 +29,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
         if (!id) {
           return createResponse(400, { message: "missing match id" });
         }
+
         const match = await getMatch(id);
         return match
           ? createResponse(200, match)
@@ -39,6 +39,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
         if (!body) {
           return createResponse(400, { message: "missing body" });
         }
+
         const input: CreateMatchInput = JSON.parse(body);
         return createResponse(201, await createMatch(input));
 
@@ -48,14 +49,13 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
         }
 
         const putContext = getAuthContext(event);
-        const matchToUpdate = await getMatch(id);
-
-        if (!matchToUpdate) {
-          return createResponse(404, { message: "match not found" });
+        if (!putContext.isAdmin) {
+          return createResponse(403, { message: "forbidden" });
         }
 
-        if (!putContext.isAdmin) {
-          return createResponse(403, { message: "admin access required" });
+        const matchToUpdate = await getMatch(id);
+        if (!matchToUpdate) {
+          return createResponse(404, { message: "match not found" });
         }
 
         const updates: UpdateMatchInput = JSON.parse(body);
@@ -67,14 +67,13 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
         }
 
         const deleteContext = getAuthContext(event);
-        const matchToDelete = await getMatch(id);
-
-        if (!matchToDelete) {
-          return createResponse(404, { message: "match not found" });
+        if (!deleteContext.isAdmin) {
+          return createResponse(403, { message: "forbidden" });
         }
 
-        if (!deleteContext.isAdmin) {
-          return createResponse(403, { message: "admin access required" });
+        const matchToDelete = await getMatch(id);
+        if (!matchToDelete) {
+          return createResponse(404, { message: "match not found" });
         }
 
         await deleteMatch(id);

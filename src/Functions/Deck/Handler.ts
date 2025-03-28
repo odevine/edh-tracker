@@ -4,8 +4,7 @@ import {
   APIGatewayProxyResultV2,
 } from "aws-lambda";
 
-import { getAuthContext } from "@/Functions/Common/Auth";
-import { createResponse } from "@/Functions/Common/Response";
+import { createResponse, getAuthContext } from "@/Functions/Common";
 import { CreateDeckInput, UpdateDeckInput } from "@/Types/Deck";
 import {
   createDeck,
@@ -49,23 +48,19 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
           return createResponse(400, { message: "missing deck id or body" });
         }
 
-        const updateAuthContext = getAuthContext(event);
         const deckToUpdate = await getDeck(id);
-
         if (!deckToUpdate) {
           return createResponse(404, { message: "deck not found" });
         }
 
-        if (
-          !updateAuthContext.isAdmin &&
-          deckToUpdate?.userId !== updateAuthContext.userId
-        ) {
+        const putContext = getAuthContext(event);
+        if (!putContext.isAdmin && deckToUpdate?.userId !== putContext.userId) {
           return createResponse(403, { message: "forbidden" });
         }
 
         const updates: UpdateDeckInput = JSON.parse(body);
-        const updated = await updateDeck(id, updates);
-        return createResponse(200, updated);
+        const updatedDeck = await updateDeck(id, updates);
+        return createResponse(200, updatedDeck);
 
       case "DELETE /decks/{id}":
         if (!id) {

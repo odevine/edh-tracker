@@ -21,7 +21,7 @@ export const getUser = async (id: string): Promise<User | null> => {
 };
 
 // creates a new user in the database
-export const createUser = async (user: User): Promise<void> => {
+export const createUser = async (user: User): Promise<User> => {
   const existing = await getUser(user.id);
   if (existing) {
     throw new Error(`user with id "${user.id}" already exists`);
@@ -31,6 +31,7 @@ export const createUser = async (user: User): Promise<void> => {
     TableName: USER_TABLE,
     Item: user,
   });
+  return user;
 };
 
 // updates an existing user with partial input fields
