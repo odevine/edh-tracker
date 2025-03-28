@@ -221,14 +221,6 @@ Resources:
             Method: PUT
             Auth:
               Authorizer: CognitoAuthorizer
-        DeleteFormat:
-          Type: HttpApi
-          Properties:
-            ApiId: !Ref TrackerApi
-            Path: /formats/{id}
-            Method: DELETE
-            Auth:
-              Authorizer: CognitoAuthorizer
     Metadata:
       BuildMethod: esbuild
       BuildProperties:

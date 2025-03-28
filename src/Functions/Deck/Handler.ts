@@ -4,8 +4,12 @@ import {
   APIGatewayProxyResultV2,
 } from "aws-lambda";
 
-import { createResponse, getAuthContext } from "@/Functions/Common";
-import { CreateDeckInput, UpdateDeckInput } from "@/Types/Deck";
+import {
+  createResponse,
+  getAuthContext,
+  parseJsonBody,
+} from "@/Functions/Common";
+import { CreateDeckInput, UpdateDeckInput } from "@/Types";
 import {
   createDeck,
   deleteDeck,
@@ -22,57 +26,75 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
 
   try {
     switch (routeKey) {
-      case "GET /decks":
+      // returns a list of all decks
+      case "GET /decks": {
         const decks = await listDecks();
         return createResponse(200, decks);
+      }
 
-      case "GET /decks/{id}":
+      // returns a deck by id
+      case "GET /decks/{id}": {
         if (!id) {
           return createResponse(400, { message: "missing deck id" });
         }
+
         const deck = await getDeck(id);
         return deck
           ? createResponse(200, deck)
           : createResponse(404, { message: "deck not found" });
+      }
 
-      case "POST /decks":
-        if (!body) {
-          return createResponse(400, { message: "missing request body" });
+      // creates and returns a new deck
+      case "POST /decks": {
+        const createInput = parseJsonBody<CreateDeckInput>(body ?? null);
+        if (!createInput) {
+          return createResponse(400, {
+            message: "missing or invalid request body",
+          });
         }
-        const newDeck: CreateDeckInput = JSON.parse(body);
-        const created = await createDeck(newDeck);
+
+        const created = await createDeck(createInput);
         return createResponse(201, created);
+      }
 
-      case "PUT /decks/{id}":
-        if (!id || !body) {
-          return createResponse(400, { message: "missing deck id or body" });
+      // updates a deck by id
+      // requires admin or self
+      case "PUT /decks/{id}": {
+        if (!id) {
+          return createResponse(400, { message: "missing deck id" });
         }
 
-        const deckToUpdate = await getDeck(id);
-        if (!deckToUpdate) {
-          return createResponse(404, { message: "deck not found" });
+        const updateInput = parseJsonBody<UpdateDeckInput>(body ?? null);
+        if (!updateInput) {
+          return createResponse(400, {
+            message: "missing or invalid request body",
+          });
         }
 
         const putContext = getAuthContext(event);
+        const deckToUpdate = await getDeck(id);
+
         if (!putContext.isAdmin && deckToUpdate?.userId !== putContext.userId) {
           return createResponse(403, { message: "forbidden" });
         }
 
-        const updates: UpdateDeckInput = JSON.parse(body);
-        const updatedDeck = await updateDeck(id, updates);
-        return createResponse(200, updatedDeck);
+        if (!deckToUpdate) {
+          return createResponse(404, { message: "deck not found" });
+        }
 
-      case "DELETE /decks/{id}":
+        const updatedDeck = await updateDeck(id, updateInput);
+        return createResponse(200, updatedDeck);
+      }
+
+      // deletes a deck by id
+      // requires admin or self
+      case "DELETE /decks/{id}": {
         if (!id) {
           return createResponse(400, { message: "missing deck id" });
         }
 
         const deleteContext = getAuthContext(event);
         const deckToDelete = await getDeck(id);
-
-        if (!deckToDelete) {
-          return createResponse(404, { message: "deck not found" });
-        }
 
         if (
           !deleteContext.isAdmin &&
@@ -81,11 +103,18 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
           return createResponse(403, { message: "forbidden" });
         }
 
+        if (!deckToDelete) {
+          return createResponse(404, { message: "deck not found" });
+        }
+
         await deleteDeck(id);
         return createResponse(204, null);
+      }
 
-      default:
+      // any unsupported route/method
+      default: {
         return createResponse(400, { message: "unsupported route or method" });
+      }
     }
   } catch (error: any) {
     console.error("deck handler error:", error);

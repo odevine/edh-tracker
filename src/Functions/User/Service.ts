@@ -1,7 +1,7 @@
-import { User } from "@/Types";
-import { dynamo } from "../Common/Db";
-import { requireEnv } from "../Common/Env";
-import { buildUpdateExpression } from "../Common/Update";
+import { randomUUID } from "crypto";
+
+import { buildUpdateExpression, dynamo, requireEnv } from "@/Functions/Common";
+import { CreateUserInput, User } from "@/Types";
 
 const USER_TABLE = requireEnv("USER_TABLE");
 
@@ -11,7 +11,7 @@ export const listUsers = async (): Promise<User[]> => {
   return (result.Items as User[]) || [];
 };
 
-// fetches a single user by their id
+// fetches a single user by id
 export const getUser = async (id: string): Promise<User | null> => {
   const result = await dynamo.get({
     TableName: USER_TABLE,
@@ -21,16 +21,22 @@ export const getUser = async (id: string): Promise<User | null> => {
 };
 
 // creates a new user in the database
-export const createUser = async (user: User): Promise<User> => {
-  const existing = await getUser(user.id);
-  if (existing) {
-    throw new Error(`user with id "${user.id}" already exists`);
+export const createUser = async (input: CreateUserInput): Promise<User> => {
+  if (input.id) {
+    const existing = await getUser(input.id);
+    if (existing) {
+      throw new Error(`user with id "${input.id}" already exists`);
+    }
   }
 
-  await dynamo.put({
-    TableName: USER_TABLE,
-    Item: user,
-  });
+  const user: User = {
+    ...input,
+    id: input.id ?? randomUUID(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  await dynamo.put({ TableName: USER_TABLE, Item: user });
   return user;
 };
 
@@ -59,8 +65,5 @@ export const updateUser = async (
 
 // deletes a user by their id
 export const deleteUser = async (id: string): Promise<void> => {
-  await dynamo.delete({
-    TableName: USER_TABLE,
-    Key: { id },
-  });
+  await dynamo.delete({ TableName: USER_TABLE, Key: { id } });
 };

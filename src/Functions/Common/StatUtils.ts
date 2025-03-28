@@ -1,6 +1,6 @@
-import { Match } from "@/Types/Match";
-import { getDeck, updateDeck } from "../Deck/Service";
-import { getUser, updateUser } from "../User/Service";
+import { getUser, updateUser } from "@/Functions//User/Service";
+import { getDeck, updateDeck } from "@/Functions/Deck/Service";
+import { Match } from "@/Types";
 
 export const updateStatsFromMatch = async (match: Match) => {
   const formatId = match.formatId;

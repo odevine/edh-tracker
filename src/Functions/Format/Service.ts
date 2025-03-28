@@ -29,6 +29,13 @@ export const getFormat = async (id: string): Promise<Format | null> => {
 export const createFormat = async (
   input: CreateFormatInput,
 ): Promise<Format> => {
+  if (input.id) {
+    const existing = await getFormat(input.id);
+    if (existing) {
+      throw new Error(`format with id "${input.id}" already exists`);
+    }
+  }
+
   const format: Format = {
     ...input,
     id: input.id || randomUUID(),

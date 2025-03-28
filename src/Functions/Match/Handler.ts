@@ -22,10 +22,13 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
 
   try {
     switch (routeKey) {
-      case "GET /matches":
+      // returns a list of all matches
+      case "GET /matches": {
         return createResponse(200, await listMatches());
+      }
 
-      case "GET /matches/{id}":
+      // returns a match by id
+      case "GET /matches/{id}": {
         if (!id) {
           return createResponse(400, { message: "missing match id" });
         }
@@ -34,16 +37,21 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
         return match
           ? createResponse(200, match)
           : createResponse(404, { message: "match not found" });
+      }
 
-      case "POST /matches":
+      // creates and returns a new match
+      case "POST /matches": {
         if (!body) {
           return createResponse(400, { message: "missing body" });
         }
 
         const input: CreateMatchInput = JSON.parse(body);
         return createResponse(201, await createMatch(input));
+      }
 
-      case "PUT /matches/{id}":
+      // updates a match by id
+      // requires admin privileges
+      case "PUT /matches/{id}": {
         if (!id || !body) {
           return createResponse(400, { message: "missing match id or body" });
         }
@@ -60,8 +68,11 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
 
         const updates: UpdateMatchInput = JSON.parse(body);
         return createResponse(200, await updateMatch(id, updates));
+      }
 
-      case "DELETE /matches/{id}":
+      // deletes a match by id
+      // requires admin privileges
+      case "DELETE /matches/{id}": {
         if (!id) {
           return createResponse(400, { message: "missing match id" });
         }
@@ -78,9 +89,12 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
 
         await deleteMatch(id);
         return createResponse(204, null);
+      }
 
-      default:
+      // any unsupported route/method
+      default: {
         return createResponse(400, { message: "unsupported route or method" });
+      }
     }
   } catch (err: any) {
     console.error("Match function error:", err);

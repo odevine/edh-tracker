@@ -5,7 +5,7 @@ import {
   dynamo,
   requireEnv,
   reverseStatsFromMatch,
-  updateStatsFromMatch,
+  updateStatsFromMatch,  
 } from "@/Functions/Common";
 import {
   CreateMatchInput,
@@ -23,6 +23,7 @@ const stripInternalFields = <T extends Record<string, any>>(item: T): T => {
   return clone;
 };
 
+// fetches and constructs all matches from the database
 export const listMatches = async (): Promise<Match[]> => {
   const result = await dynamo.scan({ TableName: MATCH_TABLE });
   const grouped: Record<string, Match> = {};
@@ -50,6 +51,7 @@ export const listMatches = async (): Promise<Match[]> => {
   return Object.values(grouped);
 };
 
+// fetches and constructs a single match object based on id
 export const getMatch = async (id: string): Promise<Match | null> => {
   const result = await dynamo.query({
     TableName: MATCH_TABLE,
@@ -73,6 +75,7 @@ export const getMatch = async (id: string): Promise<Match | null> => {
   };
 };
 
+// creates a new match and match participant entries in the database
 export const createMatch = async (input: CreateMatchInput): Promise<Match> => {
   const matchId = input.id || randomUUID();
   const timestamp = new Date().toISOString();
@@ -122,6 +125,7 @@ export const createMatch = async (input: CreateMatchInput): Promise<Match> => {
     });
   }
 
+  // upon a successful creation, apply stat updates on the participants and their decks
   const fullMatch = await getMatch(matchId);
   if (fullMatch) {
     await updateStatsFromMatch(fullMatch);
@@ -130,6 +134,8 @@ export const createMatch = async (input: CreateMatchInput): Promise<Match> => {
   return fullMatch as Match;
 };
 
+// updates an existing match with partial input fields
+// applies all stat rollbacks/updates necessary
 export const updateMatch = async (
   id: string,
   updates: UpdateMatchInput,
@@ -141,6 +147,7 @@ export const updateMatch = async (
     await reverseStatsFromMatch(originalMatch);
   }
 
+  // if updates to the match metadata are required, apply them to the PK match entry
   if (updates.matchUpdates) {
     const {
       UpdateExpression,
@@ -163,7 +170,7 @@ export const updateMatch = async (
     });
   }
 
-  // add participants
+  // if there are any participants to add, create new match participant entries
   if (updates.addParticipants?.length) {
     for (const p of updates.addParticipants) {
       const newP: MatchParticipant = {
@@ -186,7 +193,7 @@ export const updateMatch = async (
     }
   }
 
-  // remove participants
+  // if there are any participants to remove, delete those match participant entries
   if (updates.removeParticipantIds?.length) {
     for (const pid of updates.removeParticipantIds) {
       await dynamo.delete({
@@ -199,6 +206,7 @@ export const updateMatch = async (
     }
   }
 
+  // upon completion of match updates, apply stat changes to participants and their decks
   const updatedMatch = await getMatch(id);
   if (updatedMatch) {
     await updateStatsFromMatch(updatedMatch);
@@ -207,6 +215,7 @@ export const updateMatch = async (
   return updatedMatch as Match;
 };
 
+// rolls back any stats affected by the match, deletes the match provided
 export const deleteMatch = async (id: string): Promise<void> => {
   const match = await getMatch(id);
   if (match) {
