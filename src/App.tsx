@@ -4,8 +4,8 @@ import { Box, Stack, Typography } from "@mui/material";
 import { Amplify } from "aws-amplify";
 import { Redirect, useRoutes } from "raviger";
 
-import { AppAlertList, LoadingBackdrop, Toolbar } from "@/Components";
-import { useApp, useDeck, useMatch, useUser } from "@/Context";
+import { AppAlertList, LoadingBackdrop, Toolbar } from "@/components";
+import { useApp, useDeck, useMatch, useUser } from "@/context";
 import {
   DecksPage,
   LandingPage,
@@ -13,7 +13,7 @@ import {
   Profile,
   ToolsPage,
   UsersPage,
-} from "@/Pages";
+} from "@/pages";
 import awsmobile from "./aws-exports";
 
 Amplify.configure(awsmobile);
