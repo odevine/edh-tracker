@@ -18,6 +18,7 @@ import { cognitoClient } from "@/lib/cognitoClient";
 interface AuthContextType {
   userId: string | null;
   isAuthenticated: boolean;
+  isAdmin: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => void;
   accessToken: string | null;
@@ -28,6 +29,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
   const [userId, setUserId] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
 
@@ -40,6 +42,14 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       setAccessToken(storedAccessToken);
       setRefreshToken(storedRefreshToken);
       setUserId(storedUserId);
+
+      try {
+        const payload = JSON.parse(atob(storedAccessToken.split(".")[1]));
+        const groups: string[] = payload["cognito:groups"] || [];
+        setIsAdmin(groups.includes("admin"));
+      } catch {
+        console.warn("failed to decode JWT during session restore");
+      }
     }
   }, []);
 
@@ -54,7 +64,6 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     });
 
     const response = await cognitoClient.send(command);
-
     const authResult = response.AuthenticationResult;
     if (!authResult) {
       throw new Error("login failed");
@@ -63,9 +72,13 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     const { AccessToken, RefreshToken } = authResult;
 
     let userId: string;
+    let groups: string[];
+    let isAdmin = false;
     try {
       const payload = JSON.parse(atob(AccessToken!.split(".")[1]));
       userId = payload.sub;
+      groups = payload["cognito:groups"] || [];
+      isAdmin = groups.includes("admin");
     } catch {
       throw new Error("invalid access token");
     }
@@ -78,6 +91,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     setAccessToken(AccessToken!);
     setRefreshToken(RefreshToken!);
     setUserId(userId);
+    setIsAdmin(isAdmin);
 
     navigate("/users");
   };
@@ -89,6 +103,8 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     setAccessToken(null);
     setRefreshToken(null);
     setUserId(null);
+    setIsAdmin(false);
+
     navigate("/");
   };
 
@@ -113,6 +129,14 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     if (authResult?.AccessToken) {
       localStorage.setItem("accessToken", authResult.AccessToken);
       setAccessToken(authResult.AccessToken);
+
+      try {
+        const payload = JSON.parse(atob(authResult.AccessToken.split(".")[1]));
+        const groups: string[] = payload["cognito:groups"] || [];
+        setIsAdmin(groups.includes("admin"));
+      } catch {
+        console.warn("failed to decode JWT after refresh");
+      }
     }
   };
 
@@ -124,6 +148,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
         signIn,
         signOut,
         refreshSession,
+        isAdmin,
         isAuthenticated: !!accessToken,
       }}
     >
