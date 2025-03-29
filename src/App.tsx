@@ -1,7 +1,6 @@
 import { Authenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
 import { Box, Stack, Typography } from "@mui/material";
-import { Amplify } from "aws-amplify";
 import { Redirect, useRoutes } from "raviger";
 
 import { AppAlertList, LoadingBackdrop, Toolbar } from "@/components";
@@ -14,9 +13,6 @@ import {
   ToolsPage,
   UsersPage,
 } from "@/pages";
-import awsmobile from "./aws-exports";
-
-Amplify.configure(awsmobile);
 
 const NotFoundPage = () => (
   <Stack sx={{ height: "100%" }} justifyContent="center" alignItems="center">
