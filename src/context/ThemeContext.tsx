@@ -1,7 +1,3 @@
-import {
-  Theme as AmpTheme,
-  ThemeProvider as AmpThemeProvider,
-} from "@aws-amplify/ui-react";
 import "@fontsource-variable/noto-sans-mono";
 import {
   CssBaseline,
@@ -9,8 +5,6 @@ import {
   ThemeProvider as MuiThemeProvider,
   PaletteMode,
   createTheme,
-  darken,
-  lighten,
   useMediaQuery,
 } from "@mui/material";
 import {
@@ -29,7 +23,7 @@ export const ThemeContext = createContext({
   mode: "dark",
 });
 
-export const ThemeProvider = (props: PropsWithChildren) => {
+export const ThemeProvider = ({ children }: PropsWithChildren) => {
   const { currentUserProfile } = useUser();
 
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
@@ -138,52 +132,6 @@ export const ThemeProvider = (props: PropsWithChildren) => {
     [mode, lightThemeColor, darkThemeColor],
   );
 
-  // Amplify UI Theme configuration
-  const ampTheme = useMemo(
-    (): AmpTheme => ({
-      name: "customTheme",
-      tokens: {
-        colors: {
-          font: {
-            primary: mode === "light" ? "#2c292d" : "#fafbfb",
-            secondary: mode === "light" ? "#514b53" : "#c7c7c7",
-            focus: mode === "light" ? lightThemeColor : darkThemeColor,
-            active: mode === "light" ? lightThemeColor : darkThemeColor,
-            inverse: mode === "light" ? "#fffcf4" : "#2d2a2e",
-          },
-          background: {
-            primary: mode === "light" ? "#fffcf4" : "#2d2a2e",
-          },
-          border: {
-            primary: mode === "light" ? "#514b53" : "#c7c7c7",
-            focus: mode === "light" ? "#2c292d" : "#fafbfb",
-          },
-          primary: {
-            10: mode === "light" ? "#2c292d" : "#fafbfb",
-            20: mode === "light" ? "#514b53" : "#c7c7c7",
-            80:
-              mode === "light"
-                ? lighten(lightThemeColor, 0.2)
-                : darken(darkThemeColor, 0.2),
-            90:
-              mode === "light"
-                ? lighten(lightThemeColor, 0.1)
-                : darken(darkThemeColor, 0.1),
-            100: mode === "light" ? lightThemeColor : darkThemeColor,
-          },
-        },
-        components: {
-          authenticator: {
-            modal: {
-              height: { value: "calc(100vh - 64px)" },
-            },
-          },
-        },
-      },
-    }),
-    [mode, lightThemeColor, darkThemeColor],
-  );
-
   return (
     <ThemeContext.Provider value={colorMode}>
       <MuiThemeProvider theme={muiTheme}>
@@ -201,8 +149,7 @@ export const ThemeProvider = (props: PropsWithChildren) => {
             },
           }}
         />
-        {/* {props.children} */}
-        <AmpThemeProvider theme={ampTheme}>{props.children}</AmpThemeProvider>
+        {children}
       </MuiThemeProvider>
     </ThemeContext.Provider>
   );
