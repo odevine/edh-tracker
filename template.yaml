@@ -170,7 +170,7 @@ Resources:
       BuildMethod: esbuild
       BuildProperties:
         EntryPoints:
-          - Handler.ts
+          - userHandler.ts
         Minify: true
         Sourcemap: false
 
@@ -225,7 +225,7 @@ Resources:
       BuildMethod: esbuild
       BuildProperties:
         EntryPoints:
-          - Handler.ts
+          - formatHandler.ts
         Minify: true
         Sourcemap: false
 
@@ -288,7 +288,7 @@ Resources:
       BuildMethod: esbuild
       BuildProperties:
         EntryPoints:
-          - Handler.ts
+          - deckHandler.ts
         Minify: true
         Sourcemap: false
 
@@ -351,7 +351,7 @@ Resources:
       BuildMethod: esbuild
       BuildProperties:
         EntryPoints:
-          - Handler.ts
+          - matchHandler.ts
         External:
           - aws-sdk
         Minify: true
