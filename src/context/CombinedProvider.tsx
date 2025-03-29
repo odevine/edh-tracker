@@ -2,14 +2,15 @@ import { PropsWithChildren } from "react";
 
 import {
   AppProvider,
+  AuthProvider,
   DeckProvider,
   MatchProvider,
   ThemeProvider,
   UserProvider,
 } from "@/context";
 
-export const CombinedProvider = (props: PropsWithChildren) => {
-  return (
+export const CombinedProvider = (props: PropsWithChildren) => (
+  <AuthProvider>
     <AppProvider>
       <UserProvider>
         <ThemeProvider>
@@ -19,5 +20,5 @@ export const CombinedProvider = (props: PropsWithChildren) => {
         </ThemeProvider>
       </UserProvider>
     </AppProvider>
-  );
-};
+  </AuthProvider>
+);

@@ -1,4 +1,5 @@
 export * from "./AppContext";
+export * from "./AuthContext";
 export * from "./CombinedProvider";
 export * from "./DeckContext";
 export * from "./MatchContext";
