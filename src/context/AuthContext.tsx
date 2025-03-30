@@ -52,7 +52,14 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       } catch {
         console.warn("failed to decode JWT during session restore");
       }
+
+      // 👇 TRY refreshing session to validate token and get new one if needed
+      refreshSession().catch((err) => {
+        console.warn("token refresh failed", err);
+        signOut();
+      });
     }
+
     setIsInitializing(false);
   }, []);
 

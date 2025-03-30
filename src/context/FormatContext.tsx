@@ -19,7 +19,7 @@ interface FormatContextType {
 const FormatContext = createContext<FormatContextType | undefined>(undefined);
 
 export const FormatProvider = ({ children }: PropsWithChildren<{}>) => {
-  const { accessToken } = useAuth();
+  const { accessToken, isInitializing } = useAuth();
   const { addAppMessage } = useApp();
   const queryClient = useQueryClient();
 
@@ -35,7 +35,7 @@ export const FormatProvider = ({ children }: PropsWithChildren<{}>) => {
       }
       return res.json();
     },
-    enabled: !!accessToken,
+    enabled: !!accessToken && !isInitializing,
   });
 
   // get format by id
