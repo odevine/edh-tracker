@@ -1,9 +1,12 @@
-import { Authenticator } from "@aws-amplify/ui-react";
-import "@aws-amplify/ui-react/styles.css";
 import { Box, Stack, Typography } from "@mui/material";
 import { Redirect, useRoutes } from "raviger";
 
-import { AppAlertList, LoadingBackdrop, Toolbar } from "@/components";
+import {
+  AppAlertList,
+  LoadingBackdrop,
+  RequireAuth,
+  Toolbar,
+} from "@/components";
 import { useApp, useDeck, useMatch, useUser } from "@/context";
 import {
   DecksPage,
@@ -40,7 +43,7 @@ const protectedRoutes = {
 };
 
 const ProtectedRoutes = () => (
-  <Authenticator hideSignUp>{useRoutes(protectedRoutes)}</Authenticator>
+  <RequireAuth>{useRoutes(protectedRoutes)}</RequireAuth>
 );
 
 export const App = () => {
