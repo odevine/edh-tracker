@@ -1,28 +1,17 @@
-import { useAuthenticator } from "@aws-amplify/ui-react";
-import {
-  PropsWithChildren,
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { PropsWithChildren, createContext, useContext, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import { IAppMessage } from "@/components";
 
-// Define the type for the user profile context
 interface AppContextType {
   appMessages: IAppMessage[];
   addAppMessage: (message: Omit<IAppMessage, "id">) => void;
   deleteAppMessage: (messageId: string) => void;
 }
 
-// Create the context
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-// UserProvider component
 export const AppProvider = ({ children }: PropsWithChildren<{}>) => {
-  const { user } = useAuthenticator((context) => [context.user]);
   const [appMessages, setAppMessages] = useState<IAppMessage[]>([]);
 
   const addAppMessage = (message: Omit<IAppMessage, "id">) => {
@@ -41,12 +30,6 @@ export const AppProvider = ({ children }: PropsWithChildren<{}>) => {
     );
   };
 
-  useEffect(() => {
-    if (user) {
-      // TODO:
-    }
-  }, [user]);
-
   return (
     <AppContext.Provider
       value={{
@@ -60,11 +43,10 @@ export const AppProvider = ({ children }: PropsWithChildren<{}>) => {
   );
 };
 
-// Export the useUser hook to access the context
 export const useApp = () => {
-  const context = useContext(AppContext);
-  if (!context) {
+  const ctx = useContext(AppContext);
+  if (!ctx) {
     throw new Error("useApp must be used within an AppProvider");
   }
-  return context;
+  return ctx;
 };

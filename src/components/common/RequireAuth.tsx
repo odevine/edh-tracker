@@ -2,17 +2,17 @@
 import { Redirect } from "raviger";
 import { PropsWithChildren } from "react";
 
+import { LoadingBackdrop } from "@/components";
 import { useAuth } from "@/context";
 
 export const RequireAuth = ({ children }: PropsWithChildren<{}>) => {
-  const { isAuthenticated, accessToken } = useAuth();
+  const { isAuthenticated, accessToken, isInitializing } = useAuth();
 
-  // optional: handle "checking auth" state here if needed
-  if (!accessToken) {
-    return <Redirect to="/" />;
+  if (isInitializing) {
+    <LoadingBackdrop />;
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !accessToken) {
     return <Redirect to="/" />;
   }
 
