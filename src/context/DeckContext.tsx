@@ -1,237 +1,167 @@
-import {
-  PropsWithChildren,
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { PropsWithChildren, createContext, useContext, useMemo } from "react";
 
-import {
-  CreateDeckInput,
-  Deck,
-  DeckCategory,
-  UpdateDeckInput,
-  User,
-} from "@/API";
-import { useApp, useTheme, useUser } from "@/context";
-import {
-  createDeckFn,
-  deleteDeckFn,
-  getAllDecksCategoriesFn,
-  getAllDecksFn,
-  updateDeckFn,
-} from "@/logic";
+import { useApp, useAuth, useTheme, useUser } from "@/context";
+import { fetchWithAuth } from "@/logic";
+import { CreateDeckInput, Deck, UpdateDeckInput } from "@/types";
 
-interface DecksContextType {
+interface DeckContextType {
   allDecks: Deck[];
-  allDeckCategories: DeckCategory[];
   userDecks: Deck[];
   decksLoading: boolean;
-  deckToUserMap: Map<string, User>;
-  getDeckUserColor: (deckId: string) => string;
-  createNewDeck: (newDeck: CreateDeckInput) => Promise<void>;
-  updateExistingDeck: (updatedDeck: UpdateDeckInput) => Promise<void>;
+  createNewDeck: (deck: CreateDeckInput) => Promise<void>;
+  updateExistingDeck: (args: {
+    deckId: string;
+    input: UpdateDeckInput;
+  }) => Promise<void>;
   deleteDeckById: (deckId: string) => Promise<void>;
+  getDeckUserColor: (deckId: string) => string;
 }
 
-const DecksContext = createContext<DecksContextType | undefined>(undefined);
+const DeckContext = createContext<DeckContextType | undefined>(undefined);
 
 export const DeckProvider = ({ children }: PropsWithChildren<{}>) => {
+  const { userId, accessToken } = useAuth();
   const { addAppMessage } = useApp();
+  const { allUserProfiles } = useUser();
   const { mode } = useTheme();
-  const { authenticatedUser, allUserProfiles } = useUser();
+  const queryClient = useQueryClient();
 
-  const [allDecks, setAllDecks] = useState<Deck[]>([]);
-  const [allDeckCategories, setAllDeckCategories] = useState<DeckCategory[]>(
-    [],
-  );
-  const [userDecks, setUserDecks] = useState<Deck[]>([]);
-  const [decksLoading, setDecksLoading] = useState(true);
-  const [deckToUserMap, setDeckToUserMap] = useState(new Map<string, User>());
-
-  useEffect(() => {
-    if (authenticatedUser) {
-      setDecksLoading(true);
-      fetchDecks();
-      fetchDeckCategories();
-    } else {
-      setDecksLoading(false);
-    }
-  }, [authenticatedUser]);
-
-  useEffect(() => {
-    const map = new Map<string, User>();
-    allDecks.forEach((deck) => {
-      const user = allUserProfiles.find((user) => user.id === deck.deckOwnerId);
-      if (user) {
-        map.set(deck.id, user);
+  // fetch all decks
+  const { data: allDecks = [], isLoading: decksLoading } = useQuery<Deck[]>({
+    queryKey: ["decks"],
+    queryFn: async () => {
+      const res = await fetchWithAuth("/decks", accessToken);
+      if (!res.ok) {
+        throw new Error("failed to fetch decks");
       }
-    });
-    setDeckToUserMap(map);
-  }, [allDecks, allUserProfiles]);
-
-  const fetchDecks = async () => {
-    try {
-      const decks = await getAllDecksFn();
-      const allDecksResponse = decks ?? [];
-      setAllDecks(allDecksResponse);
-      setUserDecks(
-        allDecksResponse.filter(
-          (deck) => deck.deckOwnerId === authenticatedUser?.userId,
-        ),
-      );
-    } catch (error) {
-      addAppMessage({
-        title: "failed to fetch deck list",
-        content: "check console for more details",
-        severity: "error",
-      });
-      setAllDecks([]);
-      setUserDecks([]);
-    } finally {
-      setDecksLoading(false);
-    }
-  };
-
-  const fetchDeckCategories = async () => {
-    try {
-      const deckCategories = await getAllDecksCategoriesFn();
-      const allDeckCategoriesResponse = deckCategories ?? [];
-      setAllDeckCategories(allDeckCategoriesResponse);
-    } catch (error) {
-      addAppMessage({
-        title: "failed to fetch deck category list",
-        content: "check console for more details",
-        severity: "error",
-      });
-      setAllDeckCategories([]);
-    } finally {
-      setDecksLoading(false);
-    }
-  };
-
-  const createNewDeck = async (newDeck: CreateDeckInput) => {
-    const deck = await createDeckFn(newDeck);
-    if (deck) {
-      addAppMessage({
-        content: `${deck.deckName} added to deck list`,
-        severity: "success",
-      });
-      // Add the new deck to the state
-      setAllDecks((prevDecks) => [...prevDecks, deck]);
-      if (deck.deckOwnerId === authenticatedUser?.userId) {
-        setUserDecks((prevDecks) => [...prevDecks, deck]);
-      }
-    } else {
-      addAppMessage({
-        title: "failed to add deck to deck list",
-        content: "check console for more details",
-        severity: "error",
-      });
-    }
-  };
-
-  const updateExistingDeck = async (updatedDeck: UpdateDeckInput) => {
-    setDecksLoading(true);
-    const updateDeckResponse = await updateDeckFn(updatedDeck);
-    if (updateDeckResponse) {
-      addAppMessage({
-        content: `${updatedDeck.deckName} has been updated`,
-        severity: "success",
-      });
-      // Update the state with the updated deck
-      setAllDecks((prevDecks) =>
-        prevDecks.map((d) =>
-          d.id === updatedDeck.id ? updateDeckResponse : d,
-        ),
-      );
-      if (updatedDeck.deckOwnerId === authenticatedUser?.userId) {
-        setUserDecks((prevDecks) =>
-          prevDecks.map((d) =>
-            d.id === updatedDeck.id ? updateDeckResponse : d,
-          ),
-        );
-      }
-    } else {
-      addAppMessage({
-        title: `failed to update ${updatedDeck.deckName}`,
-        content: "check console for more details",
-        severity: "error",
-      });
-    }
-    setDecksLoading(false);
-  };
-
-  const deleteDeckById = async (deckId: string) => {
-    setDecksLoading(true);
-    const success = await deleteDeckFn(deckId);
-    if (success) {
-      addAppMessage({
-        content: "deck has been removed",
-        severity: "info",
-      });
-      // Filter out the deleted deck from allDecks and userDecks
-      setAllDecks((prevDecks) =>
-        prevDecks.filter((deck) => deck.id !== deckId),
-      );
-      setUserDecks((prevDecks) =>
-        prevDecks.filter((deck) => deck.id !== deckId),
-      );
-    } else {
-      addAppMessage({
-        title: "failed to remove deck",
-        content: "check console for more details",
-        severity: "error",
-      });
-    }
-    setDecksLoading(false);
-  };
-
-  const getDeckUserColor = useMemo(
-    () => (deckId: string) => {
-      const deckUser = deckToUserMap.get(deckId);
-      if (!deckUser) {
-        return "inherit";
-      }
-      return mode === "light"
-        ? deckUser.lightThemeColor ?? "inherit"
-        : deckUser.darkThemeColor ?? "inherit";
+      return res.json();
     },
-    [deckToUserMap, mode],
-  );
+    enabled: !!accessToken,
+  });
 
-  const value = useMemo(
-    () => ({
-      allDecks,
-      allDeckCategories,
-      getDeckUserColor,
-      userDecks,
-      deckToUserMap,
-      decksLoading,
-      createNewDeck,
-      updateExistingDeck,
-      deleteDeckById,
-    }),
-    [
-      allDecks,
-      allDeckCategories,
-      userDecks,
-      decksLoading,
-      deckToUserMap,
-      getDeckUserColor,
-    ],
-  );
+  // find user's decks
+  const userDecks = useMemo(() => {
+    return allDecks.filter((deck) => deck.userId === userId);
+  }, [allDecks, userId]);
+
+  // create deck
+  const { mutateAsync: createNewDeck } = useMutation({
+    mutationFn: async (deck: CreateDeckInput) => {
+      const res = await fetchWithAuth("/decks", accessToken, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(deck),
+      });
+      if (!res.ok) {
+        throw new Error("failed to create deck");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["decks"] });
+      addAppMessage({ content: "deck created", severity: "success" });
+    },
+    onError: () => {
+      addAppMessage({
+        title: "failed to create deck",
+        content: "check console for more details",
+        severity: "error",
+      });
+    },
+  });
+
+  // update deck
+  const { mutateAsync: updateExistingDeck } = useMutation({
+    mutationFn: async ({
+      deckId,
+      input,
+    }: {
+      deckId: string;
+      input: UpdateDeckInput;
+    }) => {
+      const res = await fetchWithAuth(`/decks/${deckId}`, accessToken, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      });
+      if (!res.ok) {
+        throw new Error("failed to update deck");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["decks"] });
+      addAppMessage({ content: "deck updated", severity: "success" });
+    },
+    onError: () => {
+      addAppMessage({
+        title: "failed to update deck",
+        content: "check console for more details",
+        severity: "error",
+      });
+    },
+  });
+
+  // delete deck
+  const { mutateAsync: deleteDeckById } = useMutation({
+    mutationFn: async (deckId: string) => {
+      const res = await fetchWithAuth(`/decks/${deckId}`, accessToken, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        throw new Error("failed to delete deck");
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["decks"] });
+      addAppMessage({ content: "deck deleted", severity: "info" });
+    },
+    onError: () => {
+      addAppMessage({
+        title: "failed to delete deck",
+        content: "check console for more details",
+        severity: "error",
+      });
+    },
+  });
+
+  // user color map
+  const getDeckUserColor = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const deck of allDecks) {
+      const user = allUserProfiles.find((u) => u.id === deck.userId);
+      if (!user) {
+        continue;
+      }
+      const color =
+        mode === "light"
+          ? user.lightThemeColor ?? "inherit"
+          : user.darkThemeColor ?? "inherit";
+      map.set(deck.id, color);
+    }
+    return (deckId: string) => map.get(deckId) ?? "inherit";
+  }, [allDecks, allUserProfiles, mode]);
 
   return (
-    <DecksContext.Provider value={value}>{children}</DecksContext.Provider>
+    <DeckContext.Provider
+      value={{
+        allDecks,
+        userDecks,
+        decksLoading,
+        createNewDeck,
+        updateExistingDeck,
+        deleteDeckById,
+        getDeckUserColor,
+      }}
+    >
+      {children}
+    </DeckContext.Provider>
   );
 };
 
 export const useDeck = () => {
-  const context = useContext(DecksContext);
-  if (!context) {
-    throw new Error("useDeck must be used within a DeckProvider");
-  }
-  return context;
+  const ctx = useContext(DeckContext);
+  if (!ctx) throw new Error("useDeck must be used within a DeckProvider");
+  return ctx;
 };
