@@ -12,12 +12,12 @@ import {
 import { navigate } from "raviger";
 import { useState } from "react";
 
-import { useUser } from "@/context";
+import { useAuth } from "@/context";
 
 export const LandingPage = (): JSX.Element => {
   const [accessRequestOpen, setAccessRequestOpen] = useState(false);
-  const { authenticatedUser } = useUser();
-   
+  const { isAuthenticated } = useAuth();
+
   return (
     <Box height="100%" display="flex" flexDirection="column">
       <Box sx={{ py: 8 }}>
@@ -34,31 +34,33 @@ export const LandingPage = (): JSX.Element => {
             manage your commander decks and track your match history
             effortlessly
           </Typography>
-          {!authenticatedUser && <Stack
-            direction="column"
-            justifyContent="center"
-            alignItems="center"
-            spacing={2}
-            sx={{ mt: 4 }}
-          >
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => navigate("/login")}
-              sx={{ width: 200 }}
+          {!isAuthenticated && (
+            <Stack
+              direction="column"
+              justifyContent="center"
+              alignItems="center"
+              spacing={2}
+              sx={{ mt: 4 }}
             >
-              login
-            </Button>
-            <Typography color="textSecondary">or</Typography>
-            <Button
-              variant="outlined"
-              color="secondary"
-              onClick={() => setAccessRequestOpen(true)}
-              sx={{ width: 200 }}
-            >
-              request access
-            </Button>
-          </Stack>}
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => navigate("/login")}
+                sx={{ width: 200 }}
+              >
+                login
+              </Button>
+              <Typography color="textSecondary">or</Typography>
+              <Button
+                variant="outlined"
+                color="secondary"
+                onClick={() => setAccessRequestOpen(true)}
+                sx={{ width: 200 }}
+              >
+                request access
+              </Button>
+            </Stack>
+          )}
         </Container>
       </Box>
 
