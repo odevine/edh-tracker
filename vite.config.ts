@@ -19,10 +19,10 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      "^/(users|decks|formats|matches).*": {
+      "^/api.*": {
         target: API_ORIGIN,
         changeOrigin: true,
-        rewrite: (path) => `/v1-dev${path}`,
+        rewrite: (path) => path.replace(/^\/api/, "/v1-dev"),
       },
     },
   },
