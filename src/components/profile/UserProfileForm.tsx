@@ -10,10 +10,11 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
 import { MuiColorInput } from "mui-color-input";
+import { useState } from "react";
 
-import { useUser } from "@/context";
+import { useAuth, useUser } from "@/context";
+import { UpdateUserInput } from "@/types";
 
 const convertToColor = (input: string) => {
   const validHexColor = /^#?([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/;
@@ -35,8 +36,9 @@ const convertToColor = (input: string) => {
 };
 
 export const UserProfileForm: React.FC = () => {
-  const { authenticatedUser, currentUserProfile, updateUserProfile } =
-    useUser();
+  const { isAuthenticated } = useAuth();
+  const { currentUserProfile, updateUserProfile } = useUser();
+
   const [displayName, setDisplayName] = useState(
     currentUserProfile?.displayName ?? "",
   );
@@ -75,21 +77,21 @@ export const UserProfileForm: React.FC = () => {
     setErrors(localErrors);
     return localErrors.length === 0;
   };
-  
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!authenticatedUser) {
-      console.error("User is not authenticated");
+    if (!isAuthenticated) {
+      console.error("user is not authenticated");
       return;
     }
 
     if (validateForm()) {
-      const updateData = {
-        id: authenticatedUser.userId,
-        displayName: displayName || null,
-        lightThemeColor: convertToColor(lightThemeColor) || null,
-        darkThemeColor: convertToColor(darkThemeColor) || null,
-        profilePictureURL: profilePictureURL !== "" ? profilePictureURL : null,
+      const updateData: UpdateUserInput = {
+        displayName,
+        lightThemeColor: convertToColor(lightThemeColor) ?? undefined,
+        darkThemeColor: convertToColor(darkThemeColor) ?? undefined,
+        profilePictureURL:
+          profilePictureURL !== "" ? profilePictureURL : undefined,
       };
 
       setLoading(true);

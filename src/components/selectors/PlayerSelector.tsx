@@ -9,8 +9,8 @@ import {
 } from "@mui/material";
 import { useMemo } from "react";
 
-import { User } from "@/API";
 import { useDeck, useTheme, useUser } from "@/context";
+import { User } from "@/types";
 
 export const PlayerSelector = (props: {
   filterUser: string | string[];
@@ -25,9 +25,7 @@ export const PlayerSelector = (props: {
   // Generate the unique list of user options
   const userOptions = useMemo(() => {
     // Get unique ownerIDs from allDecks
-    const uniqueOwnerIDs = [
-      ...new Set(allDecks.map((deck) => deck.deckOwnerId)),
-    ];
+    const uniqueOwnerIDs = [...new Set(allDecks.map((deck) => deck.userId))];
 
     // Map ownerIDs to user profiles, filter out undefined, and assert the remaining profiles are defined
     const users = uniqueOwnerIDs

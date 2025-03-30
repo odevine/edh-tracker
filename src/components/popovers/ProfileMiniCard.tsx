@@ -4,7 +4,6 @@ import {
   Card,
   CardActions,
   CardContent,
-  Chip,
   Divider,
   Grid,
   Stack,
@@ -13,9 +12,9 @@ import {
 import { DateTime } from "luxon";
 import { navigate } from "raviger";
 
-import { User } from "@/API";
 import { useDeck, useMatch } from "@/context";
 import { getUserStats } from "@/logic";
+import { User } from "@/types";
 
 interface ProfileMiniCardProps {
   profile: User;
@@ -27,13 +26,8 @@ export const ProfileMiniCard: React.FC<ProfileMiniCardProps> = ({
   showActions,
 }) => {
   const { allDecks } = useDeck();
-  const { allMatches, allMatchParticipants } = useMatch();
-  const userStats = getUserStats(
-    profile.id,
-    allDecks,
-    allMatches,
-    allMatchParticipants,
-  );
+  const { allMatches } = useMatch();
+  const userStats = getUserStats(profile.id, allDecks, allMatches);
 
   return (
     <Card>
@@ -58,9 +52,6 @@ export const ProfileMiniCard: React.FC<ProfileMiniCardProps> = ({
         >
           {profile.displayName}
         </Typography>
-        {profile.role && (
-          <Chip variant="outlined" size="small" label={profile.role} />
-        )}
       </Stack>
       <Stack direction="row" justifyContent="space-between" sx={{ p: 2 }}>
         <Stack sx={{ mr: 2 }}>
