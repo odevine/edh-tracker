@@ -1,202 +1,137 @@
-import { useAuthenticator } from "@aws-amplify/ui-react";
-import {
-  PropsWithChildren,
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { PropsWithChildren, createContext, useContext } from "react";
 
-import {
-  CreateMatchInput,
-  Match,
-  MatchParticipant,
-  UpdateMatchInput,
-} from "@/API";
-import { useApp } from "@/context";
-import {
-  createMatchFn,
-  createNewMatchParticipantsFn,
-  deleteMatchWithParticipantsFn,
-  getAllMatchParticipantsFn,
-  getAllMatchesFn,
-  updateMatchWithParticipantsFn,
-} from "@/logic";
+import { useApp, useAuth } from "@/context";
+import { fetchWithAuth } from "@/logic";
+import { CreateMatchInput, Match, UpdateMatchInput } from "@/types";
 
-// Define the type for the user profile context
-interface MatchesContextType {
+interface MatchContextType {
   allMatches: Match[];
-  allMatchParticipants: MatchParticipant[];
   matchesLoading: boolean;
-  createNewMatch: (
-    newMatch: CreateMatchInput,
-    deckIds: string[],
-  ) => Promise<void>;
-  updateMatchWithParticipants: (
-    updatedMatch: UpdateMatchInput,
-    newParticipantDeckIds: string[],
-  ) => Promise<void>;
+  createNewMatch: (input: CreateMatchInput) => Promise<void>;
+  updateMatchWithParticipants: (args: {
+    matchId: string;
+    updates: UpdateMatchInput;
+  }) => Promise<void>;
   deleteMatch: (matchId: string) => Promise<void>;
 }
 
-// Create the context
-const MatchesContext = createContext<MatchesContextType | undefined>(undefined);
+const MatchContext = createContext<MatchContextType | undefined>(undefined);
 
-// UserProvider component
 export const MatchProvider = ({ children }: PropsWithChildren<{}>) => {
+  const { accessToken, isAdmin } = useAuth();
   const { addAppMessage } = useApp();
-  const { user } = useAuthenticator((context) => [context.user]);
-  const [allMatches, setAllMatches] = useState<Match[]>([]);
-  const [allMatchParticipants, setAllMatchParticipants] = useState<
-    MatchParticipant[]
-  >([]);
-  const [matchesLoading, setMatchesLoading] = useState<boolean>(true);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    if (user) {
-      setMatchesLoading(true);
-      fetchMatches();
-    } else {
-      setMatchesLoading(false);
-    }
-  }, [user]);
+  // fetch all matches
+  const { data: allMatches = [], isLoading: matchesLoading } = useQuery<
+    Match[]
+  >({
+    queryKey: ["matches"],
+    queryFn: async () => {
+      const res = await fetchWithAuth("/matches", accessToken);
+      if (!res.ok) {
+        throw new Error("failed to fetch matches");
+      }
+      return res.json();
+    },
+    enabled: !!accessToken,
+  });
 
-  const fetchMatches = async () => {
-    try {
-      const [matches, matchParticipants] = await Promise.all([
-        getAllMatchesFn(),
-        getAllMatchParticipantsFn(),
-      ]);
-
-      setAllMatches(matches ?? []);
-      setAllMatchParticipants(matchParticipants ?? []); // Add this line
-    } catch (error) {
-      console.error("Failed to fetch matches and participants:", error);
-    } finally {
-      setMatchesLoading(false);
-    }
-  };
-
-  const createNewMatch = async (
-    newMatch: CreateMatchInput,
-    deckIds: string[],
-  ) => {
-    let match: Match | null = null;
-    let createdParticipants: MatchParticipant[] | null = [];
-
-    try {
-      match = await createMatchFn(newMatch);
-      if (!match) {
+  // create a new match
+  const { mutateAsync: createNewMatch } = useMutation({
+    mutationFn: async (input: CreateMatchInput) => {
+      const res = await fetchWithAuth("/matches", accessToken, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      });
+      if (!res.ok) {
         throw new Error("failed to create match");
       }
-
-      createdParticipants = await createNewMatchParticipantsFn(
-        match.id,
-        deckIds,
-      );
-      if (!createdParticipants) {
-        throw new Error("failed to create match participants");
-      } else {
-        setAllMatches((prevState) => [...prevState, match as Match]);
-        setAllMatchParticipants((prevState) => [
-          ...prevState,
-          ...(createdParticipants as MatchParticipant[]),
-        ]);
-        addAppMessage({
-          content: "match has been added",
-          severity: "success",
-        });
-      }
-    } catch (error) {
-      console.error("error creating new match or participants:", error);
-
-      // Rollback: delete any created participants and the match
-      if (match && createdParticipants) {
-        await deleteMatchWithParticipantsFn(match.id, createdParticipants);
-      }
-
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["matches"] });
+      addAppMessage({ content: "match created", severity: "success" });
+    },
+    onError: () => {
       addAppMessage({
-        title: "failed to create match or participants",
+        title: "failed to create match",
         content: "check console for more details",
         severity: "error",
       });
-    }
-  };
+    },
+  });
 
-  const updateMatchWithParticipants = async (
-    updatedMatch: UpdateMatchInput,
-    newParticipantDeckIds: string[],
-  ) => {
-    setMatchesLoading(true);
-    try {
-      const updatedMatchResponse = await updateMatchWithParticipantsFn(
-        updatedMatch,
-        newParticipantDeckIds,
-      );
-
-      if (updatedMatchResponse) {
-        setAllMatches((prevState) =>
-          prevState.map((match) =>
-            match.id === updatedMatch.id ? updatedMatchResponse : match,
-          ),
-        );
-
-        const participantsResponse = await getAllMatchParticipantsFn();
-        setAllMatchParticipants(participantsResponse ?? []);
-
-        addAppMessage({
-          content: "match and participants have been updated",
-          severity: "success",
-        });
-      } else {
+  // update match and its participants
+  const { mutateAsync: updateMatchWithParticipants } = useMutation({
+    mutationFn: async ({
+      matchId,
+      updates,
+    }: {
+      matchId: string;
+      updates: UpdateMatchInput;
+    }) => {
+      if (!isAdmin) {
+        throw new Error("unauthorized");
+      }
+      const res = await fetchWithAuth(`/matches/${matchId}`, accessToken, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+      if (!res.ok) {
         throw new Error("failed to update match");
       }
-    } catch (error) {
-      console.error("failed to update match with participants:", error);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["matches"] });
       addAppMessage({
-        content: "failed to update match",
-        severity: "error",
-      });
-    } finally {
-      setMatchesLoading(false);
-    }
-  };
-
-  const deleteMatch = async (matchId: string) => {
-    setMatchesLoading(true);
-    try {
-      const matchParticipants = allMatchParticipants.filter(
-        (participant) => participant.matchId === matchId,
-      );
-      await deleteMatchWithParticipantsFn(matchId, matchParticipants);
-      setAllMatches((prevMatches) =>
-        prevMatches.filter((match) => match.id !== matchId),
-      );
-      setAllMatchParticipants((prevParticipants) =>
-        prevParticipants.filter(
-          (participant) => participant.matchId !== matchId,
-        ),
-      );
-      addAppMessage({
-        content: "match deleted successfully",
+        content: "match and participants updated",
         severity: "success",
       });
-    } catch (error) {
-      console.error("failed to delete match:", error);
+    },
+    onError: () => {
       addAppMessage({
-        content: "failed to delete match",
+        title: "failed to update match",
+        content: "check console for more details",
         severity: "error",
       });
-    } finally {
-      setMatchesLoading(false);
-    }
-  };
+    },
+  });
+
+  // delete match
+  const { mutateAsync: deleteMatch } = useMutation({
+    mutationFn: async (matchId: string) => {
+      if (!isAdmin) {
+        throw new Error("unauthorized");
+      }
+      const res = await fetchWithAuth(`/matches/${matchId}`, accessToken, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        throw new Error("failed to delete match");
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["matches"] });
+      addAppMessage({ content: "match deleted", severity: "info" });
+    },
+    onError: () => {
+      addAppMessage({
+        title: "failed to delete match",
+        content: "check console for more details",
+        severity: "error",
+      });
+    },
+  });
 
   return (
-    <MatchesContext.Provider
+    <MatchContext.Provider
       value={{
         allMatches,
-        allMatchParticipants,
         matchesLoading,
         createNewMatch,
         updateMatchWithParticipants,
@@ -204,15 +139,14 @@ export const MatchProvider = ({ children }: PropsWithChildren<{}>) => {
       }}
     >
       {children}
-    </MatchesContext.Provider>
+    </MatchContext.Provider>
   );
 };
 
-// Export the useMatches hook to access the context
 export const useMatch = () => {
-  const context = useContext(MatchesContext);
-  if (!context) {
+  const ctx = useContext(MatchContext);
+  if (!ctx) {
     throw new Error("useMatch must be used within a MatchProvider");
   }
-  return context;
+  return ctx;
 };
