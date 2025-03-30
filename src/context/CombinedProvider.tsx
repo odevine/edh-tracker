@@ -4,6 +4,7 @@ import {
   AppProvider,
   AuthProvider,
   DeckProvider,
+  FormatProvider,
   MatchProvider,
   ThemeProvider,
   UserProvider,
@@ -14,9 +15,11 @@ export const CombinedProvider = (props: PropsWithChildren) => (
     <AppProvider>
       <UserProvider>
         <ThemeProvider>
-          <DeckProvider>
-            <MatchProvider>{props.children}</MatchProvider>
-          </DeckProvider>
+          <FormatProvider>
+            <DeckProvider>
+              <MatchProvider>{props.children}</MatchProvider>
+            </DeckProvider>
+          </FormatProvider>
         </ThemeProvider>
       </UserProvider>
     </AppProvider>
