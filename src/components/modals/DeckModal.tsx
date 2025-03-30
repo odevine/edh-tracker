@@ -11,9 +11,9 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 
-import { CreateDeckInput, UpdateDeckInput } from "@/API";
-import { useDeck, useMatch, useUser } from "@/context";
+import { useAuth, useDeck, useFormat, useMatch } from "@/context";
 import { sortColors, useCommanderSearch } from "@/logic";
+import { CreateDeckInput, UpdateDeckInput } from "@/types";
 
 interface ICommander {
   label: string;
@@ -27,23 +27,17 @@ export const DeckModal = (props: {
   editingDeckId?: string;
 }) => {
   const { open, onClose, editingDeckId } = props;
-  const { authenticatedUser } = useUser();
-  const { allDecks, allDeckCategories, createNewDeck, updateExistingDeck } =
-    useDeck();
-  const { allMatchParticipants } = useMatch();
+  const { userId, isAuthenticated } = useAuth();
+  const { allFormats } = useFormat();
+  const { allDecks, createNewDeck, updateExistingDeck } = useDeck();
+  const { hasDeckBeenUsed } = useMatch();
 
-  // Find the editing deck based on the editingDeckId
+  // find the editing deck based on the editingDeckId
   const editingDeck = allDecks.find((deck) => deck.id === editingDeckId);
+  const playedDeck = hasDeckBeenUsed(editingDeckId);
 
-  let deckHasBeenPlayed = false;
-  if (editingDeck) {
-    deckHasBeenPlayed = allMatchParticipants.some(
-      (p) => p.deckId === editingDeck.id,
-    );
-  }
-
-  // State for the deck fields
-  const [deckName, setDeckName] = useState("");
+  // state for the deck fields
+  const [displayName, setDisplayName] = useState("");
   const [commander, setCommander] = useState<ICommander | null>(null);
   const [commanderSearchTerm, setCommanderSearchTerm] = useState("");
   const [commanderOptions, setCommanderOptions] = useState<ICommander[]>([]);
@@ -70,13 +64,13 @@ export const DeckModal = (props: {
         colors: editingDeck.commanderColors ?? [],
       };
 
-      setDeckName(editingDeck.deckName);
+      setDisplayName(editingDeck.displayName);
       setCommander(existingCommander);
       setCommanderSearchTerm(editingDeck.commanderName);
-      setDeckFormat(editingDeck.deckType);
+      setDeckFormat(editingDeck.formatId);
       setDeckLink(editingDeck?.link ?? "");
       setDeckCost(String(editingDeck?.cost) ?? "");
-      setDeckIsInactive(editingDeck?.isInactive ?? false);
+      setDeckIsInactive(Boolean(editingDeck?.inactive));
 
       let existingSecondCommander: ICommander | null = null;
       if (editingDeck.secondCommanderName) {
@@ -90,7 +84,7 @@ export const DeckModal = (props: {
       }
     } else {
       // Reset state if no deck is found (or if editingDeckId is null)
-      setDeckName("");
+      setDisplayName("");
       setCommander(null);
       setCommanderSearchTerm("");
       setCommanderOptions([]);
@@ -120,68 +114,66 @@ export const DeckModal = (props: {
   }, [secondCommanderSearchResults]);
 
   const validateDeckDetails = () => {
-    const newErrors = [];
-    // Check for deck name not being blank
-    if (deckName === "") {
-      newErrors.push("deck name is required.");
-    }
-    // Check for uniqueness but exclude the current editing deck (if it exists)
-    if (
-      editingDeckId &&
-      allDecks.some(
-        (deck) => deck.deckName === deckName && deck.id !== editingDeckId,
-      )
-    ) {
-      newErrors.push("deck name must be unique.");
-    } else if (
-      !editingDeckId &&
-      allDecks.some((deck) => deck.deckName === deckName)
-    ) {
-      // If there's no editingDeckId, just check for any match
-      newErrors.push("deck name must be unique.");
-    }
-    // Check for presence of commander
-    if (!commander) {
-      newErrors.push("at least one commander is required");
-    }
-    // Check for deck format
-    if (deckFormat === "") {
-      newErrors.push("deck format is required");
-    }
-    if (
-      !/^https:\/\/(www\.)?(moxfield\.com|archidekt\.com)\/decks\/[a-zA-Z0-9\-_/]+$/.test(
-        deckLink,
-      )
-    ) {
-      newErrors.push(
-        "deck link must be a full and valid moxfield/archidekt link",
-      );
-    }
+    const newErrors: string[] = [];
+
+    const validations = [
+      {
+        condition: displayName === "",
+        message: "deck name is required.",
+      },
+      {
+        condition: allDecks.some(
+          (deck) =>
+            deck.displayName === displayName && deck.id !== editingDeckId,
+        ),
+        message: "deck name must be unique.",
+      },
+      {
+        condition: !commander,
+        message: "at least one commander is required",
+      },
+      {
+        condition: deckFormat === "",
+        message: "deck format is required",
+      },
+      {
+        condition:
+          !/^https:\/\/(www\.)?(moxfield\.com|archidekt\.com)\/decks\/[a-zA-Z0-9\-_/]+$/.test(
+            deckLink,
+          ),
+        message: "deck link must be a full and valid moxfield/archidekt link",
+      },
+    ];
+
+    validations.forEach(({ condition, message }) => {
+      if (condition) newErrors.push(message);
+    });
+
     setErrors(newErrors);
     return newErrors.length === 0;
   };
 
   const handleSubmit = () => {
-    if (authenticatedUser && validateDeckDetails()) {
+    if (isAuthenticated && validateDeckDetails()) {
       const deckInput: CreateDeckInput | UpdateDeckInput = {
-        deckOwnerId: authenticatedUser.userId,
-        deckName,
+        displayName,
+        userId: userId as string,
         commanderName: commander?.label ?? "",
         commanderColors: sortColors(commander?.colors ?? []),
-        secondCommanderName: secondCommander?.label ?? null,
+        secondCommanderName: secondCommander?.label,
         secondCommanderColors: secondCommander
           ? sortColors(secondCommander?.colors ?? [])
-          : null,
-        deckType: deckFormat,
+          : undefined,
+        formatId: deckFormat,
         cost: deckCost !== "" ? Number(deckCost) : undefined,
         link: deckLink !== "" ? deckLink : undefined,
-        isInactive: deckIsInactive ?? undefined,
+        inactive: deckIsInactive ?? undefined,
       };
 
       if (editingDeck) {
-        updateExistingDeck({ ...deckInput, id: editingDeck.id });
+        updateExistingDeck({ deckId: editingDeck.id, input: deckInput });
       } else {
-        createNewDeck(deckInput);
+        createNewDeck(deckInput as CreateDeckInput);
       }
       onClose();
     }
@@ -236,8 +228,8 @@ export const DeckModal = (props: {
               fullWidth
               required
               label="deck name"
-              value={deckName}
-              onChange={(event) => setDeckName(event?.target.value)}
+              value={displayName}
+              onChange={(event) => setDisplayName(event?.target.value)}
             />
             <Stack
               direction="row"
@@ -319,15 +311,15 @@ export const DeckModal = (props: {
               fullWidth
               required
               select
-              disabled={Boolean(editingDeck && deckHasBeenPlayed)}
+              disabled={Boolean(editingDeck && playedDeck)}
               label="deck format"
               placeholder="paste a moxfield or archidekt link here"
               value={deckFormat}
               onChange={(event) => setDeckFormat(event.target.value)}
             >
-              {allDeckCategories.map((category) => (
-                <MenuItem key={category.id} value={category.id}>
-                  {category.name}
+              {allFormats.map((format) => (
+                <MenuItem key={format.id} value={format.id}>
+                  {format.displayName}
                 </MenuItem>
               ))}
             </TextField>

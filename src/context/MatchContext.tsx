@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { PropsWithChildren, createContext, useContext } from "react";
+import { PropsWithChildren, createContext, useContext, useMemo } from "react";
 
 import { useApp, useAuth } from "@/context";
 import { fetchWithAuth } from "@/logic";
@@ -14,6 +14,7 @@ interface MatchContextType {
     updates: UpdateMatchInput;
   }) => Promise<void>;
   deleteMatch: (matchId: string) => Promise<void>;
+  hasDeckBeenUsed: (deckId: string | undefined) => boolean;
 }
 
 const MatchContext = createContext<MatchContextType | undefined>(undefined);
@@ -128,6 +129,20 @@ export const MatchProvider = ({ children }: PropsWithChildren<{}>) => {
     },
   });
 
+  // checks to see if a deck has been used in a match before
+  const hasDeckBeenUsed = useMemo(() => {
+    const usedDecks = new Set<string>();
+    allMatches.forEach((match) => {
+      match.matchParticipants?.forEach((p) => {
+        if (p.deckId) {
+          usedDecks.add(p.deckId);
+        }
+      });
+    });
+    return (deckId: string | undefined) =>
+      deckId ? usedDecks.has(deckId) : false;
+  }, [allMatches]);
+
   return (
     <MatchContext.Provider
       value={{
@@ -136,6 +151,7 @@ export const MatchProvider = ({ children }: PropsWithChildren<{}>) => {
         createNewMatch,
         updateMatchWithParticipants,
         deleteMatch,
+        hasDeckBeenUsed,
       }}
     >
       {children}
