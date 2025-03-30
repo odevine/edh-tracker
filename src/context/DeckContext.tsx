@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PropsWithChildren, createContext, useContext, useMemo } from "react";
 
 import { useApp, useAuth, useTheme, useUser } from "@/context";
-import { fetchWithAuth } from "@/logic";
+import { fetchWithAuth, matchesExactColors } from "@/logic";
 import { CreateDeckInput, Deck, UpdateDeckInput, User } from "@/types";
 
 interface DeckContextType {
@@ -17,12 +17,18 @@ interface DeckContextType {
   deleteDeckById: (deckId: string) => Promise<void>;
   getDeckUserColor: (deckId: string) => string;
   getUserForDeck: (deckId: string) => User | undefined;
+  getFilteredDecks: (filters: {
+    includeInactive: boolean;
+    filterUser: string;
+    filterFormat: string;
+    filterColor: string[];
+  }) => Deck[];
 }
 
 const DeckContext = createContext<DeckContextType | undefined>(undefined);
 
 export const DeckProvider = ({ children }: PropsWithChildren<{}>) => {
-  const { userId, accessToken } = useAuth();
+  const { userId, accessToken, isInitializing } = useAuth();
   const { addAppMessage } = useApp();
   const { allUserProfiles } = useUser();
   const { mode } = useTheme();
@@ -38,7 +44,7 @@ export const DeckProvider = ({ children }: PropsWithChildren<{}>) => {
       }
       return res.json();
     },
-    enabled: !!accessToken,
+    enabled: !!accessToken && !isInitializing,
   });
 
   // find user's decks
@@ -144,6 +150,7 @@ export const DeckProvider = ({ children }: PropsWithChildren<{}>) => {
     return (deckId: string) => map.get(deckId) ?? "inherit";
   }, [allDecks, allUserProfiles, mode]);
 
+  // returns the user profile a given deck id
   const getUserForDeck = useMemo(() => {
     const map = new Map<string, User>();
     allDecks.forEach((deck) => {
@@ -152,6 +159,34 @@ export const DeckProvider = ({ children }: PropsWithChildren<{}>) => {
     });
     return (deckId: string) => map.get(deckId);
   }, [allDecks, allUserProfiles]);
+
+  // returns a list of decks based on provided filters
+  const getFilteredDecks = ({
+    includeInactive,
+    filterUser,
+    filterFormat,
+    filterColor,
+  }: {
+    includeInactive: boolean;
+    filterUser: string;
+    filterFormat: string;
+    filterColor: string[];
+  }): Deck[] =>
+    allDecks.filter((deck) => {
+      const commanderColors = deck.commanderColors ?? [];
+      const secondCommanderColors = (deck.secondCommanderColors ??
+        []) as string[];
+      const combinedColors = [
+        ...new Set([...commanderColors, ...secondCommanderColors]),
+      ];
+
+      return (
+        (includeInactive || !deck.inactive) &&
+        (filterUser === "" || deck.userId === filterUser) &&
+        (!filterFormat || deck.formatId === filterFormat) &&
+        matchesExactColors(combinedColors, filterColor)
+      );
+    });
 
   return (
     <DeckContext.Provider
@@ -164,6 +199,7 @@ export const DeckProvider = ({ children }: PropsWithChildren<{}>) => {
         deleteDeckById,
         getDeckUserColor,
         getUserForDeck,
+        getFilteredDecks,
       }}
     >
       {children}

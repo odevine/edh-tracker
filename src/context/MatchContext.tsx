@@ -20,7 +20,7 @@ interface MatchContextType {
 const MatchContext = createContext<MatchContextType | undefined>(undefined);
 
 export const MatchProvider = ({ children }: PropsWithChildren<{}>) => {
-  const { accessToken, isAdmin } = useAuth();
+  const { accessToken, isAdmin, isInitializing } = useAuth();
   const { addAppMessage } = useApp();
   const queryClient = useQueryClient();
 
@@ -36,7 +36,7 @@ export const MatchProvider = ({ children }: PropsWithChildren<{}>) => {
       }
       return res.json();
     },
-    enabled: !!accessToken,
+    enabled: !!accessToken && !isInitializing,
   });
 
   // create a new match

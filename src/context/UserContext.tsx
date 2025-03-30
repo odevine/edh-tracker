@@ -15,7 +15,7 @@ interface UserContextType {
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: PropsWithChildren<{}>) => {
-  const { userId, accessToken } = useAuth();
+  const { userId, accessToken, isInitializing } = useAuth();
   const { addAppMessage } = useApp();
   const queryClient = useQueryClient();
 
@@ -27,7 +27,7 @@ export const UserProvider = ({ children }: PropsWithChildren<{}>) => {
       if (!res.ok) throw new Error("failed to fetch users");
       return res.json();
     },
-    enabled: !!accessToken,
+    enabled: !!accessToken && !isInitializing,
   });
 
   // get current user
@@ -83,6 +83,8 @@ export const UserProvider = ({ children }: PropsWithChildren<{}>) => {
 
 export const useUser = () => {
   const ctx = useContext(UserContext);
-  if (!ctx) throw new Error("useUser must be used within a UserProvider");
+  if (!ctx) {
+    throw new Error("useUser must be used within a UserProvider");
+  }
   return ctx;
 };
