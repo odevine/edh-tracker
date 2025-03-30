@@ -303,9 +303,15 @@ Resources:
       Environment:
         Variables:
           MATCH_TABLE: !Ref MatchTable
+          USER_TABLE: !Ref UserTable
+          DECK_TABLE: !Ref DeckTable
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref MatchTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UserTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DeckTable
       Events:
         GetMatches:
           Type: HttpApi
