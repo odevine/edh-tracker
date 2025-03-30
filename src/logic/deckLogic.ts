@@ -2,17 +2,11 @@ import axios from "axios";
 import { debounce } from "lodash";
 import { useEffect, useRef, useState } from "react";
 
-export const colorMap: Record<string, string> = {
-  W: "white",
-  U: "blue",
-  B: "black",
-  R: "red",
-  G: "green",
-  C: "colorless",
-};
+import { COLOR_MAP, COLOR_ORDER } from "@/constants";
+import { Deck, DeckWithStats } from "@/types";
 
 export const getFullColorNames = (colors: string[]): string => {
-  const fullColorNames = colors.map((color) => colorMap[color] || color);
+  const fullColorNames = colors.map((color) => COLOR_MAP[color] || color);
 
   if (fullColorNames.length === 0) {
     return "";
@@ -26,10 +20,9 @@ export const getFullColorNames = (colors: string[]): string => {
   return `${fullColorNames.slice(0, -1).join(", ")} and ${fullColorNames.slice(-1)}`;
 };
 
-const colorOrder = ["W", "B", "U", "R", "G"];
 export const sortColors = (arr: string[]) => {
   return arr.sort((a, b) => {
-    return colorOrder.indexOf(a) - colorOrder.indexOf(b);
+    return COLOR_ORDER.indexOf(a) - COLOR_ORDER.indexOf(b);
   });
 };
 
@@ -98,7 +91,7 @@ export const getCardArt = async (
   }
 };
 
-export function parseDecklist(decklist: string): string[] {
+export const parseDecklist = (decklist: string): string[] => {
   const parsedDecklist: string[] = [];
 
   // split the decklist by newlines
@@ -127,4 +120,47 @@ export function parseDecklist(decklist: string): string[] {
   });
 
   return parsedDecklist;
-}
+};
+
+export const matchesExactColors = (
+  deckColors: string[],
+  filterColors: string[],
+) => {
+  if (filterColors.length === 0) {
+    return true;
+  }
+  if (filterColors.includes("C")) {
+    return deckColors.length === 0 && filterColors.length === 1;
+  }
+  return (
+    deckColors.length === filterColors.length &&
+    deckColors.every((color) => filterColors.includes(color))
+  );
+};
+
+export const computeDeckStats = (
+  decks: Deck[],
+  includeUnranked: boolean,
+): DeckWithStats[] =>
+  decks.map((deck) => {
+    const statsMap = deck.formatStats ?? {};
+    const ranked = statsMap[deck.formatId] ?? { gamesPlayed: 0, gamesWon: 0 };
+    const unranked = statsMap.unranked ?? { gamesPlayed: 0, gamesWon: 0 };
+
+    const combined = includeUnranked
+      ? {
+          gamesPlayed: ranked.gamesPlayed + unranked.gamesPlayed,
+          gamesWon: ranked.gamesWon + unranked.gamesWon,
+        }
+      : ranked;
+
+    const winRate =
+      combined.gamesPlayed > 0 ? combined.gamesWon / combined.gamesPlayed : 0;
+
+    return {
+      ...deck,
+      totalMatches: combined.gamesPlayed,
+      totalWins: combined.gamesWon,
+      winRate,
+    };
+  });

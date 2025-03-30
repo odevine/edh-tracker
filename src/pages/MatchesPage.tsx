@@ -21,10 +21,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   DeckSelector,
   EnhancedTableHead,
+  FormatSelector,
   HeadCell,
   MatchModal,
   PlayerSelector,
-  TypeSelector,
 } from "@/components";
 import { LOCAL_STORAGE_VERSION } from "@/constants";
 import { useAuth, useDeck, useFormat, useMatch } from "@/context";
@@ -197,7 +197,7 @@ export const MatchesPage = (): JSX.Element => {
         <Toolbar sx={{ p: 2, justifyContent: "space-between" }}>
           <Grid container spacing={2} justifyContent="flex-end">
             <Grid item xs={12} sm={6} md={3} lg={2}>
-              <TypeSelector
+              <FormatSelector
                 filterFormat={filterFormat}
                 setFilterFormat={(newFormat: string) => {
                   setPage(0);

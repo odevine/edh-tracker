@@ -24,3 +24,9 @@ export type CreateDeckInput = Omit<Deck, "id" | "createdAt" | "updatedAt"> & {
 export type UpdateDeckInput = Partial<
   Omit<Deck, "id" | "createdAt" | "updatedAt">
 >;
+
+export type DeckWithStats = Deck & {
+  totalMatches: number;
+  totalWins: number;
+  winRate: number;
+};

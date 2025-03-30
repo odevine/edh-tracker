@@ -138,6 +138,7 @@ export const DeckModal = (props: {
       },
       {
         condition:
+          deckLink !== "" &&
           !/^https:\/\/(www\.)?(moxfield\.com|archidekt\.com)\/decks\/[a-zA-Z0-9\-_/]+$/.test(
             deckLink,
           ),

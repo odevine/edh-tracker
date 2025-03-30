@@ -14,7 +14,7 @@ import {
 import { navigate } from "raviger";
 import { useEffect, useMemo, useState } from "react";
 
-import { EnhancedTableHead, HeadCell, TypeSelector } from "@/components";
+import { EnhancedTableHead, FormatSelector, HeadCell } from "@/components";
 import { LOCAL_STORAGE_VERSION } from "@/constants";
 import { useDeck, useMatch, useTheme, useUser } from "@/context";
 import {
@@ -185,7 +185,7 @@ export const UsersPage = (): JSX.Element => {
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4} lg={3}>
-            <TypeSelector
+            <FormatSelector
               filterFormat={filterFormat}
               setFilterFormat={(newFormat) => {
                 setPage(0);
