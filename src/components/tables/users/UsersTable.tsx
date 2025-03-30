@@ -8,8 +8,8 @@ import {
   getUsersColumns,
 } from "@/components";
 import { useFormat, useTheme, useUser, useUsersFilters } from "@/hooks";
-import { computeUserStats } from "@/logic";
 import { User, UserWithStats } from "@/types";
+import { computeUserStats } from "@/utils";
 
 interface IUsersTableProps {
   customButtons: JSX.Element[];

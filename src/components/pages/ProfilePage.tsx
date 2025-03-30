@@ -10,7 +10,7 @@ import {
 
 import { LoadingBackdrop, UserDecksCard, UserProfileForm } from "@/components";
 import { useAuth, useDeck, useMatch, useTheme, useUser } from "@/hooks";
-import { getUserStats } from "@/logic";
+import { getUserStats } from "@/utils";
 
 export const Profile = (props: { profileId: string }): JSX.Element => {
   const { profileId } = props;

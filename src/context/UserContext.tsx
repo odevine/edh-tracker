@@ -2,8 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PropsWithChildren, createContext, useMemo } from "react";
 
 import { useApp, useAuth } from "@/hooks";
-import { fetchWithAuth } from "@/logic";
 import { UpdateUserInput, User } from "@/types";
+import { fetchWithAuth } from "@/utils";
 
 interface UserContextType {
   currentUserProfile: User | null;

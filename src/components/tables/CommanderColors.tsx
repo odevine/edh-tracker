@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 
-import { sortColors } from "@/logic";
+import { sortColors } from "@/utils";
 
 export const CommanderColors = (props: { colors: Array<string | null> }) => {
   type ColorKey = "W" | "U" | "B" | "R" | "G";

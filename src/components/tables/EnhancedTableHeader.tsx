@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import { visuallyHidden } from "@mui/utils";
 
-import { ColumnSortOrder } from "@/logic";
+import { ColumnSortOrder } from "@/utils";
 
 // Define a type for sortable head cells
 export interface SortableHeadCell<T> {
