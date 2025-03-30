@@ -1,4 +1,4 @@
-import { Deck, Match, MatchParticipant } from "@/types";
+import { Deck, Match } from "@/types";
 
 export interface UserStats {
   totalMatches: number;
@@ -11,40 +11,31 @@ export const getUserStats = (
   userId: string,
   allDecks: Deck[],
   allMatches: Match[],
-  allMatchParticipants: MatchParticipant[],
   formatId?: string,
   includeUnranked?: boolean,
 ): UserStats => {
-  // Get all decks owned by the user and is in the format
+  // get all user-owned decks in the given format
   const userDecks = allDecks.filter(
     (deck) =>
       deck.userId === userId && (formatId ? deck.formatId === formatId : true),
   );
-  const userDeckIds = userDecks.map((deck) => deck.id);
+  const userDeckIds = new Set(userDecks.map((deck) => deck.id));
 
-  // Get all match participants where the user's deck participated
-  const userParticipants = allMatchParticipants.filter((participant) =>
-    userDeckIds.includes(participant.deckId),
-  );
+  // helper to check if user's deck is in a match
+  const isUserInMatch = (match: Match) =>
+    match.matchParticipants?.some((p) => userDeckIds.has(p.deckId));
 
-  // Get the match IDs where the user participated
-  const userMatchIds = userParticipants.map(
-    (participant) => participant.matchId,
-  );
-
-  // Filter matches based on the 'includeUnranked' flag
+  // filter to matches the user participated in
   const relevantMatches = allMatches.filter((match) => {
-    const isUserInMatch = userMatchIds.includes(match.id);
-    const isRankedMatch = match.formatId !== "unranked";
-    return isUserInMatch && (includeUnranked ? true : isRankedMatch);
+    const userPlayed = isUserInMatch(match);
+    const isRanked = match.formatId !== "unranked";
+    return userPlayed && (includeUnranked ? true : isRanked);
   });
 
-  // Calculate total matches
   const totalMatches = relevantMatches.length;
 
-  // Calculate total wins by checking if the user's deck is the winning deck in a match
   const totalWins = relevantMatches.filter((match) =>
-    userDeckIds.includes(match.winningDeckId),
+    userDeckIds.has(match.winningDeckId),
   ).length;
 
   const winRate = totalMatches > 0 ? totalWins / totalMatches : 0;
@@ -68,29 +59,18 @@ export interface DeckWithStats extends DeckStats, Deck {}
 export const getDeckStats = (
   deckId: string,
   allMatches: Match[],
-  allMatchParticipants: MatchParticipant[],
   includeUnranked?: boolean,
 ): DeckStats => {
-  // Get all match participants where the specified deck participated
-  const deckParticipants = allMatchParticipants.filter(
-    (participant) => participant.deckId === deckId,
-  );
-
-  // Get the match IDs where the deck participated
-  const deckMatchIds = deckParticipants.map(
-    (participant) => participant.matchId,
-  );
-
   const relevantMatches = allMatches.filter((match) => {
-    const isDeckInMatch = deckMatchIds.includes(match.id);
+    const deckInMatch = match.matchParticipants?.some(
+      (p) => p.deckId === deckId,
+    );
     const isRankedMatch = match.formatId !== "unranked";
-    return isDeckInMatch && (includeUnranked ? true : isRankedMatch);
+    return deckInMatch && (includeUnranked ? true : isRankedMatch);
   });
 
-  // Calculate total matches
   const totalMatches = relevantMatches.length;
 
-  // Calculate total wins by checking if the deck is the winning deck in a match
   const totalWins = relevantMatches.filter(
     (match) => match.winningDeckId === deckId,
   ).length;
