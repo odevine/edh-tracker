@@ -1,6 +1,8 @@
 import { randomUUID } from "crypto";
 
-import { buildUpdateExpression, dynamo, requireEnv } from "@/functions";
+import { dynamo } from "@/functions/common/db";
+import { requireEnv } from "@/functions/common/env";
+import { buildUpdateExpression } from "@/functions/common/update";
 import { CreateUserInput, User } from "@/types";
 
 const USER_TABLE = requireEnv("USER_TABLE");

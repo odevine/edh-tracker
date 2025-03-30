@@ -4,15 +4,16 @@ import {
   APIGatewayProxyResultV2,
 } from "aws-lambda";
 
+import { getAuthContext } from "@/functions/common/auth";
+import { parseJsonBody } from "@/functions/common/parseJson";
+import { createResponse } from "@/functions/common/response";
 import {
   createMatch,
-  createResponse,
   deleteMatch,
-  getAuthContext,
   getMatch,
   listMatches,
   updateMatch,
-} from "@/functions";
+} from "@/functions/match/matchService";
 import { CreateMatchInput, UpdateMatchInput } from "@/types";
 
 export const matchHandler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
@@ -42,19 +43,29 @@ export const matchHandler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
 
       // creates and returns a new match
       case "POST /matches": {
-        if (!body) {
-          return createResponse(400, { message: "missing body" });
+        const createInput = parseJsonBody<CreateMatchInput>(body ?? null);
+        if (!createInput) {
+          return createResponse(400, {
+            message: "missing or invalid request body",
+          });
         }
 
-        const input: CreateMatchInput = JSON.parse(body);
-        return createResponse(201, await createMatch(input));
+        const createdMatch = await createMatch(createInput);
+        return createResponse(201, createdMatch);
       }
 
       // updates a match by id
       // requires admin privileges
       case "PUT /matches/{id}": {
-        if (!id || !body) {
-          return createResponse(400, { message: "missing match id or body" });
+        if (!id) {
+          return createResponse(400, { message: "missing match id" });
+        }
+
+        const updateInput = parseJsonBody<UpdateMatchInput>(body ?? null);
+        if (!updateInput) {
+          return createResponse(400, {
+            message: "missing or invalid request body",
+          });
         }
 
         const putContext = getAuthContext(event);
@@ -67,8 +78,8 @@ export const matchHandler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
           return createResponse(404, { message: "match not found" });
         }
 
-        const updates: UpdateMatchInput = JSON.parse(body);
-        return createResponse(200, await updateMatch(id, updates));
+        const updatedMatch = await updateMatch(id, updateInput);
+        return createResponse(200, updatedMatch);
       }
 
       // deletes a match by id

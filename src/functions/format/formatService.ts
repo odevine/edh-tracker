@@ -1,6 +1,8 @@
 import { randomUUID } from "crypto";
 
-import { buildUpdateExpression, dynamo, requireEnv } from "@/functions";
+import { dynamo } from "@/functions/common/db";
+import { requireEnv } from "@/functions/common/env";
+import { buildUpdateExpression } from "@/functions/common/update";
 import { CreateFormatInput, Format } from "@/types";
 
 const FORMAT_TABLE = requireEnv("FORMAT_TABLE");
