@@ -1,12 +1,8 @@
 import {
-  Box,
   Checkbox,
-  Divider,
   FormControlLabel,
   Grid,
-  MenuItem,
   Paper,
-  Select,
   Table,
   TableBody,
   TableCell,
@@ -14,13 +10,10 @@ import {
   TableRow,
   Toolbar,
   Typography,
-  useMediaQuery,
-  useTheme as useMuiTheme,
 } from "@mui/material";
 import { navigate } from "raviger";
 import { useEffect, useMemo, useState } from "react";
 
-import { User } from "@/API";
 import { EnhancedTableHead, HeadCell, TypeSelector } from "@/components";
 import { LOCAL_STORAGE_VERSION } from "@/constants";
 import { useDeck, useMatch, useTheme, useUser } from "@/context";
@@ -30,6 +23,7 @@ import {
   getComparator,
   getUserStats,
 } from "@/logic";
+import { User } from "@/types";
 
 interface UserWithStats extends User, UserStats {}
 
@@ -52,7 +46,7 @@ const loadStateFromLocalStorage = () => {
     stateVersion: LOCAL_STORAGE_VERSION,
     includeUnranked: false,
     includeInactive: false,
-    filterType: "",
+    filterFormat: "",
     order: "desc" as ColumnSortOrder,
     orderBy: "matches" as keyof UserWithStats,
   };
@@ -74,9 +68,7 @@ export const UsersPage = (): JSX.Element => {
   const { allUserProfiles } = useUser();
   const { allDecks } = useDeck();
   const { mode } = useTheme();
-  const { allMatches, allMatchParticipants } = useMatch();
-  const theme = useMuiTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const { allMatches } = useMatch();
 
   const initialState = loadStateFromLocalStorage();
 
@@ -86,7 +78,7 @@ export const UsersPage = (): JSX.Element => {
   const [includeInactive, setIncludeInactive] = useState(
     initialState.includeInactive,
   );
-  const [filterType, setFilterType] = useState(initialState.filterType);
+  const [filterFormat, setFilterFormat] = useState(initialState.filterFormat);
   const [order, setOrder] = useState<ColumnSortOrder>(initialState.order);
   const [orderBy, setOrderBy] = useState<keyof UserWithStats>(
     initialState.orderBy,
@@ -98,13 +90,13 @@ export const UsersPage = (): JSX.Element => {
       stateVersion: LOCAL_STORAGE_VERSION,
       includeUnranked,
       includeInactive,
-      filterType,
+      filterFormat,
       order,
       orderBy,
       page,
     });
     localStorage.setItem(localStorageKey, newSettings);
-  }, [order, orderBy, page, filterType, includeUnranked, includeInactive]);
+  }, [order, orderBy, page, filterFormat, includeUnranked, includeInactive]);
 
   const handleRequestSort = (property: keyof UserWithStats) => {
     const isAsc = orderBy === property && order === "asc";
@@ -130,7 +122,6 @@ export const UsersPage = (): JSX.Element => {
     }
     return new Map(usersArray.map((profile) => [profile.id, profile]));
   }, [allUserProfiles, includeInactive]);
-  console.log("  ~ userProfileMap ~ userProfileMap:", userProfileMap);
 
   const userWithStats = useMemo(() => {
     return allUserProfiles.map((user) => {
@@ -138,19 +129,12 @@ export const UsersPage = (): JSX.Element => {
         user.id,
         allDecks,
         allMatches,
-        allMatchParticipants,
-        filterType,
+        filterFormat,
         includeUnranked,
       );
       return { ...user, ...userStats };
     });
-  }, [
-    allMatches,
-    allMatchParticipants,
-    filterType,
-    includeUnranked,
-    includeInactive,
-  ]);
+  }, [allMatches, filterFormat, includeUnranked, includeInactive]);
 
   const visibleRows = useMemo(() => {
     return [...userWithStats].sort(
@@ -161,7 +145,7 @@ export const UsersPage = (): JSX.Element => {
     orderBy,
     userWithStats,
     userProfileMap,
-    filterType,
+    filterFormat,
     includeInactive,
   ]);
 
@@ -171,7 +155,7 @@ export const UsersPage = (): JSX.Element => {
         <Grid container spacing={2}>
           <Grid item xs={0} lg={3} />
           <Grid item xs={12} sm={6} md={4} lg={3}>
-            {filterType !== "none" && (
+            {filterFormat !== "unranked" && (
               <FormControlLabel
                 labelPlacement="start"
                 label="include unranked matches?"
@@ -202,11 +186,11 @@ export const UsersPage = (): JSX.Element => {
           </Grid>
           <Grid item xs={12} sm={6} md={4} lg={3}>
             <TypeSelector
-              filterType={filterType}
-              setFilterType={(newType) => {
+              filterFormat={filterFormat}
+              setFilterFormat={(newFormat) => {
                 setPage(0);
-                setFilterType(newType);
-                if (newType === "none") {
+                setFilterFormat(newFormat);
+                if (newFormat === "unranked") {
                   setIncludeUnranked(true);
                 }
               }}
@@ -214,148 +198,55 @@ export const UsersPage = (): JSX.Element => {
           </Grid>
         </Grid>
       </Toolbar>
-      {isSmallScreen ? (
-        <Box>
-          <Grid container sx={{ px: 2 }} spacing={1}>
-            <Grid item xs={6}>
-              <Select
-                fullWidth
-                displayEmpty
-                size="small"
-                value={orderBy}
-                onChange={(e) =>
-                  setOrderBy(e.target.value as keyof UserWithStats)
-                }
-              >
-                {headCells.map((headCell) =>
-                  headCell.sortable ? (
-                    <MenuItem
-                      key={headCell.id as string}
-                      value={headCell.id as string}
-                    >
-                      {headCell.label}
-                    </MenuItem>
-                  ) : null,
-                )}
-              </Select>
-            </Grid>
-            <Grid item xs={6}>
-              <Select
-                fullWidth
-                size="small"
-                value={order}
-                onChange={(e) => setOrder(e.target.value as ColumnSortOrder)}
-                displayEmpty
-              >
-                <MenuItem value="asc">asc</MenuItem>
-                <MenuItem value="desc">desc</MenuItem>
-              </Select>
-            </Grid>
-          </Grid>
-          {visibleRows.map((user) => {
-            const ownerProfileColor = user
-              ? mode === "light"
-                ? user.lightThemeColor
-                : user.darkThemeColor
-              : undefined;
-
-            return (
-              <Box key={user.id}>
-                <Grid container sx={{ px: 2, py: 1 }}>
-                  <Grid item xs={12}>
+      <TableContainer>
+        <Table size="small">
+          <EnhancedTableHead
+            headCells={headCells}
+            order={order}
+            orderBy={orderBy}
+            onRequestSort={(_event, property) => handleRequestSort(property)}
+          />
+          <TableBody>
+            {visibleRows.map((user) => {
+              const ownerProfileColor = user
+                ? mode === "light"
+                  ? user.lightThemeColor
+                  : user.darkThemeColor
+                : undefined;
+              return (
+                <TableRow
+                  key={user.id}
+                  sx={{
+                    backgroundColor: ownerProfileColor
+                      ? `${ownerProfileColor}26`
+                      : "none",
+                  }}
+                >
+                  <TableCell>
                     <Typography
-                      variant="h6"
-                      sx={{ color: ownerProfileColor }}
                       onClick={() => navigate(`/users/${user.id}`)}
+                      sx={{
+                        "&:hover": {
+                          cursor: "pointer",
+                          textDecoration: "underline",
+                        },
+                      }}
                     >
                       {user.displayName}
                     </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body2">active decks:</Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body2">{user.deckCount}</Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body2">wins:</Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body2">{user.totalWins}</Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body2">matches:</Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body2">{user.totalMatches}</Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body2">win&nbsp;rate:</Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body2">
-                      {(user.winRate * 100).toFixed(2)}%
-                    </Typography>
-                  </Grid>
-                </Grid>
-                <Divider />
-              </Box>
-            );
-          })}
-        </Box>
-      ) : (
-        <TableContainer>
-          <Table size="small">
-            <EnhancedTableHead
-              headCells={headCells}
-              order={order}
-              orderBy={orderBy}
-              onRequestSort={(_event, property) => handleRequestSort(property)}
-            />
-            <TableBody>
-              {visibleRows.map((user) => {
-                const ownerProfileColor = user
-                  ? mode === "light"
-                    ? user.lightThemeColor
-                    : user.darkThemeColor
-                  : undefined;
-                return (
-                  <TableRow
-                    key={user.id}
-                    sx={{
-                      backgroundColor: ownerProfileColor
-                        ? `${ownerProfileColor}26`
-                        : "none",
-                    }}
-                  >
-                    <TableCell>
-                      <Typography
-                        onClick={() => navigate(`/users/${user.id}`)}
-                        sx={{
-                          "&:hover": {
-                            cursor: "pointer",
-                            textDecoration: "underline",
-                          },
-                        }}
-                      >
-                        {user.displayName}
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="right">{user.deckCount}</TableCell>
-                    <TableCell align="right">{user.totalWins}</TableCell>
-                    <TableCell align="right">{user.totalMatches}</TableCell>
-                    <TableCell align="right">
-                      {user.winRate
-                        ? (user.winRate * 100).toFixed(2) + "%"
-                        : "-"}
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      )}
+                  </TableCell>
+                  <TableCell align="right">{user.deckCount}</TableCell>
+                  <TableCell align="right">{user.totalWins}</TableCell>
+                  <TableCell align="right">{user.totalMatches}</TableCell>
+                  <TableCell align="right">
+                    {user.winRate ? (user.winRate * 100).toFixed(2) + "%" : "-"}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </Paper>
   );
 };
