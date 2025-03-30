@@ -85,9 +85,15 @@ function parseCSV(filePath) {
           );
         }
 
-        if (row.link) item.link = row.link;
-        if (row.cost) item.cost = parseFloat(row.cost);
-        if (row.inactive) item.inactive = row.inactive === "True";
+        if (row.link) {
+          item.link = row.link;
+        }
+        if (row.cost) {
+          item.cost = parseFloat(row.cost);
+        }
+        if (row.inactive) {
+          item.inactive = row.inactive === "true";
+        }
 
         items.push(item);
       })
