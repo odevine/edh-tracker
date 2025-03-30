@@ -2,18 +2,14 @@ import {
   Box,
   Button,
   CircularProgress,
-  Container,
-  Paper,
   Stack,
   TextField,
   Tooltip,
   Typography,
 } from "@mui/material";
-import { del, post } from "aws-amplify/api";
-import { navigate } from "raviger";
 import { UIEvent, useEffect, useRef, useState } from "react";
 
-import { useUser } from "@/context";
+import { useAuth } from "@/context";
 
 interface PriceCheckCard {
   name: string;
@@ -58,7 +54,7 @@ function parseDecklist(decklist: string): string[] {
 }
 
 export const ToolsPage = (): JSX.Element => {
-  const { authenticatedUser, isAdmin } = useUser();
+  const { isAdmin } = useAuth();
   const [priceLoading, setPriceLoading] = useState(false);
   const [deckList, setDeckList] = useState("");
   const [priceCheckResponse, setPriceCheckResponse] = useState<
@@ -80,85 +76,12 @@ export const ToolsPage = (): JSX.Element => {
   }, [priceCheckResponse]);
 
   const handlePriceCheckClick = async () => {
-    try {
-      setPriceLoading(true);
-      const restOperation = post({
-        apiName: "edhtrackerREST",
-        path: "/priceCheck",
-        options: {
-          body: {
-            cards: parseDecklist(deckList),
-          },
-        },
-      });
-      const response = await restOperation.response;
-      if (response.statusCode === 200) {
-        const data: unknown = await response.body.json();
-        setPriceCheckResponse(data as PriceCheckCard[]);
-
-        // Sync the scroll of otherComponentRef to match textFieldRef
-        if (textFieldRef.current && otherComponentRef.current) {
-          otherComponentRef.current.scrollTop = textFieldRef.current.scrollTop;
-        }
-      }
-    } catch (error) {
-      console.error("error calling priceCheck lambda:", error);
-    } finally {
-      setPriceLoading(false);
-    }
+    // TODO: Pending implementation
   };
 
   const handlePurgeCacheClick = async () => {
-    try {
-      setPriceLoading(true);
-      const restOperation = del({
-        apiName: "edhtrackerREST",
-        path: "/purgeCache",
-      });
-      const response = await restOperation.response;
-      if (response.statusCode === 200) {
-        console.log("cache purged successfully");
-      }
-    } catch (error) {
-      console.error("could not purge cache", error);
-    } finally {
-      setPriceLoading(false);
-    }
+    // TODO: Pending implementation
   };
-
-  if (!authenticatedUser) {
-    return (
-      <Container sx={{ p: 3 }}>
-        <Stack
-          direction="column"
-          alignItems="center"
-          justifyContent="center"
-          sx={{ height: "calc(100vh - 64px)" }}
-        >
-          <Paper
-            sx={{
-              width: 340,
-              height: 200,
-              p: 2,
-            }}
-          >
-            <Stack
-              direction="column"
-              alignItems="center"
-              justifyContent="center"
-              spacing={2}
-              sx={{ height: "100%", textAlign: "center" }}
-            >
-              <Typography variant="h4">login to access edh tracker</Typography>
-              <Button variant="contained" onClick={() => navigate("/login")}>
-                log in
-              </Button>
-            </Stack>
-          </Paper>
-        </Stack>
-      </Container>
-    );
-  }
 
   const handleScroll = (
     e: UIEvent<HTMLInputElement | HTMLTextAreaElement, UIEvent>,
@@ -301,7 +224,8 @@ export const ToolsPage = (): JSX.Element => {
                       {`${cardTextStr}${cardSetCode}${cardCollectorNumber}`.toLowerCase()}
                     </Typography>
                   </Tooltip>
-                  {typeof line.price === "number" && typeof line.quantity === "number" ? (
+                  {typeof line.price === "number" &&
+                  typeof line.quantity === "number" ? (
                     <Typography>
                       {line.quantity > 1 ? `($${line.price.toFixed(2)})` : ""}
                       &nbsp;${(line.price * line.quantity).toFixed(2)}
