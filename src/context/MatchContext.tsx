@@ -15,6 +15,11 @@ interface MatchContextType {
   }) => Promise<void>;
   deleteMatch: (matchId: string) => Promise<void>;
   hasDeckBeenUsed: (deckId: string | undefined) => boolean;
+  getFilteredMatches: (filters: {
+    formatId?: string;
+    deckIds?: string[];
+    userIds?: string[];
+  }) => Match[];
 }
 
 const MatchContext = createContext<MatchContextType | undefined>(undefined);
@@ -143,6 +148,38 @@ export const MatchProvider = ({ children }: PropsWithChildren<{}>) => {
       deckId ? usedDecks.has(deckId) : false;
   }, [allMatches]);
 
+  const getFilteredMatches = ({
+    formatId,
+    deckIds,
+    userIds,
+  }: {
+    formatId?: string;
+    deckIds?: string[];
+    userIds?: string[];
+  }): Match[] => {
+    return allMatches.filter((match) => {
+      if (formatId && match.formatId !== formatId) {
+        return false;
+      }
+
+      if (deckIds && deckIds.length > 0) {
+        const usedDeckIds = match.matchParticipants?.map((p) => p.deckId);
+        if (!usedDeckIds?.some((id) => id && deckIds.includes(id))) {
+          return false;
+        }
+      }
+
+      if (userIds && userIds.length > 0) {
+        const usedUserIds = match.matchParticipants?.map((p) => p.userId);
+        if (!usedUserIds?.some((id) => id && userIds.includes(id))) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  };
+
   return (
     <MatchContext.Provider
       value={{
@@ -152,6 +189,7 @@ export const MatchProvider = ({ children }: PropsWithChildren<{}>) => {
         updateMatchWithParticipants,
         deleteMatch,
         hasDeckBeenUsed,
+        getFilteredMatches,
       }}
     >
       {children}
