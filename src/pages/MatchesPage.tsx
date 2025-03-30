@@ -18,7 +18,6 @@ import {
 import { DateTime } from "luxon";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { Match } from "@/API";
 import {
   DeckSelector,
   EnhancedTableHead,
@@ -28,18 +27,15 @@ import {
   TypeSelector,
 } from "@/components";
 import { LOCAL_STORAGE_VERSION } from "@/constants";
-import { useDeck, useMatch, useUser } from "@/context";
-import {
-  ColumnSortOrder,
-  findOrphanedMatchParticipants,
-  getComparator,
-} from "@/logic";
+import { useAuth, useDeck, useFormat, useMatch } from "@/context";
+import { ColumnSortOrder, getComparator } from "@/logic";
+import { Match } from "@/types";
 
 const localStorageKey = "matchesPageState";
 const loadStateFromLocalStorage = () => {
   const initialState = {
     stateVersion: LOCAL_STORAGE_VERSION,
-    filterType: "",
+    filterFormat: "",
     filterUser: [],
     filterDeck: [],
     order: "desc" as ColumnSortOrder,
@@ -63,13 +59,16 @@ const loadStateFromLocalStorage = () => {
 };
 
 export const MatchesPage = (): JSX.Element => {
-  const { allDecks, getDeckUserColor, allDeckCategories } = useDeck();
-  const { isAdmin } = useUser();
-  const { allMatches, allMatchParticipants, deleteMatch } = useMatch();
+  const { allDecks, getDeckUserColor } = useDeck();
+  const { isAdmin } = useAuth();
+  const { allFormats } = useFormat();
+  const { allMatches, deleteMatch } = useMatch();
 
   const initialState = loadStateFromLocalStorage();
 
-  const [filterType, setFilterType] = useState<string>(initialState.filterType);
+  const [filterFormat, setFilterFormat] = useState<string>(
+    initialState.filterFormat,
+  );
   const [filterDeck, setFilterDeck] = useState<string[] | string>(
     initialState.filterDeck,
   );
@@ -83,21 +82,10 @@ export const MatchesPage = (): JSX.Element => {
   const [modalOpen, setModalOpen] = useState(false);
   const [existingMatchId, setExistingMatchId] = useState("");
 
-  const orphanedParticipants = findOrphanedMatchParticipants(
-    allMatches,
-    allMatchParticipants,
-  );
-  if (orphanedParticipants.length > 0) {
-    console.warn(
-      "orphaned match participants found, match history may be inaccurate",
-      orphanedParticipants,
-    );
-  }
-
   useEffect(() => {
     const newSettings = JSON.stringify({
       stateVersion: LOCAL_STORAGE_VERSION,
-      filterType,
+      filterFormat,
       filterUser,
       filterDeck,
       order,
@@ -106,7 +94,7 @@ export const MatchesPage = (): JSX.Element => {
       rowsPerPage,
     });
     localStorage.setItem(localStorageKey, newSettings);
-  }, [order, orderBy, page, rowsPerPage, filterType, filterUser, filterDeck]);
+  }, [order, orderBy, page, rowsPerPage, filterFormat, filterUser, filterDeck]);
 
   const headCells: HeadCell<Match>[] = [
     {
@@ -116,8 +104,8 @@ export const MatchesPage = (): JSX.Element => {
       alignment: "right",
     },
     {
-      id: "matchType",
-      label: "type",
+      id: "formatId",
+      label: "format",
       sortable: true,
     },
     {
@@ -153,14 +141,11 @@ export const MatchesPage = (): JSX.Element => {
     setPage(0);
   }, []);
 
-  const getParticipantDeckNames = (matchId: string) => {
-    const participants = allMatchParticipants.filter(
-      (participant) => participant.matchId === matchId,
-    );
-    return participants.map((participant) => (
+  const getParticipantDeckNames = (match: Match) => {
+    return match.matchParticipants?.map((participant) => (
       <Typography key={participant.id} variant="body2">
         •&nbsp;
-        {allDecks.find((deck) => deck.id === participant.deckId)?.deckName}
+        {allDecks.find((deck) => deck.id === participant.deckId)?.displayName}
       </Typography>
     ));
   };
@@ -174,22 +159,17 @@ export const MatchesPage = (): JSX.Element => {
     );
 
     return allMatches.filter((match) => {
-      const participants = allMatchParticipants.filter(
-        (participant) => participant.matchId === match.id,
-      );
-
       const participantOwnerIds = new Set(
-        participants
-          .map(
+        match.matchParticipants
+          ?.map(
             (participant) =>
-              allDecks.find((deck) => deck.id === participant.deckId)
-                ?.deckOwnerId,
+              allDecks.find((deck) => deck.id === participant.deckId)?.userId,
           )
           .filter(Boolean),
       );
 
       const participantDeckIds = new Set(
-        participants.map((participant) => participant.deckId),
+        match.matchParticipants?.map((participant) => participant.deckId),
       );
 
       const userFilterCondition =
@@ -198,18 +178,12 @@ export const MatchesPage = (): JSX.Element => {
       const deckFilterCondition =
         !filterDeck.length ||
         [...deckFilterSet].every((deckId) => participantDeckIds.has(deckId));
-      const typeFilterCondition = !filterType || match.matchType === filterType;
+      const typeFilterCondition =
+        !filterFormat || match.formatId === filterFormat;
 
       return userFilterCondition && deckFilterCondition && typeFilterCondition;
     });
-  }, [
-    allMatches,
-    allMatchParticipants,
-    allDecks,
-    filterType,
-    filterUser,
-    filterDeck,
-  ]);
+  }, [allMatches, allDecks, filterFormat, filterUser, filterDeck]);
 
   const visibleRows = useMemo(() => {
     return [...filteredMatches]
@@ -224,17 +198,17 @@ export const MatchesPage = (): JSX.Element => {
           <Grid container spacing={2} justifyContent="flex-end">
             <Grid item xs={12} sm={6} md={3} lg={2}>
               <TypeSelector
-                filterType={filterType}
-                setFilterType={(newType: string) => {
+                filterFormat={filterFormat}
+                setFilterFormat={(newFormat: string) => {
                   setPage(0);
-                  setFilterType(newType);
+                  setFilterFormat(newFormat);
                 }}
               />
             </Grid>
             <Grid item xs={12} sm={6} md={3} lg={4}>
               <DeckSelector
                 multi
-                filterType={filterType}
+                filterFormat={filterFormat}
                 filterDeck={filterDeck}
                 setFilterDeck={(newDecks: string | string[]) => {
                   setPage(0);
@@ -288,14 +262,17 @@ export const MatchesPage = (): JSX.Element => {
                         .setLocale("en-us")
                         .toLocaleString(DateTime.DATE_MED)}
                     </TableCell>
-                    <TableCell>{allDeckCategories.find(category => category.id === match.matchType)?.name ?? "-"}</TableCell>
+                    <TableCell>
+                      {allFormats.find((format) => format.id === match.formatId)
+                        ?.displayName ?? "-"}
+                    </TableCell>
                     <TableCell sx={{ fontWeight: 700 }}>
                       {
                         allDecks.find((deck) => deck.id === match.winningDeckId)
-                          ?.deckName
+                          ?.displayName
                       }
                     </TableCell>
-                    <TableCell>{getParticipantDeckNames(match.id)}</TableCell>
+                    <TableCell>{getParticipantDeckNames(match)}</TableCell>
                     {isAdmin && (
                       <TableCell align="right">
                         <Stack direction="row" justifyContent="flex-end">

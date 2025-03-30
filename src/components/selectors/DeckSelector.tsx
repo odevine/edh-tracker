@@ -12,19 +12,19 @@ import { useMemo } from "react";
 import { useDeck, useTheme } from "@/context";
 
 export const DeckSelector = (props: {
-  filterType: string;
+  filterFormat: string;
   filterDeck: string | string[];
   setFilterDeck: (newUser: string | string[]) => void;
   multi?: boolean;
 }) => {
-  const { filterType, filterDeck, setFilterDeck, multi = false } = props;
+  const { filterFormat, filterDeck, setFilterDeck, multi = false } = props;
   const { mode } = useTheme();
   const { allDecks, getDeckUserColor, getUserForDeck } = useDeck();
 
   // Generate the unique list of user options
   const deckOptions = useMemo(() => {
     return allDecks
-      .filter((deck) => filterType === "" || deck.formatId === filterType)
+      .filter((deck) => filterFormat === "" || deck.formatId === filterFormat)
       .sort((a, b) => (a.userId < b.userId ? -1 : 1))
       .map((deck) => {
         const user = getUserForDeck(deck.id);
@@ -35,7 +35,7 @@ export const DeckSelector = (props: {
           userDisplayName: user?.displayName ?? "unknown user",
         };
       });
-  }, [allDecks, mode, filterType, getDeckUserColor, getUserForDeck]);
+  }, [allDecks, mode, filterFormat, getDeckUserColor, getUserForDeck]);
 
   // Find the selected option(s) based on filterUser
   const selectedOption = useMemo(() => {

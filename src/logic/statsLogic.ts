@@ -1,4 +1,4 @@
-import { Deck, Match, MatchParticipant } from "@/API";
+import { Deck, Match, MatchParticipant } from "@/types";
 
 export interface UserStats {
   totalMatches: number;
@@ -12,13 +12,13 @@ export const getUserStats = (
   allDecks: Deck[],
   allMatches: Match[],
   allMatchParticipants: MatchParticipant[],
-  format?: string,
+  formatId?: string,
   includeUnranked?: boolean,
 ): UserStats => {
   // Get all decks owned by the user and is in the format
   const userDecks = allDecks.filter(
     (deck) =>
-      deck.deckOwnerId === userId && (format ? deck.deckType === format : true),
+      deck.userId === userId && (formatId ? deck.formatId === formatId : true),
   );
   const userDeckIds = userDecks.map((deck) => deck.id);
 
@@ -35,7 +35,7 @@ export const getUserStats = (
   // Filter matches based on the 'includeUnranked' flag
   const relevantMatches = allMatches.filter((match) => {
     const isUserInMatch = userMatchIds.includes(match.id);
-    const isRankedMatch = match.matchType !== "none";
+    const isRankedMatch = match.formatId !== "unranked";
     return isUserInMatch && (includeUnranked ? true : isRankedMatch);
   });
 
@@ -53,7 +53,7 @@ export const getUserStats = (
     totalMatches,
     totalWins,
     winRate,
-    deckCount: userDecks.filter((deck) => !deck.isInactive).length,
+    deckCount: userDecks.filter((deck) => !deck.inactive).length,
   };
 };
 
@@ -83,7 +83,7 @@ export const getDeckStats = (
 
   const relevantMatches = allMatches.filter((match) => {
     const isDeckInMatch = deckMatchIds.includes(match.id);
-    const isRankedMatch = match.matchType !== "none";
+    const isRankedMatch = match.formatId !== "unranked";
     return isDeckInMatch && (includeUnranked ? true : isRankedMatch);
   });
 
