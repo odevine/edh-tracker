@@ -9,20 +9,21 @@ import {
 } from "@mui/material";
 
 import { LoadingBackdrop, UserDecksCard, UserProfileForm } from "@/components";
-import { useDeck, useMatch, useTheme, useUser } from "@/context";
+import { useDeck, useMatch, useTheme, useUser, useAuth } from "@/context";
 import { getUserStats } from "@/logic";
 
 export const Profile = (props: { profileId: string }): JSX.Element => {
   const { profileId } = props;
-  const { allUserProfiles, usersLoading, authenticatedUser } = useUser();
+  const { userId } = useAuth();
+  const { allUserProfiles, usersLoading } = useUser();
   const { mode } = useTheme();
   const { allDecks } = useDeck();
-  const { allMatches, allMatchParticipants } = useMatch();
+  const { allMatches } = useMatch();
 
   const currentProfile = allUserProfiles.filter(
     (profile) => profile.id === profileId,
   )[0];
-  const ownUser = profileId === authenticatedUser?.userId;
+  const ownUser = profileId === userId;
   const userColor =
     mode === "light"
       ? currentProfile?.lightThemeColor
@@ -35,7 +36,6 @@ export const Profile = (props: { profileId: string }): JSX.Element => {
       currentProfile.id,
       allDecks,
       allMatches,
-      allMatchParticipants,
     );
     return (
       <>
