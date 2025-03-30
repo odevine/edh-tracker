@@ -2,7 +2,7 @@ import { MenuItem, TextField } from "@mui/material";
 
 import { useFormat } from "@/context";
 
-export const TypeSelector = (props: {
+export const FormatSelector = (props: {
   filterFormat: string;
   setFilterFormat: (newType: string) => void;
 }) => {
@@ -16,11 +16,11 @@ export const TypeSelector = (props: {
       select
       size="small"
       value={filterFormat}
-      label="deck type"
+      label="format"
       onChange={(e) => setFilterFormat(e.target.value)}
       sx={{ minWidth: 140 }}
     >
-      <MenuItem value="">all types</MenuItem>
+      <MenuItem value="">all formats</MenuItem>
       {allFormats.map((format) => (
         <MenuItem key={format.id} value={format.id}>
           {format.displayName}
