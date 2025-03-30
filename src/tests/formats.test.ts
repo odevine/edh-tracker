@@ -6,8 +6,8 @@ import {
   getFormat,
   listFormats,
   updateFormat,
-} from "@/functions";
-import { createTestFormat } from "./testData";
+} from "@/functions/format/formatService";
+import { createTestFormat } from "@/tests/testData";
 
 const baseFormat = createTestFormat("format-test-format-1");
 

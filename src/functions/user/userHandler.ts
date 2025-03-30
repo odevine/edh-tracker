@@ -4,15 +4,15 @@ import {
   APIGatewayProxyResultV2,
 } from "aws-lambda";
 
+import { getAuthContext } from "@/functions/common/auth";
+import { parseJsonBody } from "@/functions/common/parseJson";
+import { createResponse } from "@/functions/common/response";
 import {
-  createResponse,
   createUser,
-  getAuthContext,
   getUser,
   listUsers,
-  parseJsonBody,
   updateUser,
-} from "@/functions";
+} from "@/functions/user/userService";
 import { CreateUserInput, UpdateUserInput } from "@/types";
 
 export const userHandler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (

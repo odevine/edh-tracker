@@ -1,4 +1,5 @@
-import { getDeck, getUser, updateDeck, updateUser } from "@/functions";
+import { getDeck, updateDeck } from "@/functions/deck/deckService";
+import { getUser, updateUser } from "@/functions/user/userService";
 import { Match } from "@/types";
 
 export const updateStatsFromMatch = async (match: Match) => {

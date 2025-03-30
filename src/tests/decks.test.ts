@@ -2,14 +2,13 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import {
   createDeck,
-  createUser,
   deleteDeck,
-  deleteUser,
   getDeck,
   listDecks,
   updateDeck,
-} from "@/functions";
-import { createTestDeck, createTestUser } from "./testData";
+} from "@/functions/deck/deckService";
+import { createUser, deleteUser } from "@/functions/user/userService";
+import { createTestDeck, createTestUser } from "@/tests/testData";
 
 const userId = "decks-test-user-1";
 const deckId = "decks-test-deck-1";

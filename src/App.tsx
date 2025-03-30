@@ -1,5 +1,5 @@
 import { Box, Stack, Typography } from "@mui/material";
-import { Redirect, useRoutes } from "raviger";
+import { useRoutes } from "raviger";
 
 import {
   AppAlertList,
@@ -11,6 +11,7 @@ import { useApp, useDeck, useMatch, useUser } from "@/context";
 import {
   DecksPage,
   LandingPage,
+  LoginPage,
   MatchesPage,
   Profile,
   ToolsPage,
@@ -26,12 +27,12 @@ const NotFoundPage = () => (
 
 const baseRoutes = {
   "/": () => <LandingPage />,
+  "/login": () => <LoginPage />,
   "/*": () => <ProtectedRoutes />,
   "*": () => <NotFoundPage />,
 };
 
 const protectedRoutes = {
-  "/login": () => <Redirect to="/users" />,
   "/tools": () => <ToolsPage />,
   "/decks": () => <DecksPage />,
   "/users": () => <UsersPage />,
@@ -66,7 +67,7 @@ export const App = () => {
           p: 3,
         }}
       >
-        {routeResult || <h1>404 Not Found</h1>}
+        {routeResult ?? <h1>404 Not Found</h1>}
       </Box>
       {showLoading && <LoadingBackdrop />}
       <AppAlertList messages={appMessages} onDelete={deleteAppMessage} />

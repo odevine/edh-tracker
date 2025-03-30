@@ -1,12 +1,12 @@
 import { randomUUID } from "crypto";
 
+import { dynamo } from "@/functions/common/db";
+import { requireEnv } from "@/functions/common/env";
 import {
-  buildUpdateExpression,
-  dynamo,
-  requireEnv,
   reverseStatsFromMatch,
   updateStatsFromMatch,
-} from "@/functions";
+} from "@/functions/common/statUtils";
+import { buildUpdateExpression } from "@/functions/common/update";
 import {
   CreateMatchInput,
   Match,
