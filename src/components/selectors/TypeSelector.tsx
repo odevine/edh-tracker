@@ -1,29 +1,29 @@
 import { MenuItem, TextField } from "@mui/material";
 
-import { useDeck } from "@/context";
+import { useFormat } from "@/context";
 
 export const TypeSelector = (props: {
-  filterType: string;
-  setFilterType: (newType: string) => void;
+  filterFormat: string;
+  setFilterFormat: (newType: string) => void;
 }) => {
-  const { filterType, setFilterType } = props;
+  const { filterFormat, setFilterFormat } = props;
 
-  const { allDeckCategories } = useDeck();
+  const { allFormats } = useFormat();
 
   return (
     <TextField
       fullWidth
       select
       size="small"
-      value={filterType}
+      value={filterFormat}
       label="deck type"
-      onChange={(e) => setFilterType(e.target.value)}
+      onChange={(e) => setFilterFormat(e.target.value)}
       sx={{ minWidth: 140 }}
     >
       <MenuItem value="">all types</MenuItem>
-      {allDeckCategories.map((category) => (
-        <MenuItem key={category.id} value={category.id}>
-          {category.name}
+      {allFormats.map((format) => (
+        <MenuItem key={format.id} value={format.id}>
+          {format.displayName}
         </MenuItem>
       ))}
     </TextField>
