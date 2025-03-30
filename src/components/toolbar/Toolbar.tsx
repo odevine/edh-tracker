@@ -23,10 +23,11 @@ import { navigate, usePath } from "raviger";
 import { useState } from "react";
 
 import { ThemeToggle } from "@/components";
-import { useTheme, useUser } from "@/context";
+import { useAuth, useTheme, useUser } from "@/context";
 
 export const Toolbar = () => {
-  const { authenticatedUser, currentUserProfile, signOutUser } = useUser();
+  const { userId, isAuthenticated, signOut } = useAuth();
+  const { currentUserProfile } = useUser();
   const { mode } = useTheme();
 
   const [userMenuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
@@ -50,25 +51,25 @@ export const Toolbar = () => {
     {
       label: "users",
       action: () => navigate("/users"),
-      disabled: !authenticatedUser,
+      disabled: !isAuthenticated,
       pathMatch: /\/users/,
     },
     {
       label: "decks",
       action: () => navigate("/decks"),
-      disabled: !authenticatedUser,
+      disabled: !isAuthenticated,
       pathMatch: /\/decks/,
     },
     {
       label: "matches",
       action: () => navigate("/matches"),
-      disabled: !authenticatedUser,
+      disabled: !isAuthenticated,
       pathMatch: /\/matches/,
     },
     {
       label: "tools",
       action: () => navigate("/tools"),
-      disabled: !authenticatedUser,
+      disabled: !isAuthenticated,
       pathMatch: /^\/tools$/,
     },
   ];
@@ -90,14 +91,11 @@ export const Toolbar = () => {
 
   const handleSignOut = async () => {
     handleUserMenuClose();
-    signOutUser();
+    signOut();
   };
 
   const loggedInOptions = [
-    <MenuItem
-      key="profile"
-      onClick={() => handleNavigate(`/users/${authenticatedUser?.userId}`)}
-    >
+    <MenuItem key="profile" onClick={() => handleNavigate(`/users/${userId}`)}>
       view profile
     </MenuItem>,
     <MenuItem key="logout" onClick={handleSignOut}>
@@ -126,7 +124,7 @@ export const Toolbar = () => {
       open={isUserMenuOpen}
       onClose={handleUserMenuClose}
     >
-      {authenticatedUser ? loggedInOptions : loggedOutOptions}
+      {isAuthenticated ? loggedInOptions : loggedOutOptions}
     </Menu>
   );
 
@@ -210,7 +208,7 @@ export const Toolbar = () => {
                 cursor: "pointer",
               }}
             >
-              {!authenticatedUser && (
+              {!isAuthenticated && (
                 <Login
                   sx={{
                     color: (theme) => theme.palette.background.paper,
