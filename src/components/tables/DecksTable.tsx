@@ -35,19 +35,19 @@ import {
   ProfileMiniCard,
   TypeSelector,
 } from "@/components";
-import { useDeck, useMatch, useTheme, useUser } from "@/context";
+import { useDeck, useFormat, useMatch, useTheme, useUser } from "@/context";
 import type { DeckWithStats } from "@/logic";
 import { getDeckStats, getFullColorNames } from "@/logic";
 
 interface IDecksTableProps {
   customButtons: JSX.Element[];
   filterColor: string[];
-  filterType: string;
+  filterFormat: string;
   filterUser: string;
   includeInactive: boolean;
   includeUnranked: boolean;
   setFilterColor: (newColor: string[]) => void;
-  setFilterType: (newType: string) => void;
+  setFilterFormat: (newType: string) => void;
   setFilterUser: (newUser: string | string[]) => void;
   setIncludeInactive: (checked: boolean) => void;
   setIncludeUnranked: (checked: boolean) => void;
@@ -56,20 +56,21 @@ interface IDecksTableProps {
 export const DecksTable = ({
   customButtons,
   filterColor,
-  filterType,
+  filterFormat,
   filterUser,
   includeInactive,
   includeUnranked,
   setFilterColor,
-  setFilterType,
+  setFilterFormat,
   setFilterUser,
   setIncludeInactive,
   setIncludeUnranked,
 }: IDecksTableProps) => {
   const { allUserProfiles } = useUser();
-  const { allDecks, allDeckCategories, decksLoading } = useDeck();
+  const { allDecks, decksLoading } = useDeck();
+  const { allFormats } = useFormat();
   const { mode } = useTheme();
-  const { allMatches, allMatchParticipants } = useMatch();
+  const { allMatches } = useMatch();
 
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
@@ -95,21 +96,19 @@ export const DecksTable = ({
   }, [allUserProfiles]);
 
   const deckCategoriesMap = useMemo(() => {
-    return new Map(
-      allDeckCategories.map((category) => [category.id, category]),
-    );
-  }, [allDeckCategories]);
+    return new Map(allFormats.map((format) => [format.id, format]));
+  }, [allFormats]);
 
   const columns: GridColDef[] = useMemo(
     (): GridColDef[] => [
       {
-        field: "deckName",
+        field: "displayName",
         headerName: "name",
         minWidth: 300,
         flex: 1,
         renderCell: (params: GridRenderCellParams<DeckWithStats>) => (
           <Stack direction="row" alignItems="center">
-            {params.row.isInactive && (
+            {params.row.inactive && (
               <Chip size="small" label="inactive" sx={{ mr: 1 }} />
             )}
             {params.row.link ? (
@@ -212,14 +211,14 @@ export const DecksTable = ({
         ),
       },
       {
-        field: "deckOwnerId",
+        field: "userId",
         headerName: "player",
         minWidth: 120,
         maxWidth: 130,
         flex: 1,
         valueGetter: (value) => userProfileMap.get(value)?.displayName,
         renderCell: (params: GridRenderCellParams<DeckWithStats>) => {
-          const ownerProfile = userProfileMap.get(params.row.deckOwnerId);
+          const ownerProfile = userProfileMap.get(params.row.userId);
           if (!ownerProfile) {
             return params.value;
           }
@@ -265,10 +264,11 @@ export const DecksTable = ({
         },
       },
       {
-        field: "deckType",
+        field: "formatId",
         headerName: "type",
         width: 120,
-        valueGetter: (value) => deckCategoriesMap.get(value)?.name ?? "none",
+        valueGetter: (value) =>
+          deckCategoriesMap.get(value)?.displayName ?? "-",
       },
       {
         field: "commanderColors",
@@ -334,7 +334,7 @@ export const DecksTable = ({
         },
       },
     ],
-    [allDeckCategories, allUserProfiles],
+    [allFormats, allUserProfiles],
   );
 
   const decksWithStats: DeckWithStats[] = useMemo(() => {
@@ -366,32 +366,26 @@ export const DecksTable = ({
         ];
 
         return (
-          (includeInactive || !deck.isInactive) &&
+          (includeInactive || !deck.inactive) &&
           (filterUser === "" ||
-            allUserProfiles.find((profile) => profile.id === deck.deckOwnerId)
+            allUserProfiles.find((profile) => profile.id === deck.userId)
               ?.id === filterUser) &&
-          (filterType === "" || deck.deckType === filterType) &&
+          (filterFormat === "" || deck.formatId === filterFormat) &&
           matchesExactColors(combinedColors, filterColor)
         );
       })
       .map((deck) => {
-        const deckStats = getDeckStats(
-          deck.id,
-          allMatches,
-          allMatchParticipants,
-          includeUnranked,
-        );
+        const deckStats = getDeckStats(deck.id, allMatches, includeUnranked);
         return { ...deck, ...deckStats };
       });
   }, [
     allDecks,
     includeInactive,
-    filterType,
+    filterFormat,
     filterUser,
     filterColor,
     includeUnranked,
     allMatches,
-    allMatchParticipants,
   ]);
 
   const filterDescription = useMemo(() => {
@@ -405,8 +399,8 @@ export const DecksTable = ({
       clauses.push("all");
     }
 
-    if (filterType) {
-      clauses.push(`"${deckCategoriesMap.get(filterType)?.name}"`);
+    if (filterFormat) {
+      clauses.push(`"${deckCategoriesMap.get(filterFormat)?.displayName}"`);
     }
 
     clauses.push("decks");
@@ -436,7 +430,7 @@ export const DecksTable = ({
     return clauses.join(" ");
   }, [
     filterUser,
-    filterType,
+    filterFormat,
     filterColor,
     includeInactive,
     includeUnranked,
@@ -516,7 +510,7 @@ export const DecksTable = ({
           },
         }}
         getRowClassName={(params: GridRowClassNameParams<DeckWithStats>) =>
-          `user-row-${params.row.deckOwnerId}`
+          `user-row-${params.row.userId}`
         }
         sx={{
           ...userColorClasses,
@@ -572,8 +566,8 @@ export const DecksTable = ({
             </Grid>
             <Grid item xs={12}>
               <TypeSelector
-                filterType={filterType}
-                setFilterType={setFilterType}
+                filterFormat={filterFormat}
+                setFilterFormat={setFilterFormat}
               />
             </Grid>
             <Grid item xs={12}>

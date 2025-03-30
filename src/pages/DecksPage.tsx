@@ -11,7 +11,7 @@ const loadStateFromLocalStorage = () => {
   const initialState = {
     stateVersion: LOCAL_STORAGE_VERSION,
     filterColor: [],
-    filterType: "",
+    filterFormat: "",
     filterUser: "",
     searchQuery: "",
     includeInactive: false,
@@ -39,7 +39,7 @@ export const DecksPage = (): JSX.Element => {
   const initialState = loadStateFromLocalStorage();
 
   const [filterColor, setFilterColor] = useState(initialState.filterColor);
-  const [filterType, setFilterType] = useState(initialState.filterType);
+  const [filterFormat, setFilterFormat] = useState(initialState.filterType);
   const [filterUser, setFilterUser] = useState(initialState.filterUser);
   const [includeInactive, setIncludeInactive] = useState(
     initialState.includeInactive,
@@ -53,7 +53,7 @@ export const DecksPage = (): JSX.Element => {
     const newSettings = JSON.stringify({
       stateVersion: LOCAL_STORAGE_VERSION,
       filterColor,
-      filterType,
+      filterFormat,
       filterUser,
       includeInactive,
       includeUnranked,
@@ -64,7 +64,7 @@ export const DecksPage = (): JSX.Element => {
       rowsPerPage: initialState.rowsPerPage,
     });
     localStorage.setItem(localStorageKey, newSettings);
-  }, [filterColor, filterType, filterUser, includeInactive, includeUnranked]);
+  }, [filterColor, filterFormat, filterUser, includeInactive, includeUnranked]);
 
   return (
     <Paper sx={{ height: "100%", minWidth: 740 }}>
@@ -81,12 +81,12 @@ export const DecksPage = (): JSX.Element => {
           </Button>,
         ]}
         filterColor={filterColor}
-        filterType={filterType}
+        filterFormat={filterFormat}
         filterUser={filterUser}
         includeInactive={includeInactive}
         includeUnranked={includeUnranked}
         setFilterColor={(newColor: string[]) => setFilterColor(newColor)}
-        setFilterType={(newType: string) => setFilterType(newType)}
+        setFilterFormat={(newType: string) => setFilterFormat(newType)}
         setFilterUser={(newUser: string | string[]) => setFilterUser(newUser)}
         setIncludeInactive={(checked: boolean) => setIncludeInactive(checked)}
         setIncludeUnranked={(checked: boolean) => setIncludeUnranked(checked)}
