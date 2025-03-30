@@ -10,18 +10,20 @@ import {
   UserProvider,
 } from "@/context";
 
-export const CombinedProvider = (props: PropsWithChildren) => (
-  <AuthProvider>
-    <AppProvider>
-      <UserProvider>
-        <ThemeProvider>
-          <FormatProvider>
-            <DeckProvider>
-              <MatchProvider>{props.children}</MatchProvider>
-            </DeckProvider>
-          </FormatProvider>
-        </ThemeProvider>
-      </UserProvider>
-    </AppProvider>
-  </AuthProvider>
+const providers = [
+  AuthProvider,
+  AppProvider,
+  UserProvider,
+  ThemeProvider,
+  FormatProvider,
+  DeckProvider,
+  MatchProvider,
+];
+
+export const CombinedProvider = ({ children }: PropsWithChildren<{}>) => (
+  <>
+    {providers.reduceRight((acc, Provider) => {
+      return <Provider>{acc}</Provider>;
+    }, children)}
+  </>
 );
