@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { PropsWithChildren, createContext, useContext, useMemo } from "react";
+import { PropsWithChildren, createContext, useMemo } from "react";
 
-import { useApp, useAuth } from "@/context";
+import { useApp, useAuth } from "@/hooks";
 import { fetchWithAuth } from "@/logic";
 import { CreateFormatInput, Format, UpdateFormatInput } from "@/types";
 
@@ -16,7 +16,9 @@ interface FormatContextType {
   }) => Promise<void>;
 }
 
-const FormatContext = createContext<FormatContextType | undefined>(undefined);
+export const FormatContext = createContext<FormatContextType | undefined>(
+  undefined,
+);
 
 export const FormatProvider = ({ children }: PropsWithChildren<{}>) => {
   const { accessToken, isInitializing } = useAuth();
@@ -116,12 +118,4 @@ export const FormatProvider = ({ children }: PropsWithChildren<{}>) => {
       {children}
     </FormatContext.Provider>
   );
-};
-
-export const useFormat = () => {
-  const ctx = useContext(FormatContext);
-  if (!ctx) {
-    throw new Error("useFormat must be used within a FormatProvider");
-  }
-  return ctx;
 };

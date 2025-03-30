@@ -1,6 +1,6 @@
 import { Backdrop, CircularProgress } from "@mui/material";
 
-import { useTheme } from "@/context";
+import { useTheme } from "@/hooks";
 
 export const LoadingBackdrop = (): JSX.Element => {
   const { mode } = useTheme();

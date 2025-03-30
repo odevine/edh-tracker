@@ -3,7 +3,7 @@ import { Button, Paper } from "@mui/material";
 import { useState } from "react";
 
 import { MatchModal, MatchesTable } from "@/components";
-import { useMatch } from "@/context";
+import { useMatch } from "@/hooks";
 import { Match } from "@/types";
 
 export const MatchesPage = (): JSX.Element => {

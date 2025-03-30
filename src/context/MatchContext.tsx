@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { PropsWithChildren, createContext, useContext, useMemo } from "react";
+import { PropsWithChildren, createContext, useMemo } from "react";
 
-import { useApp, useAuth } from "@/context";
+import { useApp, useAuth } from "@/hooks";
 import { fetchWithAuth } from "@/logic";
 import { CreateMatchInput, Match, UpdateMatchInput } from "@/types";
 
@@ -22,7 +22,9 @@ interface MatchContextType {
   }) => Match[];
 }
 
-const MatchContext = createContext<MatchContextType | undefined>(undefined);
+export const MatchContext = createContext<MatchContextType | undefined>(
+  undefined,
+);
 
 export const MatchProvider = ({ children }: PropsWithChildren<{}>) => {
   const { accessToken, isAdmin, isInitializing } = useAuth();
@@ -195,12 +197,4 @@ export const MatchProvider = ({ children }: PropsWithChildren<{}>) => {
       {children}
     </MatchContext.Provider>
   );
-};
-
-export const useMatch = () => {
-  const ctx = useContext(MatchContext);
-  if (!ctx) {
-    throw new Error("useMatch must be used within a MatchProvider");
-  }
-  return ctx;
 };

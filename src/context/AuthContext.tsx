@@ -4,13 +4,7 @@ import {
   InitiateAuthCommand,
 } from "@aws-sdk/client-cognito-identity-provider";
 import { navigate } from "raviger";
-import {
-  PropsWithChildren,
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { PropsWithChildren, createContext, useEffect, useState } from "react";
 
 import { AWS_COGNITO_CLIENT_ID } from "@/constants";
 import { cognitoClient } from "@/lib";
@@ -26,7 +20,9 @@ interface AuthContextType {
   refreshSession: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(
+  undefined,
+);
 
 export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
   const [userId, setUserId] = useState<string | null>(null);
@@ -166,12 +162,4 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       {children}
     </AuthContext.Provider>
   );
-};
-
-export const useAuth = () => {
-  const ctx = useContext(AuthContext);
-  if (!ctx) {
-    throw new Error("useAuth must be used inside AuthProvider");
-  }
-  return ctx;
 };

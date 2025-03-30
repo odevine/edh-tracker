@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 
 import { LoadingBackdrop, UserDecksCard, UserProfileForm } from "@/components";
-import { useDeck, useMatch, useTheme, useUser, useAuth } from "@/context";
+import { useAuth, useDeck, useMatch, useTheme, useUser } from "@/hooks";
 import { getUserStats } from "@/logic";
 
 export const Profile = (props: { profileId: string }): JSX.Element => {
@@ -32,11 +32,7 @@ export const Profile = (props: { profileId: string }): JSX.Element => {
   if (!currentProfile) {
     return <LoadingBackdrop />;
   } else {
-    const userStats = getUserStats(
-      currentProfile.id,
-      allDecks,
-      allMatches,
-    );
+    const userStats = getUserStats(currentProfile.id, allDecks, allMatches);
     return (
       <>
         {usersLoading && <LoadingBackdrop />}

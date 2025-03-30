@@ -7,8 +7,7 @@ import {
   UsersTableToolbar,
   getUsersColumns,
 } from "@/components";
-import { useFormat, useTheme, useUser } from "@/context";
-import { useUsersFilters } from "@/hooks";
+import { useFormat, useTheme, useUser, useUsersFilters } from "@/hooks";
 import { computeUserStats } from "@/logic";
 import { User, UserWithStats } from "@/types";
 

@@ -11,13 +11,12 @@ import type {} from "@mui/x-data-grid/themeAugmentation";
 import {
   PropsWithChildren,
   createContext,
-  useContext,
   useEffect,
   useMemo,
   useState,
 } from "react";
 
-import { useUser } from "@/context";
+import { useUser } from "@/hooks";
 
 export const ThemeContext = createContext({
   toggleTheme: () => {},
@@ -183,12 +182,4 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
       </MuiThemeProvider>
     </ThemeContext.Provider>
   );
-};
-
-export const useTheme = () => {
-  const context = useContext(ThemeContext);
-  if (!context) {
-    throw new Error("useTheme must be used within a ThemeProvider");
-  }
-  return context;
 };

@@ -22,7 +22,7 @@ import {
 import { useState } from "react";
 
 import { CommanderColors, DeckModal } from "@/components";
-import { useDeck, useFormat, useMatch, useTheme } from "@/context";
+import { useDeck, useFormat, useMatch, useTheme } from "@/hooks";
 import { User } from "@/types";
 
 export const UserDecksCard = (props: {

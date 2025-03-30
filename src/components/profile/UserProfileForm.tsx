@@ -13,7 +13,7 @@ import {
 import { MuiColorInput } from "mui-color-input";
 import { useState } from "react";
 
-import { useAuth, useUser } from "@/context";
+import { useAuth, useUser } from "@/hooks";
 import { UpdateUserInput } from "@/types";
 
 const convertToColor = (input: string) => {

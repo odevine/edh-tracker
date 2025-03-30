@@ -14,7 +14,7 @@ import {
 import { navigate } from "raviger";
 import { useState } from "react";
 
-import { useAuth } from "@/context";
+import { useAuth } from "@/hooks";
 
 export const LoginPage = () => {
   const [username, setUsername] = useState("");

@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { PropsWithChildren, createContext, useContext, useMemo } from "react";
+import { PropsWithChildren, createContext, useMemo } from "react";
 
-import { useApp, useAuth, useTheme, useUser } from "@/context";
+import { useApp, useAuth, useTheme, useUser } from "@/hooks";
 import { fetchWithAuth, matchesExactColors } from "@/logic";
 import { CreateDeckInput, Deck, UpdateDeckInput, User } from "@/types";
 
@@ -25,7 +25,9 @@ interface DeckContextType {
   }) => Deck[];
 }
 
-const DeckContext = createContext<DeckContextType | undefined>(undefined);
+export const DeckContext = createContext<DeckContextType | undefined>(
+  undefined,
+);
 
 export const DeckProvider = ({ children }: PropsWithChildren<{}>) => {
   const { userId, accessToken, isInitializing } = useAuth();
@@ -205,10 +207,4 @@ export const DeckProvider = ({ children }: PropsWithChildren<{}>) => {
       {children}
     </DeckContext.Provider>
   );
-};
-
-export const useDeck = () => {
-  const ctx = useContext(DeckContext);
-  if (!ctx) throw new Error("useDeck must be used within a DeckProvider");
-  return ctx;
 };

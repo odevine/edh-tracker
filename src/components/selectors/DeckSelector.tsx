@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import { useMemo } from "react";
 
-import { useDeck, useTheme } from "@/context";
+import { useDeck, useTheme } from "@/hooks";
 
 export const DeckSelector = (props: {
   filterFormat: string;

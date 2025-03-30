@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import { useMemo } from "react";
 
-import { useDeck, useTheme, useUser } from "@/context";
+import { useDeck, useTheme, useUser } from "@/hooks";
 import { User } from "@/types";
 
 export const PlayerSelector = (props: {

@@ -23,7 +23,7 @@ import { navigate, usePath } from "raviger";
 import { useState } from "react";
 
 import { ThemeToggle } from "@/components";
-import { useAuth, useTheme, useUser } from "@/context";
+import { useAuth, useTheme, useUser } from "@/hooks";
 
 export const Toolbar = () => {
   const { userId, isAuthenticated, signOut } = useAuth();

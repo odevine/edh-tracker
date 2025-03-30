@@ -7,8 +7,13 @@ import {
   DecksTableToolbar,
   getDecksColumns,
 } from "@/components";
-import { useDeck, useFormat, useTheme, useUser } from "@/context";
-import { useDecksFilters } from "@/hooks";
+import {
+  useDeck,
+  useDecksFilters,
+  useFormat,
+  useTheme,
+  useUser,
+} from "@/hooks";
 import { computeDeckStats, getFullColorNames } from "@/logic";
 import { Deck, DeckWithStats } from "@/types";
 
