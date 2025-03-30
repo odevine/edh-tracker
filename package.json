@@ -28,6 +28,7 @@
     "@mui/x-data-grid": "^7.23.3",
     "@mui/x-date-pickers": "^7.4.0",
     "@tanstack/react-query": "^5.70.0",
+    "aws-lambda": "^1.0.7",
     "axios": "^1.7.7",
     "lodash": "^4.17.21",
     "luxon": "^3.4.4",
@@ -40,6 +41,7 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "@types/aws-lambda": "^8.10.148",
     "@types/lodash": "^4.17.1",
     "@types/luxon": "^3.4.2",
     "@types/node": "^20.12.7",
