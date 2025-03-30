@@ -25,3 +25,9 @@ export type CreateUserInput = Omit<User, "id" | "createdAt" | "updatedAt"> & {
 export type UpdateUserInput = Partial<
   Omit<User, "id" | "createdAt" | "updatedAt">
 >;
+
+export type UserWithStats = User & {
+  totalMatches: number;
+  totalWins: number;
+  winRate: number;
+};

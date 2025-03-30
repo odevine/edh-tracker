@@ -48,38 +48,3 @@ export const getUserStats = (
   };
 };
 
-export interface DeckStats {
-  totalMatches: number;
-  totalWins: number;
-  winRate: number;
-}
-
-export interface DeckWithStats extends DeckStats, Deck {}
-
-export const getDeckStats = (
-  deckId: string,
-  allMatches: Match[],
-  includeUnranked?: boolean,
-): DeckStats => {
-  const relevantMatches = allMatches.filter((match) => {
-    const deckInMatch = match.matchParticipants?.some(
-      (p) => p.deckId === deckId,
-    );
-    const isRankedMatch = match.formatId !== "unranked";
-    return deckInMatch && (includeUnranked ? true : isRankedMatch);
-  });
-
-  const totalMatches = relevantMatches.length;
-
-  const totalWins = relevantMatches.filter(
-    (match) => match.winningDeckId === deckId,
-  ).length;
-
-  const winRate = totalMatches > 0 ? totalWins / totalMatches : 0;
-
-  return {
-    totalMatches,
-    totalWins,
-    winRate,
-  };
-};

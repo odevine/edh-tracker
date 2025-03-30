@@ -137,6 +137,7 @@ export const DecksTable = ({ customButtons }: IDecksTableProps) => {
         getRowHeight={() => "auto"}
         rows={filteredDecks}
         columns={columns}
+        sx={userColorClasses}
         slots={{
           toolbar: () => (
             <DecksTableToolbar
@@ -156,24 +157,6 @@ export const DecksTable = ({ customButtons }: IDecksTableProps) => {
         getRowClassName={(params: GridRowClassNameParams<Deck>) =>
           `user-row-${params.row.userId}`
         }
-        sx={{
-          ...userColorClasses,
-          "&.MuiDataGrid-root": { border: "none" },
-          "&.MuiDataGrid-root .MuiDataGrid-cell": {
-            whiteSpace: "nowrap",
-            border: "none",
-          },
-          "&.MuiDataGrid-root .MuiDataGrid-cell:focus": { outline: "none" },
-          "&.MuiDataGrid-root--densityCompact .MuiDataGrid-cell": { py: "8px" },
-          "&.MuiDataGrid-root--densityStandard .MuiDataGrid-cell": {
-            py: "15px",
-          },
-          "&.MuiDataGrid-root--densityComfortable .MuiDataGrid-cell": {
-            py: "22px",
-          },
-          "&.MuiDataGrid-root .MuiDataGrid-row": { alignItems: "center" },
-          minWidth: 740,
-        }}
       />
       <DecksTableFilters
         anchorEl={anchorEl}
