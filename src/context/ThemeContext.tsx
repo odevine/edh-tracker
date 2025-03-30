@@ -7,6 +7,7 @@ import {
   createTheme,
   useMediaQuery,
 } from "@mui/material";
+import type {} from "@mui/x-data-grid/themeAugmentation";
 import {
   PropsWithChildren,
   createContext,
@@ -124,6 +125,35 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
             styleOverrides: {
               root: {
                 textTransform: "lowercase",
+              },
+            },
+          },
+          MuiDataGrid: {
+            styleOverrides: {
+              root: {
+                border: "none",
+                "& .MuiDataGrid-cell": {
+                  whiteSpace: "nowrap",
+                  border: "none",
+                },
+                "& .MuiDataGrid-cell:focus": {
+                  outline: "none",
+                },
+                "&.MuiDataGrid-root--densityCompact .MuiDataGrid-cell": {
+                  paddingTop: 8,
+                  paddingBottom: 8,
+                },
+                "&.MuiDataGrid-root--densityStandard .MuiDataGrid-cell": {
+                  paddingTop: 15,
+                  paddingBottom: 15,
+                },
+                "&.MuiDataGrid-root--densityComfortable .MuiDataGrid-cell": {
+                  paddingTop: 22,
+                  paddingBottom: 22,
+                },
+                "& .MuiDataGrid-row": {
+                  alignItems: "center",
+                },
               },
             },
           },
