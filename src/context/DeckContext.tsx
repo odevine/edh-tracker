@@ -2,8 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PropsWithChildren, createContext, useMemo } from "react";
 
 import { useApp, useAuth, useTheme, useUser } from "@/hooks";
-import { fetchWithAuth, matchesExactColors } from "@/logic";
 import { CreateDeckInput, Deck, UpdateDeckInput, User } from "@/types";
+import { fetchWithAuth, matchesExactColors } from "@/utils";
 
 interface DeckContextType {
   allDecks: Deck[];

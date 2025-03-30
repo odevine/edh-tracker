@@ -14,8 +14,8 @@ import {
   useTheme,
   useUser,
 } from "@/hooks";
-import { computeDeckStats, getFullColorNames } from "@/logic";
 import { Deck, DeckWithStats } from "@/types";
+import { computeDeckStats, getFullColorNames } from "@/utils";
 
 interface IDecksTableProps {
   customButtons: JSX.Element[];

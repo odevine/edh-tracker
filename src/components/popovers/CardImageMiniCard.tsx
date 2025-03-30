@@ -7,7 +7,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 
-import { getCardArt } from "@/logic";
+import { getCardArt } from "@/utils";
 
 interface CardImageMiniCardProps {
   cardName?: string;

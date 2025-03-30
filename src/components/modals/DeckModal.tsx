@@ -12,8 +12,8 @@ import {
 import { useEffect, useState } from "react";
 
 import { useAuth, useDeck, useFormat, useMatch } from "@/hooks";
-import { sortColors, useCommanderSearch } from "@/logic";
 import { CreateDeckInput, UpdateDeckInput } from "@/types";
+import { sortColors, useCommanderSearch } from "@/utils";
 
 interface ICommander {
   label: string;

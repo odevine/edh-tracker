@@ -13,8 +13,8 @@ import { DateTime } from "luxon";
 import { navigate } from "raviger";
 
 import { useDeck, useMatch } from "@/hooks";
-import { getUserStats } from "@/logic";
 import { User } from "@/types";
+import { getUserStats } from "@/utils";
 
 interface ProfileMiniCardProps {
   profile: User;
