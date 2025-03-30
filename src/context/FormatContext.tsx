@@ -33,7 +33,8 @@ export const FormatProvider = ({ children }: PropsWithChildren<{}>) => {
       if (!res.ok) {
         throw new Error("failed to fetch formats");
       }
-      return res.json();
+      const data: Format[] = await res.json();
+      return data.sort((a, b) => a.displayName.localeCompare(b.displayName));
     },
     enabled: !!accessToken && !isInitializing,
   });
