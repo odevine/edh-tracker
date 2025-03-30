@@ -21,18 +21,18 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 
-import { User } from "@/API";
 import { CommanderColors, DeckModal } from "@/components";
-import { useDeck, useMatch, useTheme } from "@/context";
+import { useDeck, useFormat, useMatch, useTheme } from "@/context";
+import { User } from "@/types";
 
 export const UserDecksCard = (props: {
   ownUser: boolean;
   userProfile: User;
 }) => {
   const { ownUser, userProfile } = props;
-  const { allDecks, deleteDeckById, allDeckCategories, updateExistingDeck } =
-    useDeck();
-  const { allMatchParticipants } = useMatch();
+  const { allDecks, deleteDeckById, updateExistingDeck } = useDeck();
+  const { allFormats } = useFormat();
+  const { hasDeckBeenUsed } = useMatch();
   const { mode } = useTheme();
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -46,8 +46,7 @@ export const UserDecksCard = (props: {
 
   const userDecks = allDecks.filter(
     (deck) =>
-      deck.deckOwnerId === userProfile.id &&
-      (includeInactive || !deck.isInactive),
+      deck.userId === userProfile.id && (includeInactive || !deck.inactive),
   );
 
   return (
@@ -123,10 +122,10 @@ export const UserDecksCard = (props: {
                             "&:hover": { textDecoration: "underline" },
                           }}
                         >
-                          {deck.deckName}
+                          {deck.displayName}
                         </Link>
                       ) : (
-                        deck.deckName
+                        deck.displayName
                       )}
                     </TableCell>
                     <TableCell>
@@ -139,9 +138,8 @@ export const UserDecksCard = (props: {
                       )}
                     </TableCell>
                     <TableCell>
-                      {allDeckCategories.find(
-                        (category) => category.id === deck.deckType,
-                      )?.name ?? "-"}
+                      {allFormats.find((format) => format.id === deck.formatId)
+                        ?.displayName ?? "-"}
                     </TableCell>
                     <TableCell>
                       <CommanderColors
@@ -171,14 +169,14 @@ export const UserDecksCard = (props: {
                               <Edit fontSize="small" />
                             </IconButton>
                           </Tooltip>
-                          {!deck.isInactive && (
+                          {!deck.inactive && (
                             <Tooltip arrow title="mark inactive">
                               <IconButton
                                 size="small"
                                 onClick={() => {
                                   updateExistingDeck({
-                                    ...deck,
-                                    isInactive: true,
+                                    deckId: deck.id,
+                                    input: { inactive: true },
                                   });
                                 }}
                               >
@@ -190,18 +188,14 @@ export const UserDecksCard = (props: {
                             <Tooltip
                               arrow
                               title={
-                                allMatchParticipants.some(
-                                  (p) => p.deckId === deck.id,
-                                )
+                                hasDeckBeenUsed(deck.id)
                                   ? "cannot delete, used in match"
                                   : "delete deck"
                               }
                             >
                               <Box component="span">
                                 <IconButton
-                                  disabled={allMatchParticipants.some(
-                                    (p) => p.deckId === deck.id,
-                                  )}
+                                  disabled={hasDeckBeenUsed(deck.id)}
                                   size="small"
                                   onClick={() => deleteDeckById(deck.id)}
                                 >
