@@ -8,7 +8,7 @@ export const RequireAuth = ({ children }: PropsWithChildren<{}>) => {
   const { isAuthenticated, accessToken, isInitializing } = useAuth();
 
   if (isInitializing) {
-    <LoadingBackdrop />;
+    return <LoadingBackdrop />;
   }
 
   if (!isAuthenticated || !accessToken) {
