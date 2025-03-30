@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { PropsWithChildren } from "react";
 
 import {
@@ -20,10 +21,12 @@ const providers = [
   MatchProvider,
 ];
 
+const queryClient = new QueryClient();
+
 export const CombinedProvider = ({ children }: PropsWithChildren<{}>) => (
-  <>
+  <QueryClientProvider client={queryClient}>
     {providers.reduceRight((acc, Provider) => {
       return <Provider>{acc}</Provider>;
     }, children)}
-  </>
+  </QueryClientProvider>
 );
