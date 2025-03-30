@@ -1,4 +1,3 @@
-// components/RequireAuth.tsx
 import { Redirect } from "raviger";
 import { PropsWithChildren } from "react";
 
