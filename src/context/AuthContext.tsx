@@ -13,12 +13,13 @@ import {
 } from "react";
 
 import { AWS_COGNITO_CLIENT_ID } from "@/constants";
-import { cognitoClient } from "@/lib/cognitoClient";
+import { cognitoClient } from "@/lib";
 
 interface AuthContextType {
   userId: string | null;
   isAuthenticated: boolean;
   isAdmin: boolean;
+  isInitializing: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => void;
   accessToken: string | null;
@@ -32,6 +33,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
+  const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
     const storedAccessToken = localStorage.getItem("accessToken");
@@ -51,6 +53,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
         console.warn("failed to decode JWT during session restore");
       }
     }
+    setIsInitializing(false);
   }, []);
 
   const signIn = async (email: string, password: string) => {
@@ -149,6 +152,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
         signOut,
         refreshSession,
         isAdmin,
+        isInitializing,
         isAuthenticated: !!accessToken,
       }}
     >
