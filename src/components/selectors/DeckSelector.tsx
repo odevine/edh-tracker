@@ -30,7 +30,7 @@ export const DeckSelector = (props: {
         const user = getUserForDeck(deck.id);
         return {
           id: deck.id,
-          deckName: deck.displayName,
+          displayName: deck.displayName,
           color: getDeckUserColor(deck.id),
           userDisplayName: user?.displayName ?? "unknown user",
         };
@@ -60,7 +60,7 @@ export const DeckSelector = (props: {
       getOptionLabel={(option) => {
         const displayName =
           getUserForDeck(option?.id ?? "")?.displayName ?? "unknown user";
-        return `${displayName} - ${option?.deckName}`;
+        return `${displayName} - ${option?.displayName}`;
       }}
       value={selectedOption}
       onChange={(_event, newValue) => {
@@ -107,7 +107,7 @@ export const DeckSelector = (props: {
               variant="outlined"
               size="small"
               label={
-                <Tooltip title={option.deckName} placement="top" arrow>
+                <Tooltip title={option.displayName} placement="top" arrow>
                   <Box
                     sx={{
                       maxWidth: 120,
@@ -117,7 +117,7 @@ export const DeckSelector = (props: {
                       color: option.color,
                     }}
                   >
-                    {`${displayName} - ${option.deckName}`}
+                    {`${displayName} - ${option.displayName}`}
                   </Box>
                 </Tooltip>
               }
@@ -142,7 +142,7 @@ export const DeckSelector = (props: {
                 color: option.color,
               }}
             >
-              {`${displayName} - ${option.deckName}`}
+              {`${displayName} - ${option.displayName}`}
             </Typography>
           </MenuItem>
         );
