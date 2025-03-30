@@ -12,7 +12,7 @@ import {
 import { navigate } from "raviger";
 import { useState } from "react";
 
-import { useAuth } from "@/context";
+import { useAuth } from "@/hooks";
 
 export const LandingPage = (): JSX.Element => {
   const [accessRequestOpen, setAccessRequestOpen] = useState(false);

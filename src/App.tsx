@@ -7,7 +7,7 @@ import {
   RequireAuth,
   Toolbar,
 } from "@/components";
-import { useApp, useDeck, useMatch, useUser } from "@/context";
+import { useApp, useDeck, useMatch, useUser } from "@/hooks";
 import {
   DecksPage,
   LandingPage,

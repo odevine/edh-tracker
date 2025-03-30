@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { PropsWithChildren, createContext, useContext, useMemo } from "react";
+import { PropsWithChildren, createContext, useMemo } from "react";
 
-import { useApp, useAuth } from "@/context";
+import { useApp, useAuth } from "@/hooks";
 import { fetchWithAuth } from "@/logic";
 import { UpdateUserInput, User } from "@/types";
 
@@ -13,7 +13,9 @@ interface UserContextType {
   getFilteredUsers: (filters: { activeRecentOnly: boolean }) => User[];
 }
 
-const UserContext = createContext<UserContextType | undefined>(undefined);
+export const UserContext = createContext<UserContextType | undefined>(
+  undefined,
+);
 
 export const UserProvider = ({ children }: PropsWithChildren<{}>) => {
   const { userId, accessToken, isInitializing } = useAuth();
@@ -99,12 +101,4 @@ export const UserProvider = ({ children }: PropsWithChildren<{}>) => {
       {children}
     </UserContext.Provider>
   );
-};
-
-export const useUser = () => {
-  const ctx = useContext(UserContext);
-  if (!ctx) {
-    throw new Error("useUser must be used within a UserProvider");
-  }
-  return ctx;
 };

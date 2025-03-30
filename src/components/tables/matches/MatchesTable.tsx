@@ -12,10 +12,10 @@ import {
   useDeck,
   useFormat,
   useMatch,
+  useMatchesFilters,
   useTheme,
   useUser,
-} from "@/context";
-import { useMatchesFilters } from "@/hooks";
+} from "@/hooks";
 import { Match } from "@/types";
 
 interface MatchesTableProps {

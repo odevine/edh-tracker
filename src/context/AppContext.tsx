@@ -1,4 +1,4 @@
-import { PropsWithChildren, createContext, useContext, useState } from "react";
+import { PropsWithChildren, createContext, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import { IAppMessage } from "@/components";
@@ -9,7 +9,7 @@ interface AppContextType {
   deleteAppMessage: (messageId: string) => void;
 }
 
-const AppContext = createContext<AppContextType | undefined>(undefined);
+export const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider = ({ children }: PropsWithChildren<{}>) => {
   const [appMessages, setAppMessages] = useState<IAppMessage[]>([]);
@@ -41,12 +41,4 @@ export const AppProvider = ({ children }: PropsWithChildren<{}>) => {
       {children}
     </AppContext.Provider>
   );
-};
-
-export const useApp = () => {
-  const ctx = useContext(AppContext);
-  if (!ctx) {
-    throw new Error("useApp must be used within an AppProvider");
-  }
-  return ctx;
 };

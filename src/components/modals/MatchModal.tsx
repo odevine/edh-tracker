@@ -15,7 +15,7 @@ import { DatePicker } from "@mui/x-date-pickers";
 import { DateTime } from "luxon";
 import { useEffect, useMemo, useState } from "react";
 
-import { useAuth, useDeck, useFormat, useMatch } from "@/context";
+import { useAuth, useDeck, useFormat, useMatch } from "@/hooks";
 import { CreateMatchInput, Deck, UpdateMatchInput } from "@/types";
 
 interface NewMatchModalProps {

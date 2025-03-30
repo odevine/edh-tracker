@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 
-import { useAuth, useDeck, useFormat, useMatch } from "@/context";
+import { useAuth, useDeck, useFormat, useMatch } from "@/hooks";
 import { sortColors, useCommanderSearch } from "@/logic";
 import { CreateDeckInput, UpdateDeckInput } from "@/types";
 
