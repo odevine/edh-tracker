@@ -3,20 +3,18 @@ import { useRoutes } from "raviger";
 
 import {
   AppAlertList,
-  LoadingBackdrop,
-  RequireAuth,
-  Toolbar,
-} from "@/components";
-import { useApp, useDeck, useMatch, useUser } from "@/hooks";
-import {
   DecksPage,
   LandingPage,
+  LoadingBackdrop,
   LoginPage,
   MatchesPage,
   Profile,
+  RequireAuth,
+  Toolbar,
   ToolsPage,
   UsersPage,
-} from "@/pages";
+} from "@/components";
+import { useApp, useDeck, useMatch, useUser } from "@/hooks";
 
 const NotFoundPage = () => (
   <Stack sx={{ height: "100%" }} justifyContent="center" alignItems="center">
