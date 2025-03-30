@@ -19,22 +19,23 @@ export const DeckSelector = (props: {
 }) => {
   const { filterType, filterDeck, setFilterDeck, multi = false } = props;
   const { mode } = useTheme();
-  const { allDecks, getDeckUserColor, deckToUserMap } = useDeck();
+  const { allDecks, getDeckUserColor, getUserForDeck } = useDeck();
 
   // Generate the unique list of user options
   const deckOptions = useMemo(() => {
-    // Map ownerIDs to user profiles, filter out undefined, and assert the remaining profiles are defined
-    const decks = allDecks
-      .filter((deck) => filterType === "" || deck.deckType === filterType)
-      .sort((a, b) => (a.deckOwnerId < b.deckOwnerId ? -1 : 1))
-      .map((deck) => ({
-        id: deck.id,
-        deckName: deck.deckName,
-        color: getDeckUserColor(deck.id),
-      }));
-
-    return decks;
-  }, [allDecks, mode, filterType, getDeckUserColor]);
+    return allDecks
+      .filter((deck) => filterType === "" || deck.formatId === filterType)
+      .sort((a, b) => (a.userId < b.userId ? -1 : 1))
+      .map((deck) => {
+        const user = getUserForDeck(deck.id);
+        return {
+          id: deck.id,
+          deckName: deck.displayName,
+          color: getDeckUserColor(deck.id),
+          userDisplayName: user?.displayName ?? "unknown user",
+        };
+      });
+  }, [allDecks, mode, filterType, getDeckUserColor, getUserForDeck]);
 
   // Find the selected option(s) based on filterUser
   const selectedOption = useMemo(() => {
@@ -56,9 +57,11 @@ export const DeckSelector = (props: {
       size="small"
       multiple={multi}
       options={deckOptions}
-      getOptionLabel={(option) =>
-        `${deckToUserMap.get(option?.id ?? "")?.displayName} - ${option?.deckName}`
-      }
+      getOptionLabel={(option) => {
+        const displayName =
+          getUserForDeck(option?.id ?? "")?.displayName ?? "unknown user";
+        return `${displayName} - ${option?.deckName}`;
+      }}
       value={selectedOption}
       onChange={(_event, newValue) => {
         if (multi) {
@@ -91,8 +94,13 @@ export const DeckSelector = (props: {
         />
       )}
       renderTags={(value, getTagProps) =>
-        value.map((option, index) =>
-          option ? (
+        value.map((option, index) => {
+          if (!option) {
+            return null;
+          }
+          const displayName =
+            getUserForDeck(option.id ?? "")?.displayName ?? "unknown user";
+          return (
             <Chip
               {...getTagProps({ index })}
               key={option.id}
@@ -109,16 +117,23 @@ export const DeckSelector = (props: {
                       color: option.color,
                     }}
                   >
-                    {`${deckToUserMap.get(option?.id ?? "")?.displayName} - ${option?.deckName}`}
+                    {`${displayName} - ${option.deckName}`}
                   </Box>
                 </Tooltip>
               }
             />
-          ) : null,
-        )
+          );
+        })
       }
-      renderOption={(props, option) =>
-        option ? (
+      renderOption={(props, option) => {
+        if (!option) {
+          return null;
+        }
+
+        const displayName =
+          getUserForDeck(option?.id ?? "")?.displayName ?? "unknown user";
+
+        return (
           <MenuItem {...props} key={option.id}>
             <Typography
               sx={{
@@ -127,11 +142,11 @@ export const DeckSelector = (props: {
                 color: option.color,
               }}
             >
-              {`${deckToUserMap.get(option?.id ?? "")?.displayName} - ${option?.deckName}`}
+              {`${displayName} - ${option.deckName}`}
             </Typography>
           </MenuItem>
-        ) : null
-      }
+        );
+      }}
       fullWidth
       sx={{ minWidth: 140 }}
     />

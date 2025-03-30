@@ -3,7 +3,7 @@ import { PropsWithChildren, createContext, useContext, useMemo } from "react";
 
 import { useApp, useAuth, useTheme, useUser } from "@/context";
 import { fetchWithAuth } from "@/logic";
-import { CreateDeckInput, Deck, UpdateDeckInput } from "@/types";
+import { CreateDeckInput, Deck, UpdateDeckInput, User } from "@/types";
 
 interface DeckContextType {
   allDecks: Deck[];
@@ -16,6 +16,7 @@ interface DeckContextType {
   }) => Promise<void>;
   deleteDeckById: (deckId: string) => Promise<void>;
   getDeckUserColor: (deckId: string) => string;
+  getUserForDeck: (deckId: string) => User | undefined;
 }
 
 const DeckContext = createContext<DeckContextType | undefined>(undefined);
@@ -143,6 +144,15 @@ export const DeckProvider = ({ children }: PropsWithChildren<{}>) => {
     return (deckId: string) => map.get(deckId) ?? "inherit";
   }, [allDecks, allUserProfiles, mode]);
 
+  const getUserForDeck = useMemo(() => {
+    const map = new Map<string, User>();
+    allDecks.forEach((deck) => {
+      const user = allUserProfiles.find((u) => u.id === deck.userId);
+      if (user) map.set(deck.id, user);
+    });
+    return (deckId: string) => map.get(deckId);
+  }, [allDecks, allUserProfiles]);
+
   return (
     <DeckContext.Provider
       value={{
@@ -153,6 +163,7 @@ export const DeckProvider = ({ children }: PropsWithChildren<{}>) => {
         updateExistingDeck,
         deleteDeckById,
         getDeckUserColor,
+        getUserForDeck,
       }}
     >
       {children}
