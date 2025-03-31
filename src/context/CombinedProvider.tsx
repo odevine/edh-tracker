@@ -14,11 +14,11 @@ import {
 const providers = [
   AuthProvider,
   AppProvider,
+  MatchProvider,
   UserProvider,
   ThemeProvider,
   FormatProvider,
   DeckProvider,
-  MatchProvider,
 ];
 
 const queryClient = new QueryClient();

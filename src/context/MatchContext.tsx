@@ -14,12 +14,14 @@ interface MatchContextType {
     updates: UpdateMatchInput;
   }) => Promise<void>;
   deleteMatch: (matchId: string) => Promise<void>;
-  hasDeckBeenUsed: (deckId: string | undefined) => boolean;
   getFilteredMatches: (filters: {
     formatId?: string;
     deckIds?: string[];
     userIds?: string[];
   }) => Match[];
+  // non-match helper functions
+  hasDeckBeenUsed: (deckId: string | undefined) => boolean;
+  getUsersActiveInLast60Days: () => string[];
 }
 
 export const MatchContext = createContext<MatchContextType | undefined>(
@@ -182,6 +184,26 @@ export const MatchProvider = ({ children }: PropsWithChildren<{}>) => {
     });
   };
 
+  const getUsersActiveInLast60Days = useMemo(() => {
+    const SIXTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+    const now = new Date().getTime();
+
+    const recentUserIds = new Set<string>();
+
+    allMatches.forEach((match) => {
+      const matchDate = new Date(match.datePlayed).getTime();
+      if (now - matchDate <= SIXTY_DAYS_MS) {
+        match.matchParticipants?.forEach((p) => {
+          if (p.userId) {
+            recentUserIds.add(p.userId);
+          }
+        });
+      }
+    });
+
+    return () => Array.from(recentUserIds);
+  }, [allMatches]);
+
   return (
     <MatchContext.Provider
       value={{
@@ -190,8 +212,9 @@ export const MatchProvider = ({ children }: PropsWithChildren<{}>) => {
         createNewMatch,
         updateMatchWithParticipants,
         deleteMatch,
-        hasDeckBeenUsed,
         getFilteredMatches,
+        hasDeckBeenUsed,
+        getUsersActiveInLast60Days,
       }}
     >
       {children}
