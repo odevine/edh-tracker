@@ -7,7 +7,13 @@ import {
   UsersTableToolbar,
   getUsersColumns,
 } from "@/components";
-import { useFormat, useTheme, useUser, useUsersFilters } from "@/hooks";
+import {
+  useFormat,
+  useMatch,
+  useTheme,
+  useUser,
+  useUsersFilters,
+} from "@/hooks";
 import { User, UserWithStats } from "@/types";
 import { computeUserStats } from "@/utils";
 
@@ -16,7 +22,8 @@ interface IUsersTableProps {
 }
 
 export const UsersTable = ({ customButtons }: IUsersTableProps) => {
-  const { allUserProfiles, usersLoading, getFilteredUsers } = useUser();
+  const { allUserProfiles, usersLoading } = useUser();
+  const { getUsersActiveInLast60Days } = useMatch();
   const { allFormats } = useFormat();
   const { mode } = useTheme();
 
@@ -51,13 +58,25 @@ export const UsersTable = ({ customButtons }: IUsersTableProps) => {
   const columns = useMemo(() => getUsersColumns(), []);
 
   const filteredUsers: UserWithStats[] = useMemo(() => {
-    const baseUsers = getFilteredUsers({ activeRecentOnly });
+    let baseUsers = allUserProfiles;
+    if (activeRecentOnly) {
+      const activeUserIds = getUsersActiveInLast60Days();
+      baseUsers = allUserProfiles.filter((user) =>
+        activeUserIds.includes(user.id),
+      );
+    }
 
     return computeUserStats(baseUsers, {
       includeUnranked,
       formatId: filterFormat,
     });
-  }, [includeUnranked, filterFormat, activeRecentOnly]);
+  }, [
+    includeUnranked,
+    filterFormat,
+    activeRecentOnly,
+    allUserProfiles,
+    getUsersActiveInLast60Days,
+  ]);
 
   const filterDescription = useMemo(() => {
     const formatName = allFormats.find(
@@ -89,7 +108,7 @@ export const UsersTable = ({ customButtons }: IUsersTableProps) => {
         }}
         pageSizeOptions={[15, 25, 50]}
         getRowHeight={() => "auto"}
-        rows={filteredUsers}
+        rows={usersLoading ? [] : filteredUsers}
         columns={columns}
         sx={userColorClasses}
         slots={{

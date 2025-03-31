@@ -11,7 +11,7 @@ export const useUsersFilters = () => {
   );
   const [activeRecentOnly, setActiveRecentOnly] = usePersistentState<boolean>(
     "users_active_recent_only",
-    false,
+    true,
   );
 
   return {

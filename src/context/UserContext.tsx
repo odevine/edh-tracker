@@ -10,7 +10,6 @@ interface UserContextType {
   allUserProfiles: User[];
   updateUserProfile: (data: UpdateUserInput) => Promise<void>;
   usersLoading: boolean;
-  getFilteredUsers: (filters: { activeRecentOnly: boolean }) => User[];
 }
 
 export const UserContext = createContext<UserContextType | undefined>(
@@ -70,30 +69,11 @@ export const UserProvider = ({ children }: PropsWithChildren<{}>) => {
     },
   });
 
-  // returns a list of decks based on provided filters
-  const getFilteredUsers = ({
-    activeRecentOnly,
-  }: {
-    activeRecentOnly: boolean;
-  }): User[] =>
-    allUsers.filter((user) => {
-      if (!activeRecentOnly) return true;
-
-      const lastOnline = user.lastOnline ? new Date(user.lastOnline) : null;
-      const now = new Date();
-      const daysSinceLastOnline =
-        lastOnline &&
-        (now.getTime() - lastOnline.getTime()) / (1000 * 60 * 60 * 24);
-
-      return daysSinceLastOnline != null ? daysSinceLastOnline <= 30 : false;
-    });
-
   return (
     <UserContext.Provider
       value={{
         currentUserProfile,
         updateUserProfile,
-        getFilteredUsers,
         allUserProfiles: allUsers,
         usersLoading: isLoading,
       }}
