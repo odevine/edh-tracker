@@ -4,16 +4,16 @@ import {
   APIGatewayProxyResultV2,
 } from "aws-lambda";
 
-import { getAuthContext } from "@/functions/common/auth";
-import { parseJsonBody } from "@/functions/common/parseJson";
-import { createResponse } from "@/functions/common/response";
 import {
   createDeck,
   deleteDeck,
   getDeck,
   listDecks,
   updateDeck,
-} from "@/functions/deck/deckService";
+} from "@/api/deck/deckService";
+import { getAuthContext } from "@/api/utils/auth";
+import { parseJsonBody } from "@/api/utils/parseJson";
+import { createResponse } from "@/api/utils/response";
 import { CreateDeckInput, UpdateDeckInput } from "@/types";
 
 export const deckHandler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (

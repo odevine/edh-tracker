@@ -6,7 +6,7 @@ import {
   getUser,
   listUsers,
   updateUser,
-} from "@/functions/user/userService";
+} from "@/api/user/userService";
 import { createTestUser } from "@/tests/testData";
 
 const baseUser = createTestUser("user-test-user-1");

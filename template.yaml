@@ -123,7 +123,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub "edhtracker-user-function-${Env}"
-      CodeUri: src/functions/user/
+      CodeUri: src/api/user/
       Handler: userHandler.userHandler
       Description: "Handles REST API operations for user profiles."
       MemorySize: 128
@@ -178,7 +178,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub "edhtracker-format-function-${Env}"
-      CodeUri: src/functions/format/
+      CodeUri: src/api/format/
       Handler: formatHandler.formatHandler
       Description: "Handles REST API operations for formats."
       MemorySize: 128
@@ -233,7 +233,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub "edhtracker-deck-function-${Env}"
-      CodeUri: src/functions/deck/
+      CodeUri: src/api/deck/
       Handler: deckHandler.deckHandler
       Description: "Handles REST API operations for decks."
       MemorySize: 128
@@ -296,7 +296,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub "edhtracker-match-function-${Env}"
-      CodeUri: src/functions/match/
+      CodeUri: src/api/match/
       Handler: matchHandler.matchHandler
       Description: "Handles REST API operations for matches and participants."
       MemorySize: 128

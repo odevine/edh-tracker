@@ -1,14 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { reverseStatsFromMatch } from "@/functions/common/statUtils";
-import { createDeck, deleteDeck, getDeck } from "@/functions/deck/deckService";
+import { createDeck, deleteDeck, getDeck } from "@/api/deck/deckService";
 import {
   createMatch,
   deleteMatch,
   getMatch,
   updateMatch,
-} from "@/functions/match/matchService";
-import { createUser, deleteUser, getUser } from "@/functions/user/userService";
+} from "@/api/match/matchService";
+import { createUser, deleteUser, getUser } from "@/api/user/userService";
+import { reverseStatsFromMatch } from "@/api/utils/statUtils";
 import {
   createMatchInput,
   createTestDeck,
