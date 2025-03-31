@@ -18,6 +18,9 @@ Parameters:
     Type: String
   UserPoolClientId:
     Type: String
+  DomainName:
+    Type: String
+    Description: "The custom domain name for the CloudFront distribution (e.g., edh.devine.dev or edh-dev.devine.dev)"
 
 Globals:
   Function:
@@ -31,6 +34,76 @@ Globals:
         COGNITO_USER_POOL_ID: !Ref UserPoolId
 
 Resources:
+  # ----- OAC -----
+  FrontendOriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub "edhtracker-oac-${Env}"
+        Description: Access control for CloudFront to S3
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  # ----- S3 BUCKET -----
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub edhtracker-frontend-${Env}
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: index.html
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+    DeletionPolicy: Retain
+
+  FrontendBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref FrontendBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowCloudFrontServicePrincipalReadOnly
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub "${FrontendBucket.Arn}/*"
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${FrontendDistribution}"
+
+  # ----- CLOUDFRONT -----
+  FrontendDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Aliases:
+          - !Ref DomainName
+        Origins:
+          - Id: S3Origin
+            DomainName: !GetAtt FrontendBucket.RegionalDomainName
+            S3OriginConfig: {}
+            OriginAccessControlId: !GetAtt FrontendOriginAccessControl.Id
+        Enabled: true
+        DefaultRootObject: index.html
+        DefaultCacheBehavior:
+          TargetOriginId: S3Origin
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods: [GET, HEAD]
+          ForwardedValues:
+            QueryString: false
+            Cookies:
+              Forward: none
+        ViewerCertificate:
+          AcmCertificateArn: arn:aws:acm:us-east-1:471112850924:certificate/19698d67-7f6d-437b-92e1-7341aebd420a
+          SslSupportMethod: sni-only
+          MinimumProtocolVersion: TLSv1.2_2021
+
   # ----- TABLES -----
   FormatTable:
     Type: AWS::DynamoDB::Table
@@ -107,7 +180,9 @@ Resources:
           - X-Api-Key
           - X-Amz-Security-Token
         AllowOrigins:
-          - !Ref AllowedOrigin
+          Fn::Split:
+            - ","
+            - !Ref AllowedOrigin
       Auth:
         Authorizers:
           CognitoAuthorizer:
@@ -371,6 +446,14 @@ Outputs:
   UserPoolClientId:
     Description: "Cognito User Pool Client ID (injected via parameter)"
     Value: !Ref UserPoolClientId
+
+  FrontendURL:
+    Description: "CloudFront URL for the frontend"
+    Value: !Sub "https://${FrontendDistribution.DomainName}"
+
+  FrontendDistributionId:
+    Description: "CloudFront Distribution ID"
+    Value: !Ref FrontendDistribution
 
   TrackerApiUrl:
     Description: "URL of the deployed User REST API."
