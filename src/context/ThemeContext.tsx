@@ -8,88 +8,77 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import type {} from "@mui/x-data-grid/themeAugmentation";
-import {
-  PropsWithChildren,
-  createContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { PropsWithChildren, createContext, useEffect, useMemo } from "react";
 
 import { useUser } from "@/hooks";
+import { usePersistentState } from "@/hooks/usePersistentState";
 
 export const ThemeContext = createContext({
   toggleTheme: () => {},
-  mode: "dark",
+  mode: "dark" as PaletteMode,
+  setLightColor: (_: string) => {},
+  setDarkColor: (_: string) => {},
 });
 
 export const ThemeProvider = ({ children }: PropsWithChildren) => {
   const { currentUserProfile } = useUser();
-
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
-  const previousThemeMode = localStorage.getItem("theme");
-  let defaultTheme = "dark";
 
-  if (!prefersDarkMode) {
-    defaultTheme = "light";
-  }
+  const defaultLightPrimary = "#1976d2";
+  const defaultDarkPrimary = "#90caf9";
 
-  if (previousThemeMode) {
-    defaultTheme = previousThemeMode;
-  }
+  const [mode, setMode] = usePersistentState<PaletteMode>(
+    "theme",
+    prefersDarkMode ? "dark" : "light",
+  );
 
-  const [mode, setMode] = useState<PaletteMode>(defaultTheme as PaletteMode);
+  const [lightColor, setLightColor] = usePersistentState<string>(
+    "lightThemeColor",
+    currentUserProfile?.lightThemeColor ?? defaultLightPrimary,
+  );
+
+  const [darkColor, setDarkColor] = usePersistentState<string>(
+    "darkThemeColor",
+    currentUserProfile?.darkThemeColor ?? defaultDarkPrimary,
+  );
 
   useEffect(() => {
-    // Save the current theme in localStorage
-    localStorage.setItem("theme", mode);
-  }, [mode]);
+    if (currentUserProfile?.lightThemeColor) {
+      setLightColor(currentUserProfile.lightThemeColor);
+    }
+    if (currentUserProfile?.darkThemeColor) {
+      setDarkColor(currentUserProfile.darkThemeColor);
+    }
+  }, [currentUserProfile]);
 
   const colorMode = useMemo(
     () => ({
       toggleTheme: () => {
-        setMode((prevMode) => (prevMode === "light" ? "dark" : "light"));
+        setMode(mode === "light" ? "dark" : "light");
       },
       mode,
+      setLightColor,
+      setDarkColor,
     }),
-    [mode],
+    [mode, setLightColor, setDarkColor],
   );
 
-  // Function to generate scrollbar styles
-  const scrollbarStyles = (mode: PaletteMode) => ({
-    html: {
-      "*::-webkit-scrollbar": {
-        width: 8,
-        height: 8,
-      },
-      "*::-webkit-scrollbar-track": {
-        backgroundColor: mode === "light" ? "#ccc9c3" : "#2d2a2e",
-      },
-      "*::-webkit-scrollbar-thumb": {
-        backgroundColor: mode === "light" ? "#999692" : "#524c54",
-        minHeight: 24,
-        minWidth: 24,
-      },
-      "*::-webkit-scrollbar-thumb:focus": {
-        backgroundColor: mode === "light" ? "#656461" : "#776e7a",
-      },
-      "*::-webkit-scrollbar-thumb:active": {
-        backgroundColor: mode === "light" ? "#656461" : "#776e7a",
-      },
-      "*::-webkit-scrollbar-thumb:hover": {
-        backgroundColor: mode === "light" ? "#656461" : "#776e7a",
-      },
-    },
-  });
+  // Consolidated theme colors based on mode
+  const themeColors = useMemo(() => {
+    return {
+      primary: mode === "light" ? lightColor : darkColor,
+      secondary: mode === "light" ? lightColor : darkColor,
+      backgroundDefault: mode === "light" ? "#fdf9f3" : "#221f22",
+      backgroundPaper: mode === "light" ? "#fffcf4" : "#2d2a2e",
+      textPrimary: mode === "light" ? "#2c292d" : "#fafbfb",
+      textSecondary: mode === "light" ? "#514b53" : "#c7c7c7",
+      scrollbarColor: mode === "light" ? "#656461" : "#776e7a",
+      trackColor: mode === "light" ? "#ccc9c3" : "#2d2a2e",
+      thumbColor: mode === "light" ? "#999692" : "#524c54",
+    };
+  }, [mode, lightColor, darkColor]);
 
-  const defaultLightPrimary = "#1976d2";
-  const defaultDarkPrimary = "#90caf9";
-  const lightThemeColor =
-    currentUserProfile?.lightThemeColor || defaultLightPrimary;
-  const darkThemeColor =
-    currentUserProfile?.darkThemeColor || defaultDarkPrimary;
-
-  // MUI Theme configuration
+  // Final MUI theme
   const muiTheme = useMemo(
     () =>
       createTheme({
@@ -101,24 +90,44 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
         },
         palette: {
           mode,
-          primary: {
-            main: mode === "light" ? lightThemeColor : darkThemeColor,
-          },
-          secondary: {
-            main: mode === "light" ? lightThemeColor : darkThemeColor,
-          },
+          primary: { main: themeColors.primary },
+          secondary: { main: themeColors.secondary },
           background: {
-            default: mode === "light" ? "#fdf9f3" : "#221f22",
-            paper: mode === "light" ? "#fffcf4" : "#2d2a2e",
+            default: themeColors.backgroundDefault,
+            paper: themeColors.backgroundPaper,
           },
           text: {
-            primary: mode === "light" ? "#2c292d" : "#fafbfb",
-            secondary: mode === "light" ? "#514b53" : "#c7c7c7",
+            primary: themeColors.textPrimary,
+            secondary: themeColors.textSecondary,
           },
         },
         components: {
           MuiCssBaseline: {
-            styleOverrides: scrollbarStyles(mode),
+            styleOverrides: {
+              html: {
+                "*::-webkit-scrollbar": {
+                  width: 8,
+                  height: 8,
+                },
+                "*::-webkit-scrollbar-track": {
+                  backgroundColor: themeColors.trackColor,
+                },
+                "*::-webkit-scrollbar-thumb": {
+                  backgroundColor: themeColors.thumbColor,
+                  minHeight: 24,
+                  minWidth: 24,
+                },
+                "*::-webkit-scrollbar-thumb:focus": {
+                  backgroundColor: themeColors.scrollbarColor,
+                },
+                "*::-webkit-scrollbar-thumb:active": {
+                  backgroundColor: themeColors.scrollbarColor,
+                },
+                "*::-webkit-scrollbar-thumb:hover": {
+                  backgroundColor: themeColors.scrollbarColor,
+                },
+              },
+            },
           },
           MuiButton: {
             styleOverrides: {
@@ -158,7 +167,7 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
           },
         },
       }),
-    [mode, lightThemeColor, darkThemeColor],
+    [mode, themeColors],
   );
 
   return (
@@ -167,14 +176,10 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
         <CssBaseline />
         <GlobalStyles
           styles={{
-            html: {
-              height: "100%",
-            },
+            html: { height: "100%" },
             body: {
               height: "100%",
-              "#root": {
-                height: "100%",
-              },
+              "#root": { height: "100%" },
             },
           }}
         />
