@@ -4,16 +4,16 @@ import {
   APIGatewayProxyResultV2,
 } from "aws-lambda";
 
-import { getAuthContext } from "@/functions/common/auth";
-import { parseJsonBody } from "@/functions/common/parseJson";
-import { createResponse } from "@/functions/common/response";
 import {
   createFormat,
   deleteFormat,
   getFormat,
   listFormats,
   updateFormat,
-} from "@/functions/format/formatService";
+} from "@/api/format/formatService";
+import { getAuthContext } from "@/api/utils/auth";
+import { parseJsonBody } from "@/api/utils/parseJson";
+import { createResponse } from "@/api/utils/response";
 import { CreateFormatInput, UpdateFormatInput } from "@/types";
 
 export const formatHandler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (

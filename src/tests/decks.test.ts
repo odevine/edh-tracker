@@ -6,8 +6,8 @@ import {
   getDeck,
   listDecks,
   updateDeck,
-} from "@/functions/deck/deckService";
-import { createUser, deleteUser } from "@/functions/user/userService";
+} from "@/api/deck/deckService";
+import { createUser, deleteUser } from "@/api/user/userService";
 import { createTestDeck, createTestUser } from "@/tests/testData";
 
 const userId = "decks-test-user-1";

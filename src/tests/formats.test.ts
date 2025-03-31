@@ -6,7 +6,7 @@ import {
   getFormat,
   listFormats,
   updateFormat,
-} from "@/functions/format/formatService";
+} from "@/api/format/formatService";
 import { createTestFormat } from "@/tests/testData";
 
 const baseFormat = createTestFormat("format-test-format-1");

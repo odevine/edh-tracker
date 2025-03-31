@@ -1,8 +1,8 @@
 import { randomUUID } from "crypto";
 
-import { dynamo } from "@/functions/common/db";
-import { requireEnv } from "@/functions/common/env";
-import { buildUpdateExpression } from "@/functions/common/update";
+import { dynamo } from "@/api/utils/db";
+import { requireEnv } from "@/api/utils/env";
+import { buildUpdateExpression } from "@/api/utils/update";
 import { CreateDeckInput, Deck, UpdateDeckInput } from "@/types";
 
 const DECK_TABLE = requireEnv("DECK_TABLE");

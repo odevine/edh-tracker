@@ -4,16 +4,16 @@ import {
   APIGatewayProxyResultV2,
 } from "aws-lambda";
 
-import { getAuthContext } from "@/functions/common/auth";
-import { parseJsonBody } from "@/functions/common/parseJson";
-import { createResponse } from "@/functions/common/response";
 import {
   createMatch,
   deleteMatch,
   getMatch,
   listMatches,
   updateMatch,
-} from "@/functions/match/matchService";
+} from "@/api/match/matchService";
+import { getAuthContext } from "@/api/utils/auth";
+import { parseJsonBody } from "@/api/utils/parseJson";
+import { createResponse } from "@/api/utils/response";
 import { CreateMatchInput, UpdateMatchInput } from "@/types";
 
 export const matchHandler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
