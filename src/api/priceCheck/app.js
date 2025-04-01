@@ -1,3 +1,7 @@
+// this lambda function was originally used for the $300 format, but will likely not be used for the new
+// bracket system and removed as a result. keeping it here for the time being until I figure out what to
+// do with it
+
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const {
   GetCommand,
@@ -41,11 +45,20 @@ const findLowestUsdPrice = (cards) => {
   cards.forEach((card) => {
     // Parse the available prices and find the lowest
     const usdPrice = card.prices.usd ? parseFloat(card.prices.usd) : null;
-    const usdFoilPrice = card.prices.usd_foil ? parseFloat(card.prices.usd_foil) : null;
-    const usdEtchedPrice = card.prices.usd_etched ? parseFloat(card.prices.usd_etched) : null;
-    const availablePrices = [usdPrice, usdFoilPrice, usdEtchedPrice].filter(price => price !== null);
+    const usdFoilPrice = card.prices.usd_foil
+      ? parseFloat(card.prices.usd_foil)
+      : null;
+    const usdEtchedPrice = card.prices.usd_etched
+      ? parseFloat(card.prices.usd_etched)
+      : null;
+    const availablePrices = [usdPrice, usdFoilPrice, usdEtchedPrice].filter(
+      (price) => price !== null,
+    );
 
-    if (!ILLEGAL_SETS.includes(card.set.toLowerCase()) && availablePrices.length > 0) {
+    if (
+      !ILLEGAL_SETS.includes(card.set.toLowerCase()) &&
+      availablePrices.length > 0
+    ) {
       const lowestPrice = Math.min(...availablePrices);
 
       // Update the lowest price data if needed
