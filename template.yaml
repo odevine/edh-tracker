@@ -179,10 +179,7 @@ Resources:
           - X-Amz-Date
           - X-Api-Key
           - X-Amz-Security-Token
-        AllowOrigins:
-          Fn::Split:
-            - ","
-            - !Ref AllowedOrigin
+        AllowOrigins: !Ref AllowedOrigin
       Auth:
         Authorizers:
           CognitoAuthorizer:
