@@ -106,6 +106,8 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("userId");
+    localStorage.removeItem("lightThemeColor");
+    localStorage.removeItem("darkThemeColor");
     setAccessToken(null);
     setRefreshToken(null);
     setUserId(null);
