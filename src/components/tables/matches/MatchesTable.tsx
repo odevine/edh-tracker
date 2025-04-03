@@ -32,7 +32,7 @@ export const MatchesTable = ({
   const { allDecks } = useDeck();
   const { allFormats } = useFormat();
   const { matchesLoading, getFilteredMatches } = useMatch();
-  const { allUserProfiles } = useUser();
+  const { allUsers } = useUser();
   const { isAdmin } = useAuth();
   const { mode } = useTheme();
 
@@ -60,7 +60,7 @@ export const MatchesTable = ({
 
   const userColorClasses = useMemo(() => {
     const styles: Record<string, any> = {};
-    allUserProfiles.forEach((user) => {
+    allUsers.forEach((user) => {
       const color =
         mode === "light" ? user.lightThemeColor : user.darkThemeColor;
       if (color) {
@@ -74,7 +74,7 @@ export const MatchesTable = ({
       }
     });
     return styles;
-  }, [allUserProfiles, mode]);
+  }, [allUsers, mode]);
 
   const filteredMatches = useMemo(() => {
     return getFilteredMatches({

@@ -7,7 +7,7 @@ import { fetchWithAuth } from "@/utils";
 
 interface UserContextType {
   currentUserProfile: User | null;
-  allUserProfiles: User[];
+  allUsers: User[];
   updateUserProfile: (data: UpdateUserInput) => Promise<void>;
   usersLoading: boolean;
 }
@@ -74,7 +74,7 @@ export const UserProvider = ({ children }: PropsWithChildren<{}>) => {
       value={{
         currentUserProfile,
         updateUserProfile,
-        allUserProfiles: allUsers,
+        allUsers,
         usersLoading: isLoading,
       }}
     >

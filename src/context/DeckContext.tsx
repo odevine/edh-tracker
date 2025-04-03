@@ -32,7 +32,7 @@ export const DeckContext = createContext<DeckContextType | undefined>(
 export const DeckProvider = ({ children }: PropsWithChildren<{}>) => {
   const { userId, accessToken, isInitializing } = useAuth();
   const { addAppMessage } = useApp();
-  const { allUserProfiles } = useUser();
+  const { allUsers } = useUser();
   const { mode } = useTheme();
   const queryClient = useQueryClient();
 
@@ -139,7 +139,7 @@ export const DeckProvider = ({ children }: PropsWithChildren<{}>) => {
   const getDeckUserColor = useMemo(() => {
     const map = new Map<string, string>();
     for (const deck of allDecks) {
-      const user = allUserProfiles.find((u) => u.id === deck.userId);
+      const user = allUsers.find((u) => u.id === deck.userId);
       if (!user) {
         continue;
       }
@@ -150,17 +150,17 @@ export const DeckProvider = ({ children }: PropsWithChildren<{}>) => {
       map.set(deck.id, color);
     }
     return (deckId: string) => map.get(deckId) ?? "inherit";
-  }, [allDecks, allUserProfiles, mode]);
+  }, [allDecks, allUsers, mode]);
 
   // returns the user profile a given deck id
   const getUserForDeck = useMemo(() => {
     const map = new Map<string, User>();
     allDecks.forEach((deck) => {
-      const user = allUserProfiles.find((u) => u.id === deck.userId);
+      const user = allUsers.find((u) => u.id === deck.userId);
       if (user) map.set(deck.id, user);
     });
     return (deckId: string) => map.get(deckId);
-  }, [allDecks, allUserProfiles]);
+  }, [allDecks, allUsers]);
 
   // returns a list of decks based on provided filters
   const getFilteredDecks = ({

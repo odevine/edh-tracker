@@ -22,7 +22,7 @@ interface IDecksTableProps {
 }
 
 export const DecksTable = ({ customButtons }: IDecksTableProps) => {
-  const { allUserProfiles } = useUser();
+  const { allUsers } = useUser();
   const { getFilteredDecks, decksLoading } = useDeck();
   const { allFormats } = useFormat();
   const { mode } = useTheme();
@@ -44,8 +44,8 @@ export const DecksTable = ({ customButtons }: IDecksTableProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
 
   const userProfileMap = useMemo(
-    () => new Map(allUserProfiles.map((profile) => [profile.id, profile])),
-    [allUserProfiles],
+    () => new Map(allUsers.map((profile) => [profile.id, profile])),
+    [allUsers],
   );
 
   const userColorClasses = useMemo(() => {
@@ -100,9 +100,7 @@ export const DecksTable = ({ customButtons }: IDecksTableProps) => {
     }
     clauses.push("decks");
     if (filterUser) {
-      const userProfile = allUserProfiles.find(
-        (profile) => profile.id === filterUser,
-      );
+      const userProfile = allUsers.find((profile) => profile.id === filterUser);
       if (userProfile) {
         clauses.push(`owned by ${userProfile.displayName}`);
       }
@@ -124,7 +122,7 @@ export const DecksTable = ({ customButtons }: IDecksTableProps) => {
     filterColor,
     includeInactive,
     includeUnranked,
-    allUserProfiles,
+    allUsers,
   ]);
 
   return (

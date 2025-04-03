@@ -15,12 +15,12 @@ import { getUserStats } from "@/utils";
 export const Profile = (props: { profileId: string }): JSX.Element => {
   const { profileId } = props;
   const { userId } = useAuth();
-  const { allUserProfiles, usersLoading } = useUser();
+  const { allUsers, usersLoading } = useUser();
   const { mode } = useTheme();
   const { allDecks } = useDeck();
   const { allMatches } = useMatch();
 
-  const currentProfile = allUserProfiles.filter(
+  const currentProfile = allUsers.filter(
     (profile) => profile.id === profileId,
   )[0];
   const ownUser = profileId === userId;
