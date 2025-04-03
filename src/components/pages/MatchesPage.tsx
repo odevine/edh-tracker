@@ -25,7 +25,10 @@ export const MatchesPage = (): JSX.Element => {
             add match
           </Button>,
         ]}
-        onEdit={(match) => setEditingMatch(match)}
+        onEdit={(match) => {
+          setEditingMatch(match);
+          setModalOpen(true);
+        }}
         onDelete={(match) => {
           if (confirm(`Are you sure you want to delete "${match.id}"?`)) {
             deleteMatch(match.id);

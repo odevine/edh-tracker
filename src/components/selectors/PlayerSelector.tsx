@@ -20,7 +20,7 @@ export const PlayerSelector = (props: {
   const { filterUser, setFilterUser, multi = false } = props;
   const { mode } = useTheme();
   const { allDecks } = useDeck();
-  const { allUserProfiles } = useUser();
+  const { allUsers } = useUser();
 
   // Generate the unique list of user options
   const userOptions = useMemo(() => {
@@ -29,9 +29,7 @@ export const PlayerSelector = (props: {
 
     // Map ownerIDs to user profiles, filter out undefined, and assert the remaining profiles are defined
     const users = uniqueOwnerIDs
-      .map((ownerId) =>
-        allUserProfiles.find((profile) => profile.id === ownerId),
-      )
+      .map((ownerId) => allUsers.find((profile) => profile.id === ownerId))
       .filter((profile): profile is User => profile !== undefined)
       .map((profile) => ({
         id: profile.id,
@@ -41,7 +39,7 @@ export const PlayerSelector = (props: {
       }));
 
     return users;
-  }, [allDecks, allUserProfiles, mode]);
+  }, [allDecks, allUsers, mode]);
 
   // Find the selected option(s) based on filterUser
   const selectedOption = useMemo(() => {

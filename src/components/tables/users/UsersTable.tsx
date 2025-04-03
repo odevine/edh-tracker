@@ -22,7 +22,7 @@ interface IUsersTableProps {
 }
 
 export const UsersTable = ({ customButtons }: IUsersTableProps) => {
-  const { allUserProfiles, usersLoading } = useUser();
+  const { allUsers, usersLoading } = useUser();
   const { getUsersActiveInLast60Days } = useMatch();
   const { allFormats } = useFormat();
   const { mode } = useTheme();
@@ -41,7 +41,7 @@ export const UsersTable = ({ customButtons }: IUsersTableProps) => {
 
   const userColorClasses = useMemo(() => {
     const styles: Record<string, any> = {};
-    allUserProfiles.forEach((user) => {
+    allUsers.forEach((user) => {
       const userColor =
         mode === "light" ? user.lightThemeColor : user.darkThemeColor;
       styles[`.user-row-${user.id}`] = {
@@ -53,17 +53,15 @@ export const UsersTable = ({ customButtons }: IUsersTableProps) => {
       };
     });
     return styles;
-  }, [allUserProfiles, mode]);
+  }, [allUsers, mode]);
 
   const columns = useMemo(() => getUsersColumns(), []);
 
   const filteredUsers: UserWithStats[] = useMemo(() => {
-    let baseUsers = allUserProfiles;
+    let baseUsers = allUsers;
     if (activeRecentOnly) {
       const activeUserIds = getUsersActiveInLast60Days();
-      baseUsers = allUserProfiles.filter((user) =>
-        activeUserIds.includes(user.id),
-      );
+      baseUsers = allUsers.filter((user) => activeUserIds.includes(user.id));
     }
 
     return computeUserStats(baseUsers, {
@@ -74,7 +72,7 @@ export const UsersTable = ({ customButtons }: IUsersTableProps) => {
     includeUnranked,
     filterFormat,
     activeRecentOnly,
-    allUserProfiles,
+    allUsers,
     getUsersActiveInLast60Days,
   ]);
 
