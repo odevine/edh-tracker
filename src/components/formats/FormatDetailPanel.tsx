@@ -13,15 +13,20 @@ import { Format } from "@/types";
 
 interface FormatDetailPanelProps {
   format: Format | null;
+  onEdit: (formatId: string) => void;
 }
 
-export function FormatDetailPanel({ format }: FormatDetailPanelProps) {
+export function FormatDetailPanel({ format, onEdit }: FormatDetailPanelProps) {
   const { isAdmin } = useAuth();
-  const { getFormatStats } = useFormat();
+  const { allFormats, getFormatStats } = useFormat();
   const { muiTheme } = useTheme();
   const showFormatTitle = useMediaQuery(muiTheme.breakpoints.up("lg"));
 
-  if (!format) {
+  const currentFormat = format
+    ? allFormats.find((f) => f.id === format.id) ?? format
+    : null;
+
+  if (!currentFormat) {
     return (
       <Paper sx={{ p: 3, height: 600 }}>
         <Stack height="100%" justifyContent="center" alignItems="center">
@@ -33,7 +38,7 @@ export function FormatDetailPanel({ format }: FormatDetailPanelProps) {
     );
   }
 
-  const formatStats = getFormatStats(format.id);
+  const formatStats = getFormatStats(currentFormat.id);
 
   return (
     <Paper sx={{ p: 3, pt: 2, borderRadius: "10px" }}>
@@ -43,12 +48,16 @@ export function FormatDetailPanel({ format }: FormatDetailPanelProps) {
         alignItems="center"
       >
         {showFormatTitle && (
-          <Typography variant="h4">{format.displayName}</Typography>
+          <Typography variant="h4">{currentFormat.displayName}</Typography>
         )}
-        {isAdmin && <Button variant="contained">edit format</Button>}
+        {isAdmin && (
+          <Button variant="contained" onClick={() => onEdit(currentFormat.id)}>
+            edit format
+          </Button>
+        )}
       </Stack>
       <Typography paragraph sx={{ mt: 1 }}>
-        {format.description}
+        {currentFormat.description}
       </Typography>
       <Divider />
       {formatStats.totalMatches === 0 && (

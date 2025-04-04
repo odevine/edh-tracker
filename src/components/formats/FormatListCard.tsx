@@ -17,12 +17,14 @@ interface FormatListCardProps {
   format: Format;
   selected?: boolean;
   onClick: (format: Format) => void;
+  onEdit: (formatId: string) => void;
 }
 
 export function FormatListCard({
   format,
   selected,
   onClick,
+  onEdit,
 }: FormatListCardProps) {
   const muiTheme = useMuiTheme();
   const hideDetailsPanel = useMediaQuery(muiTheme.breakpoints.down("lg"));
@@ -59,7 +61,7 @@ export function FormatListCard({
       </CardActionArea>
       {hideDetailsPanel && (
         <Collapse in={selected}>
-          <FormatDetailPanel format={format} />
+          <FormatDetailPanel format={format} onEdit={onEdit} />
         </Collapse>
       )}
     </Card>
