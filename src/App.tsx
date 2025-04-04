@@ -4,6 +4,7 @@ import { useRoutes } from "raviger";
 import {
   AppAlertList,
   DecksPage,
+  FormatsPage,
   LandingPage,
   LoadingBackdrop,
   LoginPage,
@@ -11,7 +12,6 @@ import {
   Profile,
   RequireAuth,
   Toolbar,
-  ToolsPage,
   UsersPage,
 } from "@/components";
 import { useApp, useDeck, useMatch, useUser } from "@/hooks";
@@ -31,7 +31,7 @@ const baseRoutes = {
 };
 
 const protectedRoutes = {
-  "/tools": () => <ToolsPage />,
+  "/formats": () => <FormatsPage />,
   "/decks": () => <DecksPage />,
   "/users": () => <UsersPage />,
   "/matches": () => <MatchesPage />,
