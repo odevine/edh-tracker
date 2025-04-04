@@ -83,6 +83,7 @@ export const UserPodiumChart = ({
           },
         ]}
         height={200}
+        borderRadius={10}
         margin={{ top: 10, bottom: 10, left: 10, right: 10 }}
         yAxis={[{ tickLabelStyle: { display: "none" } }]}
         grid={{ horizontal: false, vertical: false }}

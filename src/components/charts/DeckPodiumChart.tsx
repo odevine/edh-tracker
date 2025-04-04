@@ -89,6 +89,7 @@ export const DeckPodiumChart = ({
           },
         ]}
         barLabel={(item) => String(item.value)}
+        borderRadius={10}
         height={200}
         margin={{ top: 10, bottom: 10, left: 10, right: 10 }}
         yAxis={[{ tickLabelStyle: { display: "none" } }]}

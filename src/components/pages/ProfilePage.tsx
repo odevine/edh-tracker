@@ -166,12 +166,11 @@ export const Profile = ({ profileId }: { profileId: string }) => {
 
           {/* enhanced stats card */}
           <Card sx={{ flex: 1 }}>
-            <CardContent>
+            <CardContent sx={{ height: "100%" }}>
               <Stack
                 direction="row"
                 alignItems="center"
                 justifyContent="space-between"
-                sx={{ mb: 2 }}
               >
                 <Typography variant="h4">stats</Typography>
                 <Stack direction="row" alignItems="center" sx={{ mt: 1 }}>
@@ -186,7 +185,11 @@ export const Profile = ({ profileId }: { profileId: string }) => {
                   />
                 </Stack>
               </Stack>
-              <Stack spacing={1}>
+              <Stack
+                spacing={1}
+                sx={{ height: "100%" }}
+                justifyContent="center"
+              >
                 {userStats.bestDecks && (
                   <Box>
                     <Typography variant="body2" color="text.secondary">
