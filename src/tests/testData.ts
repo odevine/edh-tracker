@@ -23,8 +23,10 @@ export const createTestDeck = (id: string, userId: string): Deck => ({
 export const createTestFormat = (id: string): Format => ({
   id,
   displayName: `Test Format ${id}`,
+  description: "",
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
+  playerRange: "2-4",
   inactive: false,
 });
 
