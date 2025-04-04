@@ -1,7 +1,14 @@
-import { Button, Divider, Paper, Stack, Typography } from "@mui/material";
+import {
+  Button,
+  Divider,
+  Paper,
+  Stack,
+  Typography,
+  useMediaQuery,
+} from "@mui/material";
 
 import { DeckPodiumChart, UserPodiumChart } from "@/components";
-import { useAuth, useFormat } from "@/hooks";
+import { useAuth, useFormat, useTheme } from "@/hooks";
 import { Format } from "@/types";
 
 interface FormatDetailPanelProps {
@@ -11,6 +18,8 @@ interface FormatDetailPanelProps {
 export function FormatDetailPanel({ format }: FormatDetailPanelProps) {
   const { isAdmin } = useAuth();
   const { getFormatStats } = useFormat();
+  const { muiTheme } = useTheme();
+  const showFormatTitle = useMediaQuery(muiTheme.breakpoints.up("lg"));
 
   if (!format) {
     return (
@@ -27,11 +36,15 @@ export function FormatDetailPanel({ format }: FormatDetailPanelProps) {
   const formatStats = getFormatStats(format.id);
 
   return (
-    <Paper sx={{ p: 3 }}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Typography variant="h4" gutterBottom>
-          {format.displayName}
-        </Typography>
+    <Paper sx={{ p: 3, pt: 2, borderRadius: "10px" }}>
+      <Stack
+        direction="row"
+        justifyContent={showFormatTitle ? "space-between" : "flex-end"}
+        alignItems="center"
+      >
+        {showFormatTitle && (
+          <Typography variant="h4">{format.displayName}</Typography>
+        )}
         {isAdmin && <Button variant="contained">edit format</Button>}
       </Stack>
       <Typography paragraph sx={{ mt: 1 }}>

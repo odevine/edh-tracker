@@ -54,7 +54,7 @@ export const FormatsPage = () => {
           ))}
       </Box>
       {showBreakoutDetails && (
-        <Box flex={1}>
+        <Box flex={1} sx={{ mt: 5 }}>
           <FormatDetailPanel format={selectedFormat} />
         </Box>
       )}
