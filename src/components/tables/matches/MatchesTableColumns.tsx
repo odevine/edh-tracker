@@ -13,13 +13,13 @@ interface ColumnOptions {
   onDelete?: (match: Match) => void;
 }
 
-export function getMatchesColumns({
+export const getMatchesColumns = ({
   formatLookup,
   deckLookup,
   showActions = false,
   onEdit,
   onDelete,
-}: ColumnOptions): GridColDef[] {
+}: ColumnOptions): GridColDef[] => {
   const columns: GridColDef[] = [
     {
       field: "datePlayed",

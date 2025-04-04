@@ -1,12 +1,13 @@
-import { ProfileMiniCard } from "@/components";
-import { UserWithStats } from "@/types";
 import { Box, Typography } from "@mui/material";
 import { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import PopupState, { bindHover, bindPopover } from "material-ui-popup-state";
 import HoverPopover from "material-ui-popup-state/HoverPopover";
 import { navigate } from "raviger";
 
-export function getUsersColumns(): GridColDef[] {
+import { ProfileMiniCard } from "@/components";
+import { UserWithStats } from "@/types";
+
+export const getUsersColumns = (): GridColDef[] => {
   return [
     {
       field: "displayName",
@@ -77,4 +78,4 @@ export function getUsersColumns(): GridColDef[] {
           : "-",
     },
   ];
-}
+};

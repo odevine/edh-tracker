@@ -26,17 +26,34 @@ export const sortColors = (arr: string[]) => {
   });
 };
 
+export const getCommanderColors = async (
+  commanderName: string,
+): Promise<string[]> => {
+  const query = encodeURIComponent(`!"${commanderName}"`);
+  const url = `https://api.scryfall.com/cards/named?fuzzy=${query}`;
+
+  try {
+    const response = await axios.get(url);
+    const data = response.data;
+
+    return sortColors(data.color_identity ?? []);
+  } catch (error) {
+    console.error(`failed to fetch colors for ${commanderName}:`, error);
+    return [];
+  }
+};
+
 export const useCommanderSearch = () => {
   const [commanderSearchTerm, setCommanderSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
 
   // initialize debouncedSearch with Lodash's debounce
   const debouncedSearch = useRef(
-    debounce(async (searchTerm: string) => {
+    debounce(async (searchTerm: string, alternateFilters?: string) => {
       if (searchTerm.length >= 3) {
         try {
           const response = await axios.get(
-            `https://api.scryfall.com/cards/search?q=${encodeURIComponent(searchTerm)}+%28game%3Apaper%29+is%3Acommander`,
+            `https://api.scryfall.com/cards/search?q=${encodeURIComponent(searchTerm)}+${alternateFilters ?? "game%3Apaper+is%3Acommander"}`,
           );
           setSearchResults(response.data.data);
         } catch (err) {
@@ -53,9 +70,12 @@ export const useCommanderSearch = () => {
     };
   }, [debouncedSearch]);
 
-  const commanderSearch = (searchTerm: string) => {
-    setCommanderSearchTerm(searchTerm);
-    debouncedSearch(searchTerm);
+  const commanderSearch = (searchOptions: {
+    searchTerm: string;
+    commanderFilters?: string;
+  }) => {
+    setCommanderSearchTerm(searchOptions.searchTerm);
+    debouncedSearch(searchOptions.searchTerm, searchOptions.commanderFilters);
   };
 
   return {

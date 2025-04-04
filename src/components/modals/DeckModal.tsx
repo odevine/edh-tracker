@@ -11,9 +11,10 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 
+import { ColorSelector } from "@/components";
 import { useAuth, useDeck, useFormat, useMatch } from "@/hooks";
-import { CreateDeckInput, UpdateDeckInput } from "@/types";
-import { sortColors, useCommanderSearch } from "@/utils";
+import { CreateDeckInput, Format, UpdateDeckInput } from "@/types";
+import { getCommanderColors, useCommanderSearch } from "@/utils";
 
 interface ICommander {
   label: string;
@@ -38,6 +39,8 @@ export const DeckModal = (props: {
 
   // state for the deck fields
   const [displayName, setDisplayName] = useState("");
+  const [deckFormat, setDeckFormat] = useState<Format | "">("");
+  const [deckColors, setDeckColors] = useState<string[]>([]);
   const [commander, setCommander] = useState<ICommander | null>(null);
   const [commanderSearchTerm, setCommanderSearchTerm] = useState("");
   const [commanderOptions, setCommanderOptions] = useState<ICommander[]>([]);
@@ -50,7 +53,6 @@ export const DeckModal = (props: {
   const [secondCommanderOptions, setSecondCommanderOptions] = useState<
     ICommander[]
   >([]);
-  const [deckFormat, setDeckFormat] = useState("");
   const [deckLink, setDeckLink] = useState("");
   const [deckCost, setDeckCost] = useState("");
   const [deckIsInactive, setDeckIsInactive] = useState(false);
@@ -58,46 +60,61 @@ export const DeckModal = (props: {
 
   // Update state when editingDeck changes
   useEffect(() => {
-    if (editingDeck) {
-      const existingCommander = {
-        label: editingDeck.commanderName,
-        colors: editingDeck.commanderColors ?? [],
-      };
+    const initializeDeckData = async () => {
+      if (editingDeck) {
+        setDisplayName(editingDeck.displayName);
+        setDeckFormat(
+          allFormats.find((f) => f.id === editingDeck.formatId) ?? "",
+        );
+        setDeckLink(editingDeck?.link ?? "");
+        setDeckCost(String(editingDeck?.cost) ?? "");
+        setDeckIsInactive(Boolean(editingDeck?.inactive));
 
-      setDisplayName(editingDeck.displayName);
-      setCommander(existingCommander);
-      setCommanderSearchTerm(editingDeck.commanderName);
-      setDeckFormat(editingDeck.formatId);
-      setDeckLink(editingDeck?.link ?? "");
-      setDeckCost(String(editingDeck?.cost) ?? "");
-      setDeckIsInactive(Boolean(editingDeck?.inactive));
+        const format = allFormats.find((f) => f.id === editingDeck.formatId);
+        const requiresCommander = format?.requiresCommander;
 
-      let existingSecondCommander: ICommander | null = null;
-      if (editingDeck.secondCommanderName) {
-        existingSecondCommander = {
-          label: editingDeck.secondCommanderName,
-          colors: editingDeck.secondCommanderColors as string[],
-        };
-        setMultiCommander(Boolean(existingSecondCommander));
-        setSecondCommander(existingSecondCommander ?? null);
+        if (requiresCommander && editingDeck.commanderName) {
+          const commanderColors = await getCommanderColors(
+            editingDeck.commanderName,
+          );
+          const existingCommander: ICommander = {
+            label: editingDeck.commanderName,
+            colors: commanderColors,
+          };
+          setCommander(existingCommander);
+          setCommanderSearchTerm(editingDeck.commanderName);
+
+          if (editingDeck.secondCommanderName) {
+            const secondCommanderColors = await getCommanderColors(
+              editingDeck.secondCommanderName,
+            );
+            const existingSecondCommander: ICommander = {
+              label: editingDeck.secondCommanderName,
+              colors: secondCommanderColors,
+            };
+            setMultiCommander(true);
+            setSecondCommander(existingSecondCommander);
+            setSecondCommanderSearchTerm("");
+          }
+        }
+      } else {
+        setDisplayName("");
+        setCommander(null);
+        setCommanderSearchTerm("");
+        setCommanderOptions([]);
+        setDeckFormat("");
+        setDeckLink("");
+        setDeckCost("");
+        setDeckIsInactive(false);
+        setErrors([]);
+        setMultiCommander(false);
+        setSecondCommander(null);
         setSecondCommanderSearchTerm("");
+        setSecondCommanderOptions([]);
       }
-    } else {
-      // Reset state if no deck is found (or if editingDeckId is null)
-      setDisplayName("");
-      setCommander(null);
-      setCommanderSearchTerm("");
-      setCommanderOptions([]);
-      setDeckFormat("");
-      setDeckLink("");
-      setDeckCost("");
-      setDeckIsInactive(false);
-      setErrors([]);
-      setMultiCommander(false);
-      setSecondCommander(null);
-      setSecondCommanderSearchTerm("");
-      setSecondCommanderOptions([]);
-    }
+    };
+
+    void initializeDeckData(); // Run the async init
   }, [editingDeck, open]);
 
   const { commanderSearch, searchResults } = useCommanderSearch();
@@ -129,12 +146,20 @@ export const DeckModal = (props: {
         message: "deck name must be unique.",
       },
       {
-        condition: !commander,
+        condition: deckFormat === "",
+        message: "deck format is required",
+      },
+      {
+        condition:
+          !commander && deckFormat !== "" && deckFormat.requiresCommander,
         message: "at least one commander is required",
       },
       {
-        condition: deckFormat === "",
-        message: "deck format is required",
+        condition:
+          deckFormat !== "" &&
+          !deckFormat.requiresCommander &&
+          deckColors.length === 0,
+        message: "assigning deck colors is required",
       },
       {
         condition:
@@ -156,16 +181,25 @@ export const DeckModal = (props: {
 
   const handleSubmit = () => {
     if (isAuthenticated && validateDeckDetails()) {
+      // Union + sort logic
+      let combinedColors: string[] = [];
+      if (commander?.colors?.length || secondCommander?.colors?.length) {
+        const colorSet = new Set([
+          ...(commander?.colors ?? []),
+          ...(secondCommander?.colors ?? []),
+        ]);
+        combinedColors = Array.from(colorSet).sort();
+      } else {
+        combinedColors = deckColors;
+      }
+
       const deckInput: CreateDeckInput | UpdateDeckInput = {
         displayName,
         userId: userId as string,
         commanderName: commander?.label ?? "",
-        commanderColors: sortColors(commander?.colors ?? []),
+        deckColors: combinedColors,
         secondCommanderName: secondCommander?.label,
-        secondCommanderColors: secondCommander
-          ? sortColors(secondCommander?.colors ?? [])
-          : undefined,
-        formatId: deckFormat,
+        formatId: (deckFormat as Format)?.id,
         cost: deckCost !== "" ? Number(deckCost) : undefined,
         link: deckLink !== "" ? deckLink : undefined,
         inactive: deckIsInactive ?? undefined,
@@ -180,17 +214,23 @@ export const DeckModal = (props: {
     }
   };
 
-  const handleCommanderSearchChange = (searchTerm: string) => {
+  const handleCommanderSearchChange = (
+    searchTerm: string,
+    commanderFilters?: string,
+  ) => {
     setCommanderSearchTerm(searchTerm);
     if (searchTerm.length >= 3) {
-      commanderSearch(searchTerm);
+      commanderSearch({ searchTerm, commanderFilters });
     }
   };
 
-  const handleSecondCommanderSearchChange = (searchTerm: string) => {
+  const handleSecondCommanderSearchChange = (
+    searchTerm: string,
+    commanderFilters?: string,
+  ) => {
     setSecondCommanderSearchTerm(searchTerm);
     if (searchTerm.length >= 3) {
-      secondCommanderSearch(searchTerm);
+      secondCommanderSearch({ searchTerm, commanderFilters });
     }
   };
 
@@ -232,82 +272,6 @@ export const DeckModal = (props: {
               value={displayName}
               onChange={(event) => setDisplayName(event?.target.value)}
             />
-            <Stack
-              direction="row"
-              sx={{ width: "100%" }}
-              alignItems="center"
-              spacing={2}
-            >
-              <Autocomplete
-                key={open ? "open" : "closed"}
-                fullWidth
-                freeSolo
-                options={commanderOptions.map((option) => ({
-                  label: option.name,
-                  colors: option.color_identity,
-                }))}
-                value={commander}
-                onInputChange={(_event, value) =>
-                  handleCommanderSearchChange(value)
-                }
-                onChange={(_event, value) => setCommander(value as ICommander)}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    required
-                    value={commanderSearchTerm}
-                    placeholder="start typing to search commanders..."
-                    label="commander"
-                  />
-                )}
-              />
-              <Stack
-                direction="column"
-                justifyContent="center"
-                alignItems="center"
-              >
-                <Typography variant="caption">multi?</Typography>
-                <Checkbox
-                  size="small"
-                  checked={multiCommander}
-                  onChange={(_event, checked) => {
-                    setMultiCommander(checked);
-                    if (!checked) {
-                      setSecondCommander(null);
-                      setSecondCommanderOptions([]);
-                      setSecondCommanderSearchTerm("");
-                    }
-                  }}
-                />
-              </Stack>
-            </Stack>
-            {multiCommander && (
-              <Autocomplete
-                key={open ? "open" : "closed"}
-                fullWidth
-                freeSolo
-                options={secondCommanderOptions.map((option) => ({
-                  label: option.name,
-                  colors: option.colors,
-                }))}
-                value={secondCommander}
-                onInputChange={(_event, value) =>
-                  handleSecondCommanderSearchChange(value)
-                }
-                onChange={(_event, value) =>
-                  setSecondCommander(value as ICommander)
-                }
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    required
-                    value={secondCommanderSearchTerm}
-                    placeholder="start typing to search commanders..."
-                    label="second commander"
-                  />
-                )}
-              />
-            )}
             <TextField
               fullWidth
               required
@@ -315,8 +279,12 @@ export const DeckModal = (props: {
               disabled={Boolean(editingDeck && playedDeck)}
               label="deck format"
               placeholder="paste a moxfield or archidekt link here"
-              value={deckFormat}
-              onChange={(event) => setDeckFormat(event.target.value)}
+              value={(deckFormat as Format)?.id ?? ""}
+              onChange={(event) => {
+                setDeckFormat(
+                  allFormats.find((f) => f.id === event.target.value) ?? "",
+                );
+              }}
             >
               {allFormats.map((format) => (
                 <MenuItem key={format.id} value={format.id}>
@@ -324,6 +292,98 @@ export const DeckModal = (props: {
                 </MenuItem>
               ))}
             </TextField>
+            {deckFormat !== "" && deckFormat.requiresCommander && (
+              <>
+                <Stack
+                  direction="row"
+                  sx={{ width: "100%" }}
+                  alignItems="center"
+                  spacing={2}
+                >
+                  <Autocomplete
+                    key={open ? "open" : "closed"}
+                    fullWidth
+                    freeSolo
+                    options={commanderOptions.map((option) => ({
+                      label: option.name,
+                      colors: option.color_identity,
+                    }))}
+                    value={commander}
+                    onInputChange={(_event, value) =>
+                      handleCommanderSearchChange(
+                        value,
+                        deckFormat?.validCommanderFilters,
+                      )
+                    }
+                    onChange={(_event, value) =>
+                      setCommander(value as ICommander)
+                    }
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        required
+                        value={commanderSearchTerm}
+                        placeholder="start typing to search commanders..."
+                        label="commander"
+                      />
+                    )}
+                  />
+                  <Stack
+                    direction="column"
+                    justifyContent="center"
+                    alignItems="center"
+                  >
+                    <Typography variant="caption">multi?</Typography>
+                    <Checkbox
+                      size="small"
+                      checked={multiCommander}
+                      onChange={(_event, checked) => {
+                        setMultiCommander(checked);
+                        if (!checked) {
+                          setSecondCommander(null);
+                          setSecondCommanderOptions([]);
+                          setSecondCommanderSearchTerm("");
+                        }
+                      }}
+                    />
+                  </Stack>
+                </Stack>
+                {multiCommander && (
+                  <Autocomplete
+                    key={open ? "open" : "closed"}
+                    fullWidth
+                    freeSolo
+                    options={secondCommanderOptions.map((option) => ({
+                      label: option.name,
+                      colors: option.colors,
+                    }))}
+                    value={secondCommander}
+                    onInputChange={(_event, value) =>
+                      handleSecondCommanderSearchChange(value)
+                    }
+                    onChange={(_event, value) =>
+                      setSecondCommander(value as ICommander)
+                    }
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        required
+                        value={secondCommanderSearchTerm}
+                        placeholder="start typing to search commanders..."
+                        label="second commander"
+                      />
+                    )}
+                  />
+                )}
+              </>
+            )}
+            {deckFormat !== "" && !deckFormat.requiresCommander && (
+              <ColorSelector
+                filterColor={deckColors}
+                setFilterColor={setDeckColors}
+                size="medium"
+              />
+            )}
             <TextField
               fullWidth
               label="deck link"

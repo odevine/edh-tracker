@@ -26,11 +26,13 @@ const colorOptions: ColorOption[] = [
 type ColorSelectorProps = {
   filterColor: string[];
   setFilterColor: (newColor: string[]) => void;
+  size?: "small" | "medium";
 };
 
 export const ColorSelector = ({
   filterColor,
   setFilterColor,
+  size,
 }: ColorSelectorProps) => {
   const selectedOptions = useMemo(
     () =>
@@ -61,7 +63,7 @@ export const ColorSelector = ({
 
   return (
     <Autocomplete
-      size="small"
+      size={size ?? "small"}
       multiple
       disableCloseOnSelect
       onChange={(_event, newValue) => handleColorChange(newValue)}
