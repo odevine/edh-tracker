@@ -3,6 +3,7 @@ import { BarChart } from "@mui/x-charts/BarChart";
 
 import { useDeck, useTheme, useUser } from "@/hooks";
 import { FormatStatsResult } from "@/types";
+import { getContrastText } from "@/utils";
 
 interface DeckPodiumChartProps extends BoxProps {
   deckWins: FormatStatsResult["deckWins"];
@@ -53,13 +54,14 @@ export const DeckPodiumChart = ({
       wins,
       color: isDarkMode
         ? user?.darkThemeColor
-        : user?.lightThemeColor ?? "gray",
+        : user?.lightThemeColor ?? muiTheme.palette.grey[400],
     };
   });
 
   // extract labels and colors for the colorMap
   const labels = data.map((d) => d.label);
-  const colors = data.map((d) => d.color ?? "gray");
+  const colors = data.map((d) => d.color ?? muiTheme.palette.grey[400]);
+  const labelColors = colors.map(getContrastText);
 
   return (
     <Box {...boxProps}>
@@ -82,14 +84,32 @@ export const DeckPodiumChart = ({
         series={[
           {
             data: data.map((d) => d.wins),
+            valueFormatter: (value) =>
+              `${value} win${Number(value) > 1 ? "s" : ""}`,
           },
         ]}
+        barLabel={(item) => String(item.value)}
         height={200}
         margin={{ top: 10, bottom: 10, left: 10, right: 10 }}
         yAxis={[{ tickLabelStyle: { display: "none" } }]}
         grid={{ horizontal: false, vertical: false }}
         slotProps={{
           legend: { hidden: true },
+        }}
+        sx={{
+          "& .MuiBarLabel-root": {
+            fontWeight: 700,
+            fontSize: 20,
+          },
+          ...labelColors.reduce(
+            (acc, color, index) => {
+              acc[`& .MuiBarLabel-root:nth-of-type(${index + 1})`] = {
+                fill: color,
+              };
+              return acc;
+            },
+            {} as Record<string, any>,
+          ),
         }}
       />
     </Box>
