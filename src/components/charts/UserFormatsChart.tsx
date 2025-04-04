@@ -2,16 +2,19 @@ import { Circle } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
 import { PieChart } from "@mui/x-charts";
 
-import { useFormat, useTheme } from "@/hooks";
-import { Deck } from "@/types";
+import { useTheme } from "@/hooks";
+import { Deck, Format } from "@/types";
 import { percentFormatter } from "@/utils";
 
 interface UserFormatsChartProps {
   userDecks: Deck[];
+  allFormats: Format[];
 }
 
-export const UserFormatsChart = ({ userDecks }: UserFormatsChartProps) => {
-  const { allFormats } = useFormat();
+export const UserFormatsChart = ({
+  userDecks,
+  allFormats,
+}: UserFormatsChartProps) => {
   const { muiTheme, chartPalette } = useTheme();
   const palette = chartPalette(muiTheme.palette.mode);
 
@@ -49,16 +52,14 @@ export const UserFormatsChart = ({ userDecks }: UserFormatsChartProps) => {
 
   return (
     <Box sx={{ width: "100%", height: "100%" }}>
-      <Typography variant="h6">format participation</Typography>
       <Stack
         direction={{ xs: "column", sm: "row" }}
         alignItems="center"
-        sx={{ height: "calc(100% - 32px)" }}
+        sx={{ height: "100%" }}
       >
         <Stack
           direction={{ xs: "row", sm: "column" }}
           spacing={1}
-          mt={2}
           flexWrap="wrap"
         >
           {playedData.map((entry) => (

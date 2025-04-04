@@ -1,43 +1,29 @@
 import { Circle } from "@mui/icons-material";
-import { Box, MenuItem, Select, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import { PieChart } from "@mui/x-charts";
-import { useMemo, useState } from "react";
 
-import { useFormat, useTheme } from "@/hooks";
+import { useTheme } from "@/hooks";
 import { Deck } from "@/types";
 import { percentFormatter } from "@/utils";
 
 interface UserDecksByFormatProps {
   userDecks: Deck[];
+  selectedFormatId: string;
 }
 
 export const UserDecksByFormatChart = ({
   userDecks,
+  selectedFormatId,
 }: UserDecksByFormatProps) => {
   const { muiTheme, chartPalette } = useTheme();
-  const { allFormats } = useFormat();
   const palette = chartPalette(muiTheme.palette.mode);
-
-  const formatIdsWithDecks = useMemo(() => {
-    const formatIds = new Set<string>();
-    for (const deck of userDecks) {
-      for (const formatId of Object.keys(deck.formatStats ?? {})) {
-        if ((deck.formatStats?.[formatId]?.gamesPlayed ?? 0) > 0) {
-          formatIds.add(formatId);
-        }
-      }
-    }
-    return [...formatIds];
-  }, [userDecks]);
-
-  const [selectedFormatId, setSelectedFormatId] = useState(
-    formatIdsWithDecks[0] ?? "",
-  );
 
   const decksWithStats = userDecks
     .map((deck) => {
       const stats = deck.formatStats?.[selectedFormatId];
-      if (!stats || stats.gamesPlayed === 0) return null;
+      if (!stats || stats.gamesPlayed === 0) {
+        return null;
+      }
       return {
         label: deck.displayName,
         played: stats.gamesPlayed,
@@ -65,37 +51,15 @@ export const UserDecksByFormatChart = ({
 
   return (
     <Box sx={{ width: "100%", height: "100%" }}>
-      <Stack direction="row" alignItems="center" justifyContent="space-between">
-        <Typography variant="h6">decks by format</Typography>
-        <Box>
-          <Select
-            value={selectedFormatId}
-            onChange={(e) => setSelectedFormatId(e.target.value)}
-            size="small"
-          >
-            {formatIdsWithDecks.map((id) => {
-              const formatName =
-                allFormats.find((f) => f.id === id)?.displayName ?? id;
-              return (
-                <MenuItem key={id} value={id}>
-                  {formatName}
-                </MenuItem>
-              );
-            })}
-          </Select>
-        </Box>
-      </Stack>
-
       <Stack
         direction={{ xs: "column", sm: "row" }}
         alignItems="center"
-        sx={{ height: "calc(100% - 32px)" }}
+        sx={{ height: "100%" }}
       >
         {/* Manual Legend */}
         <Stack
           direction={{ xs: "row", sm: "column" }}
           spacing={1}
-          mt={2}
           sx={{ width: 160 }}
         >
           {playedData.map((entry) => (
