@@ -23,6 +23,31 @@ const NotFoundPage = () => (
   </Stack>
 );
 
+const ProfileRoute = ({ profileId }: { profileId: string }) => {
+  const { allUsers, usersLoading } = useUser();
+
+  if (usersLoading) {
+    return <LoadingBackdrop />;
+  }
+
+  const exists = allUsers.some((u) => u.id === profileId);
+
+  if (!exists) {
+    return (
+      <Stack
+        sx={{ height: "100%" }}
+        justifyContent="center"
+        alignItems="center"
+      >
+        <Typography variant="h1">404</Typography>
+        <Typography variant="h5">user not found</Typography>
+      </Stack>
+    );
+  }
+
+  return <Profile profileId={profileId} />;
+};
+
 const baseRoutes = {
   "/": () => <LandingPage />,
   "/login": () => <LoginPage />,
@@ -35,8 +60,8 @@ const protectedRoutes = {
   "/decks": () => <DecksPage />,
   "/users": () => <UsersPage />,
   "/matches": () => <MatchesPage />,
-  "/users/:profileId": (routeParams: { profileId: string }) => (
-    <Profile profileId={routeParams.profileId} />
+  "/users/:profileId": ({ profileId }: { profileId: string }) => (
+    <ProfileRoute profileId={profileId} />
   ),
   "*": () => <NotFoundPage />,
 };

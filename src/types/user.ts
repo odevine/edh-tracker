@@ -31,3 +31,27 @@ export type UserWithStats = User & {
   totalWins: number;
   winRate: number;
 };
+
+type UserDeckStat = {
+  displayName: string;
+  gamesPlayed: number;
+};
+
+type UserFormatStat = {
+  displayName: string;
+  gamesPlayed: number;
+};
+
+export type UserStatsResult = {
+  totalMatches: number;
+  totalWins: number;
+  winRate: number;
+  deckCount: number;
+  bestDecks?: { decks: UserDeckStat[]; winRate: number };
+  mostPlayedDecks?: { displayNames: string[]; gamesPlayed: number };
+  bestFormats?: { formats: UserFormatStat[]; winRate: number };
+  mostPlayedFormats?: { displayNames: string[]; gamesPlayed: number };
+  nemesis?: { displayNames: string[]; losses: number };
+  victim?: { displayNames: string[]; wins: number };
+  rivalry?: { displayNames: string[]; wins: number; losses: number };
+};
