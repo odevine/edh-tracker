@@ -4,6 +4,7 @@ import {
   GlobalStyles,
   ThemeProvider as MuiThemeProvider,
   PaletteMode,
+  Theme,
   createTheme,
   useMediaQuery,
 } from "@mui/material";
@@ -13,12 +14,17 @@ import { PropsWithChildren, createContext, useEffect, useMemo } from "react";
 import { useUser } from "@/hooks";
 import { usePersistentState } from "@/hooks/usePersistentState";
 
-export const ThemeContext = createContext({
-  toggleTheme: () => {},
-  mode: "dark" as PaletteMode,
-  setLightColor: (_: string) => {},
-  setDarkColor: (_: string) => {},
-});
+interface ThemeContextType {
+  mode: PaletteMode;
+  muiTheme: Theme;
+  toggleTheme: () => void;
+  setLightColor: (color: string) => void;
+  setDarkColor: (color: string) => void;
+}
+
+export const ThemeContext = createContext<ThemeContextType | undefined>(
+  undefined,
+);
 
 export const ThemeProvider = ({ children }: PropsWithChildren) => {
   const { currentUserProfile } = useUser();
@@ -50,18 +56,6 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
       setDarkColor(currentUserProfile.darkThemeColor);
     }
   }, [currentUserProfile]);
-
-  const colorMode = useMemo(
-    () => ({
-      toggleTheme: () => {
-        setMode(mode === "light" ? "dark" : "light");
-      },
-      mode,
-      setLightColor,
-      setDarkColor,
-    }),
-    [mode, setLightColor, setDarkColor],
-  );
 
   // Consolidated theme colors based on mode
   const themeColors = useMemo(() => {
@@ -168,6 +162,19 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
         },
       }),
     [mode, themeColors],
+  );
+
+  const colorMode = useMemo(
+    () => ({
+      toggleTheme: () => {
+        setMode(mode === "light" ? "dark" : "light");
+      },
+      mode,
+      setLightColor,
+      setDarkColor,
+      muiTheme,
+    }),
+    [mode, setLightColor, setDarkColor, muiTheme],
   );
 
   return (

@@ -49,6 +49,12 @@ export const Toolbar = () => {
       pathMatch: /^\/$/,
     },
     {
+      label: "formats",
+      action: () => navigate("/formats"),
+      disabled: false,
+      pathMatch: /^\/formats$/,
+    },
+    {
       label: "users",
       action: () => navigate("/users"),
       disabled: !isAuthenticated,
@@ -65,12 +71,6 @@ export const Toolbar = () => {
       action: () => navigate("/matches"),
       disabled: !isAuthenticated,
       pathMatch: /\/matches/,
-    },
-    {
-      label: "tools",
-      action: () => navigate("/tools"),
-      disabled: !isAuthenticated,
-      pathMatch: /^\/tools$/,
     },
   ];
 
