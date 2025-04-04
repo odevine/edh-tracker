@@ -91,7 +91,9 @@ export function getDecksColumns(
       valueGetter: (value) => usersMap.get(value)?.displayName,
       renderCell: (params: GridRenderCellParams<DeckWithStats>) => {
         const ownerProfile = usersMap.get(params.row.userId);
-        if (!ownerProfile) return params.value;
+        if (!ownerProfile) {
+          return params.value;
+        }
 
         return (
           <PopupState variant="popover">

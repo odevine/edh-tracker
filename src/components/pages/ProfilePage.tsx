@@ -4,6 +4,7 @@ import {
   Button,
   Card,
   CardContent,
+  CardHeader,
   Container,
   Divider,
   Modal,
@@ -50,7 +51,7 @@ const StatRow = ({
   </Stack>
 );
 
-export const Profile = ({ profileId }: { profileId: string }) => {
+export const ProfilePage = ({ profileId }: { profileId: string }) => {
   const { userId } = useAuth();
   const { allUsers, usersLoading } = useUser();
   const { allDecks } = useDeck();
@@ -82,7 +83,7 @@ export const Profile = ({ profileId }: { profileId: string }) => {
         allMatches,
         allUsers,
       }),
-    [allDecks, allFormats, allUsers, allMatches, includeUnranked],
+    [allDecks, allFormats, allUsers, allMatches, includeUnranked, profileId],
   );
   const userDecks = useMemo(
     () => allDecks.filter((deck) => deck.userId === currentProfile.id),
@@ -166,25 +167,29 @@ export const Profile = ({ profileId }: { profileId: string }) => {
 
           {/* enhanced stats card */}
           <Card sx={{ flex: 1 }}>
-            <CardContent sx={{ height: "100%" }}>
-              <Stack
-                direction="row"
-                alignItems="center"
-                justifyContent="space-between"
-              >
-                <Typography variant="h4">stats</Typography>
-                <Stack direction="row" alignItems="center" sx={{ mt: 1 }}>
-                  <Typography component="span" variant="caption">
-                    include unranked
-                  </Typography>
-                  <Switch
-                    checked={includeUnranked}
-                    onChange={(event) =>
-                      setIncludeUnranked(event.target.checked)
-                    }
-                  />
+            <CardHeader
+              title={
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  justifyContent="space-between"
+                >
+                  <Typography variant="h4">stats</Typography>
+                  <Stack direction="row" alignItems="center" sx={{ mt: 1 }}>
+                    <Typography component="span" variant="caption">
+                      include unranked
+                    </Typography>
+                    <Switch
+                      checked={includeUnranked}
+                      onChange={(event) =>
+                        setIncludeUnranked(event.target.checked)
+                      }
+                    />
+                  </Stack>
                 </Stack>
-              </Stack>
+              }
+            />
+            <CardContent sx={{ height: "calc(100% - 78px)" }}>
               <Stack
                 spacing={1}
                 sx={{ height: "100%" }}
@@ -288,7 +293,9 @@ export const Profile = ({ profileId }: { profileId: string }) => {
         </Stack>
 
         {/* deck format charts */}
-        {userDecks.length > 0 && <UserChartsContainer userDecks={userDecks} />}
+        {userDecks.length > 0 && (
+          <UserChartsContainer userDecks={userDecks} allFormats={allFormats} />
+        )}
       </Container>
 
       {/* profile edit modal */}

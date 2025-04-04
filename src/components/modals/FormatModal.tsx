@@ -100,7 +100,9 @@ export const FormatModal = (props: {
   };
 
   const handleSubmit = () => {
-    if (!validateFormatDetails()) return;
+    if (!validateFormatDetails()) {
+      return;
+    }
 
     const formatInput: CreateFormatInput | UpdateFormatInput = {
       displayName,

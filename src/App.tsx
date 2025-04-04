@@ -9,7 +9,7 @@ import {
   LoadingBackdrop,
   LoginPage,
   MatchesPage,
-  Profile,
+  ProfilePage,
   RequireAuth,
   Toolbar,
   UsersPage,
@@ -45,7 +45,7 @@ const ProfileRoute = ({ profileId }: { profileId: string }) => {
     );
   }
 
-  return <Profile profileId={profileId} />;
+  return <ProfilePage profileId={profileId} />;
 };
 
 const baseRoutes = {
