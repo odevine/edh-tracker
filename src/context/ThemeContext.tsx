@@ -9,7 +9,14 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import type {} from "@mui/x-data-grid/themeAugmentation";
-import { PropsWithChildren, createContext, useEffect, useMemo } from "react";
+import {
+  PropsWithChildren,
+  MouseEvent as ReactMouseEvent,
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+} from "react";
 
 import { useUser } from "@/hooks";
 import { usePersistentState } from "@/hooks/usePersistentState";
@@ -17,7 +24,7 @@ import { usePersistentState } from "@/hooks/usePersistentState";
 interface ThemeContextType {
   mode: PaletteMode;
   muiTheme: Theme;
-  toggleTheme: () => void;
+  toggleTheme: (event: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void;
   setLightColor: (color: string) => void;
   setDarkColor: (color: string) => void;
 }
@@ -164,11 +171,31 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
     [mode, themeColors],
   );
 
+  const toggleTheme = useCallback(
+    (event: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => {
+      const xPos = event.clientX ?? 0;
+      const yPos = event.clientY ?? 0;
+      const nextThemeMode: PaletteMode = mode === "light" ? "dark" : "light";
+
+      document.documentElement.style.setProperty("--x", `${xPos}px`);
+      document.documentElement.style.setProperty("--y", `${yPos}px`);
+
+      if ("startViewTransition" in document) {
+        (document as any).startViewTransition(() => {
+          setMode(nextThemeMode); // trigger theme change right here
+        });
+      } else {
+        setMode(nextThemeMode);
+      }
+
+      localStorage.setItem("theme", nextThemeMode);
+    },
+    [mode, setMode],
+  );
+
   const colorMode = useMemo(
     () => ({
-      toggleTheme: () => {
-        setMode(mode === "light" ? "dark" : "light");
-      },
+      toggleTheme,
       mode,
       setLightColor,
       setDarkColor,
@@ -187,6 +214,21 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
             body: {
               height: "100%",
               "#root": { height: "100%" },
+            },
+            "::view-transition-old(root)": {
+              animation: "none",
+            },
+            "::view-transition-new(root)": {
+              animation: "rippleReveal 600ms cubic-bezier(0.4, 0, 0.2, 1)",
+              clipPath: "circle(0% at var(--x, 50%) var(--y, 50%))",
+            },
+            "@keyframes rippleReveal": {
+              "0%": {
+                clipPath: "circle(0% at var(--x, 50%) var(--y, 50%))",
+              },
+              "100%": {
+                clipPath: "circle(150% at var(--x, 50%) var(--y, 50%))",
+              },
             },
           }}
         />
