@@ -18,24 +18,24 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuth, useDeck, useFormat, useMatch } from "@/hooks";
 import { CreateMatchInput, Deck, UpdateMatchInput } from "@/types";
 
-interface NewMatchModalProps {
+interface MatchModalProps {
   open: boolean;
   onClose: () => void;
   editingMatchId?: string;
 }
 
-export const MatchModal: React.FC<NewMatchModalProps> = ({
+export const MatchModal = ({
   open,
   onClose,
   editingMatchId,
-}) => {
+}: MatchModalProps) => {
   const { allDecks, getDeckUserColor, getUserForDeck } = useDeck();
   const { allFormats } = useFormat();
   const { isAuthenticated } = useAuth();
   const { createNewMatch, allMatches, updateMatchWithParticipants } =
     useMatch();
 
-  // Find the editing deck based on the editingDeckId
+  // find the editing deck based on the editingDeckId
   const editingMatch = allMatches.find((match) => match.id === editingMatchId);
 
   const [loading, setLoading] = useState(false);
@@ -104,6 +104,7 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+
     if (!isAuthenticated) {
       console.error("user is not authenticated");
       return;
@@ -113,29 +114,58 @@ export const MatchModal: React.FC<NewMatchModalProps> = ({
       return;
     }
 
-    // build the participants list from decks
-    const matchParticipants = participantDecks.map((deck) => ({
-      deckId: deck.id,
-      userId: deck.userId,
-    }));
-
-    const matchData: CreateMatchInput = {
-      winningDeckId,
-      datePlayed: datePlayed.toFormat("yyyy-MM-dd"),
-      formatId: matchFormatId,
-      archived: false,
-      matchParticipants,
-    };
-
     setLoading(true);
+
     try {
-      if (editingMatch) {
+      // creation path
+      if (!editingMatch) {
+        const matchData: CreateMatchInput = {
+          winningDeckId,
+          datePlayed: datePlayed.toFormat("yyyy-MM-dd"),
+          formatId: matchFormatId,
+          archived: false,
+          matchParticipants: participantDecks.map((deck) => ({
+            deckId: deck.id,
+            userId: deck.userId,
+          })),
+        };
+
+        await createNewMatch(matchData);
+      } else {
+        // editing path
+        const updatedDeckIds = participantDecks.map((deck) => deck.id);
+
+        const originalParticipantMap = new Map(
+          editingMatch.matchParticipants?.map((p) => [p.deckId, p.id]) ?? [],
+        );
+
+        const addParticipants = participantDecks
+          .filter((deck) => !originalParticipantMap.has(deck.id))
+          .map((deck) => ({
+            deckId: deck.id,
+            userId: deck.userId,
+          }));
+
+        const removeParticipantIds =
+          editingMatch.matchParticipants
+            ?.filter((p) => !updatedDeckIds.includes(p.deckId))
+            .map((p) => p.id) ?? [];
+
+        const updateInput: UpdateMatchInput = {
+          matchUpdates: {
+            winningDeckId,
+            datePlayed: datePlayed.toFormat("yyyy-MM-dd"),
+            formatId: matchFormatId,
+            archived: false,
+          },
+          addParticipants,
+          removeParticipantIds,
+        };
+
         await updateMatchWithParticipants({
           matchId: editingMatch.id,
-          updates: matchData as UpdateMatchInput,
+          updates: updateInput,
         });
-      } else {
-        await createNewMatch(matchData);
       }
     } finally {
       setLoading(false);

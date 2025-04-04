@@ -1,5 +1,3 @@
-export const LOCAL_STORAGE_VERSION = 7;
-
 export const API_BASE_PATH = import.meta.env.DEV
   ? "/api"
   : import.meta.env.VITE_API_BASE_PATH;

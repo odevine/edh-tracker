@@ -54,7 +54,7 @@ export const UsersTableFilters = ({
               onChange={(e) => setActiveRecentOnly(e.target.checked)}
             />
             <Typography component="span">
-              only show users active in last 30 days?
+              only show users active in last 60 days?
             </Typography>
           </Grid>
         </Grid>

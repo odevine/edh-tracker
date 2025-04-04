@@ -24,6 +24,8 @@ interface MatchContextType {
   getUsersActiveInLast60Days: () => string[];
 }
 
+const QUERIES_TO_INVALIDATE = ["matches", "decks", "users"];
+
 export const MatchContext = createContext<MatchContextType | undefined>(
   undefined,
 );
@@ -62,7 +64,9 @@ export const MatchProvider = ({ children }: PropsWithChildren<{}>) => {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["matches"] });
+      QUERIES_TO_INVALIDATE.forEach((key) =>
+        queryClient.invalidateQueries({ queryKey: [key] }),
+      );
       addAppMessage({ content: "match created", severity: "success" });
     },
     onError: () => {
@@ -97,7 +101,9 @@ export const MatchProvider = ({ children }: PropsWithChildren<{}>) => {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["matches"] });
+      QUERIES_TO_INVALIDATE.forEach((key) =>
+        queryClient.invalidateQueries({ queryKey: [key] }),
+      );
       addAppMessage({
         content: "match and participants updated",
         severity: "success",
@@ -126,7 +132,9 @@ export const MatchProvider = ({ children }: PropsWithChildren<{}>) => {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["matches"] });
+      QUERIES_TO_INVALIDATE.forEach((key) =>
+        queryClient.invalidateQueries({ queryKey: [key] }),
+      );
       addAppMessage({ content: "match deleted", severity: "info" });
     },
     onError: () => {
