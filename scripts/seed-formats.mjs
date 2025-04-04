@@ -29,14 +29,14 @@ function parseCSV(filePath) {
         };
 
         if (row.inactive) {
-          item.inactive = row.inactive === "true";
+          item.inactive = row.inactive === "True";
         }
 
         if (row.singleton) {
-          item.singleton = row.singleton === "true";
+          item.singleton = row.singleton === "True";
         }
 
-        if (row.requiresCommander === "true") {
+        if (row.requiresCommander === "True") {
           item.requiresCommander = true;
           item.validCommanderFilters = row.validCommanderFilters;
         }
