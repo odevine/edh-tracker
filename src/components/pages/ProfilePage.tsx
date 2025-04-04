@@ -7,7 +7,6 @@ import {
   CardHeader,
   Container,
   Divider,
-  Modal,
   Stack,
   Switch,
   Typography,
@@ -17,7 +16,7 @@ import { useMemo, useState } from "react";
 import {
   LoadingBackdrop,
   UserChartsContainer,
-  UserProfileForm,
+  UserProfileModal,
 } from "@/components";
 import {
   useAuth,
@@ -300,28 +299,7 @@ export const ProfilePage = ({ profileId }: { profileId: string }) => {
 
       {/* profile edit modal */}
       {ownUser && (
-        <Modal open={editOpen} onClose={() => setEditOpen(false)}>
-          <Box
-            sx={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              backgroundColor: "background.paper",
-              borderRadius: 2,
-              boxShadow: 24,
-              p: 4,
-              minWidth: { xs: 310, sm: 420 },
-              maxWidth: "90vw",
-              outline: "none",
-            }}
-          >
-            <Typography variant="h6" gutterBottom>
-              edit profile
-            </Typography>
-            <UserProfileForm />
-          </Box>
-        </Modal>
+        <UserProfileModal open={editOpen} onClose={() => setEditOpen(false)} />
       )}
     </>
   );
