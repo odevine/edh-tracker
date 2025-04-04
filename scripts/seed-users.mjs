@@ -25,13 +25,18 @@ function parseCSV(filePath) {
           createdAt: row.createdAt,
           updatedAt: row.updatedAt,
         };
-
-        if (row.description) item.description = row.description;
-        if (row.profilePictureURL)
+        if (row.profilePictureURL) {
           item.profilePictureURL = row.profilePictureURL;
-        if (row.lastOnline) item.lastOnline = row.lastOnline;
-        if (row.lightThemeColor) item.lightThemeColor = row.lightThemeColor;
-        if (row.darkThemeColor) item.darkThemeColor = row.darkThemeColor;
+        }
+        if (row.lastOnline) {
+          item.lastOnline = row.lastOnline;
+        }
+        if (row.lightThemeColor) {
+          item.lightThemeColor = row.lightThemeColor;
+        }
+        if (row.darkThemeColor) {
+          item.darkThemeColor = row.darkThemeColor;
+        }
 
         items.push(item);
       })
@@ -79,21 +84,35 @@ async function batchWrite(items) {
   while (items.length) chunks.push(items.splice(0, 25));
 
   for (const chunk of chunks) {
-    const params = {
-      RequestItems: {
-        [TABLE_NAME]: chunk.map((item) => ({
-          PutRequest: {
-            Item: marshall(item),
-          },
-        })),
-      },
+    let requestItems = {
+      [TABLE_NAME]: chunk.map((item) => ({
+        PutRequest: { Item: marshall(item) },
+      })),
     };
 
-    try {
-      await client.send(new BatchWriteItemCommand(params));
-      console.log(`✅ Inserted ${chunk.length} users into ${TABLE_NAME}`);
-    } catch (err) {
-      console.error("❌ Error writing batch:", err);
+    let retryCount = 0;
+    do {
+      const response = await client.send(
+        new BatchWriteItemCommand({
+          RequestItems: requestItems,
+        }),
+      );
+
+      const unprocessed = response.UnprocessedItems?.[TABLE_NAME] || [];
+
+      if (unprocessed.length > 0) {
+        console.warn(`⚠️ Retrying ${unprocessed.length} unprocessed items...`);
+        requestItems = { [TABLE_NAME]: unprocessed };
+        await new Promise((r) => setTimeout(r, 500 * (retryCount + 1))); // simple backoff
+        retryCount++;
+      } else {
+        console.log(`✅ Inserted ${chunk.length} users into ${TABLE_NAME}`);
+        break;
+      }
+    } while (retryCount < 5);
+
+    if (retryCount === 5) {
+      console.error("❌ Gave up on some unprocessed items after 5 retries.");
     }
   }
 }
@@ -102,6 +121,8 @@ async function batchWrite(items) {
   try {
     await deleteAllUsers();
     const users = await parseCSV("./scripts/seed-data/users.csv");
+    console.log(`Parsed ${users.length} users`);
+    console.log(users.map((u) => u.displayName));
     await batchWrite(users);
     console.log("🎉 User table seeded successfully.");
   } catch (err) {
