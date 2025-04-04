@@ -3,6 +3,7 @@ import { BarChart } from "@mui/x-charts/BarChart";
 
 import { useTheme, useUser } from "@/hooks";
 import { FormatStatsResult } from "@/types";
+import { getContrastText } from "@/utils";
 
 interface UserPodiumChartProps extends BoxProps {
   userWins: FormatStatsResult["userWins"];
@@ -45,6 +46,7 @@ export const UserPodiumChart = ({
       // fallback to a substring of userId if displayName is unavailable
       label: user?.displayName ?? userId.slice(0, 6),
       wins,
+      barLabel: `${wins} win${wins > 1 ? "s" : ""}`,
       // choose color based on theme mode
       color: isDarkMode ? user?.darkThemeColor : user?.lightThemeColor,
     };
@@ -52,7 +54,8 @@ export const UserPodiumChart = ({
 
   // extract labels and colors for the colorMap
   const labels = data.map((d) => d.label);
-  const colors = data.map((d) => d.color ?? "gray");
+  const colors = data.map((d) => d.color ?? muiTheme.palette.grey[400]);
+  const labelColors = colors.map(getContrastText);
 
   return (
     <Box {...boxProps}>
@@ -75,14 +78,32 @@ export const UserPodiumChart = ({
         series={[
           {
             data: data.map((d) => d.wins),
+            valueFormatter: (value) =>
+              `${value} win${Number(value) > 1 ? "s" : ""}`,
           },
         ]}
         height={200}
         margin={{ top: 10, bottom: 10, left: 10, right: 10 }}
         yAxis={[{ tickLabelStyle: { display: "none" } }]}
         grid={{ horizontal: false, vertical: false }}
+        barLabel={(item) => String(item.value)}
         slotProps={{
           legend: { hidden: true },
+        }}
+        sx={{
+          "& .MuiBarLabel-root": {
+            fontWeight: 700,
+            fontSize: 20,
+          },
+          ...labelColors.reduce(
+            (acc, color, index) => {
+              acc[`& .MuiBarLabel-root:nth-of-type(${index + 1})`] = {
+                fill: color,
+              };
+              return acc;
+            },
+            {} as Record<string, any>,
+          ),
         }}
       />
     </Box>
