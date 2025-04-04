@@ -20,12 +20,26 @@ function parseCSV(filePath) {
       .pipe(csv())
       .on("data", (row) => {
         const item = {
-          id: row.id === "none" ? "unranked" : row.id,
-          displayName: row.displayName,
+          id: row.id,
           createdAt: row.createdAt,
           updatedAt: row.updatedAt,
-          inactive: row.inactive,
+          displayName: row.displayName,
+          description: row.description,
+          playerRange: row.playerRange,
         };
+
+        if (row.inactive) {
+          item.inactive = row.inactive === "true";
+        }
+
+        if (row.singleton) {
+          item.singleton = row.singleton === "true";
+        }
+
+        if (row.requiresCommander === "true") {
+          item.requiresCommander = true;
+          item.validCommanderFilters = row.validCommanderFilters;
+        }
         items.push(item);
       })
       .on("end", () => resolve(items))
