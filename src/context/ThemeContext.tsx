@@ -8,6 +8,10 @@ import {
   createTheme,
   useMediaQuery,
 } from "@mui/material";
+import {
+  ChartsColorPaletteCallback,
+  cheerfulFiestaPalette,
+} from "@mui/x-charts";
 import type {} from "@mui/x-data-grid/themeAugmentation";
 import {
   PropsWithChildren,
@@ -24,6 +28,7 @@ import { usePersistentState } from "@/hooks/usePersistentState";
 interface ThemeContextType {
   mode: PaletteMode;
   muiTheme: Theme;
+  chartPalette: ChartsColorPaletteCallback;
   toggleTheme: (event: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void;
   setLightColor: (color: string) => void;
   setDarkColor: (color: string) => void;
@@ -193,13 +198,14 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
     [mode, setMode],
   );
 
-  const colorMode = useMemo(
+  const colorMode: ThemeContextType = useMemo(
     () => ({
-      toggleTheme,
       mode,
+      muiTheme,
+      chartPalette: cheerfulFiestaPalette,
+      toggleTheme,
       setLightColor,
       setDarkColor,
-      muiTheme,
     }),
     [mode, setLightColor, setDarkColor, muiTheme],
   );

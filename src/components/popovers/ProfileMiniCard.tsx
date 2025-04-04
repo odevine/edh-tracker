@@ -12,9 +12,9 @@ import {
 import { DateTime } from "luxon";
 import { navigate } from "raviger";
 
-import { useDeck, useMatch } from "@/hooks";
+import { useDeck } from "@/hooks";
 import { User } from "@/types";
-import { getUserStats } from "@/utils";
+import { percentFormatter } from "@/utils";
 
 interface ProfileMiniCardProps {
   profile: User;
@@ -26,9 +26,18 @@ export const ProfileMiniCard: React.FC<ProfileMiniCardProps> = ({
   showActions,
 }) => {
   const { allDecks } = useDeck();
-  const { allMatches } = useMatch();
-  const userStats = getUserStats(profile.id, allDecks, allMatches);
 
+  const deckCount = allDecks.filter(
+    (deck) => deck.userId === profile.id,
+  ).length;
+  const totalWins = Object.values(profile.formatStats).reduce(
+    (acc, value) => acc + value.gamesWon,
+    0,
+  );
+  const totalMatches = Object.values(profile.formatStats).reduce(
+    (acc, value) => acc + value.gamesPlayed,
+    0,
+  );
   return (
     <Card>
       <Stack
@@ -92,11 +101,11 @@ export const ProfileMiniCard: React.FC<ProfileMiniCardProps> = ({
           </Grid>
           <Grid item xs={4}>
             <Stack spacing={1} alignItems="flex-end">
-              <Typography variant="body2">{userStats.deckCount}</Typography>
-              <Typography variant="body2">{userStats.totalWins}</Typography>
-              <Typography variant="body2">{userStats.totalMatches}</Typography>
+              <Typography variant="body2">{deckCount}</Typography>
+              <Typography variant="body2">{totalWins}</Typography>
+              <Typography variant="body2">{totalMatches}</Typography>
               <Typography variant="body2">
-                {(userStats.winRate * 100).toFixed(2)}%
+                {percentFormatter.format(totalWins / (totalMatches ?? 1))}
               </Typography>
             </Stack>
           </Grid>

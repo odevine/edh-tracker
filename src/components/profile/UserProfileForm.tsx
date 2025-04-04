@@ -106,10 +106,10 @@ export const UserProfileForm: React.FC = () => {
   };
 
   return (
-    <Card>
+    <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <CardHeader title="profile" />
       <Divider />
-      <CardContent>
+      <CardContent sx={{ flex: 1 }}>
         <Stack spacing={3}>
           <TextField
             label="display name"
@@ -145,7 +145,7 @@ export const UserProfileForm: React.FC = () => {
           </Stack>
         </Stack>
       </CardContent>
-      <CardActions sx={{ justifyContent: "flex-end" }}>
+      <CardActions sx={{ justifyContent: "flex-end", m: 1 }}>
         <Button
           type="submit"
           variant="contained"
