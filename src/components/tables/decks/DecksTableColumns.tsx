@@ -1,4 +1,5 @@
-import { Box, Chip, Link, Stack, Typography } from "@mui/material";
+import { Delete, Edit } from "@mui/icons-material";
+import { Box, Chip, IconButton, Link, Stack, Typography } from "@mui/material";
 import { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import PopupState, { bindHover, bindPopover } from "material-ui-popup-state";
 import HoverPopover from "material-ui-popup-state/HoverPopover";
@@ -9,12 +10,25 @@ import {
   CommanderColors,
   ProfileMiniCard,
 } from "@/components";
-import { DeckWithStats, Format, User } from "@/types";
+import { Deck, DeckWithStats, Format, User } from "@/types";
 
-export function getDecksColumns(
-  usersMap: Map<string, User>,
-  formatsMap: Map<string, Format>,
-): GridColDef[] {
+interface DeckColumnOptions {
+  usersMap: Map<string, User>;
+  formatsMap: Map<string, Format>;
+  currentUserId: string;
+  onEdit: (deck: Deck) => void;
+  onDelete: (deck: Deck) => void;
+  hasDeckBeenUsed: (deckId: string) => boolean;
+}
+
+export const getDecksColumns = ({
+  usersMap,
+  formatsMap,
+  currentUserId,
+  onEdit,
+  onDelete,
+  hasDeckBeenUsed,
+}: DeckColumnOptions): GridColDef[] => {
   return [
     {
       field: "displayName",
@@ -140,12 +154,7 @@ export function getDecksColumns(
       sortable: false,
       type: "custom",
       renderCell: (params: GridRenderCellParams<DeckWithStats>) => (
-        <CommanderColors
-          colors={[
-            ...(params.row.commanderColors ?? []),
-            ...(params.row.secondCommanderColors ?? []),
-          ]}
-        />
+        <CommanderColors colors={params.row.deckColors} />
       ),
     },
     {
@@ -192,5 +201,31 @@ export function getDecksColumns(
             })
           : "-",
     },
+    {
+      field: "actions",
+      headerName: "",
+      sortable: false,
+      filterable: false,
+      width: 80,
+      renderCell: (params: GridRenderCellParams<Deck>) =>
+        params.row.userId === currentUserId && (
+          <Stack direction="row" spacing={0.5}>
+            {onEdit && (
+              <IconButton size="small" onClick={() => onEdit(params.row)}>
+                <Edit fontSize="small" />
+              </IconButton>
+            )}
+            {onDelete && (
+              <IconButton
+                size="small"
+                onClick={() => onDelete(params.row)}
+                disabled={hasDeckBeenUsed(params.row.id)}
+              >
+                <Delete fontSize="small" />
+              </IconButton>
+            )}
+          </Stack>
+        ),
+    },
   ];
-}
+};

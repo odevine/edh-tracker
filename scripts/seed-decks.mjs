@@ -13,15 +13,6 @@ const REGION = process.env.AWS_REGION || "us-east-1";
 
 const client = new DynamoDBClient({ region: REGION });
 
-function parseColorArray(jsonStr) {
-  try {
-    const parsed = JSON.parse(jsonStr);
-    return parsed.map((colorObj) => colorObj.S);
-  } catch {
-    return [];
-  }
-}
-
 async function deleteAllDecks() {
   console.log("🧹 Deleting all existing decks...");
 
@@ -72,18 +63,12 @@ function parseCSV(filePath) {
           updatedAt: row.updatedAt,
         };
 
-        if (row.commanderColors) {
-          item.commanderColors = parseColorArray(row.commanderColors);
+        if (row.deckColors) {
+          item.deckColors = row.deckColors.split(",").map((c) => c.trim());
         }
 
         if (row.secondCommanderName)
           item.secondCommanderName = row.secondCommanderName;
-
-        if (row.secondCommanderColors) {
-          item.secondCommanderColors = parseColorArray(
-            row.secondCommanderColors,
-          );
-        }
 
         if (row.link) {
           item.link = row.link;
@@ -92,7 +77,7 @@ function parseCSV(filePath) {
           item.cost = parseFloat(row.cost);
         }
         if (row.inactive) {
-          item.inactive = row.inactive === "true";
+          item.inactive = row.inactive === "True";
         }
 
         items.push(item);
@@ -129,7 +114,9 @@ async function batchWrite(items) {
 (async () => {
   try {
     await deleteAllDecks();
-    const decks = await parseCSV("./scripts/seed-data/decks.csv");
+    const decks = await parseCSV(
+      "./scripts/seed-data/decks_with_deckColors.csv",
+    );
     await batchWrite(decks);
     console.log("🎉 Deck table seeded successfully.");
   } catch (err) {

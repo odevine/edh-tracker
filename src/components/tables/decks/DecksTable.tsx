@@ -8,9 +8,11 @@ import {
   getDecksColumns,
 } from "@/components";
 import {
+  useAuth,
   useDeck,
   useDecksFilters,
   useFormat,
+  useMatch,
   useTheme,
   useUser,
 } from "@/hooks";
@@ -19,12 +21,20 @@ import { computeDeckStats, getFullColorNames } from "@/utils";
 
 interface IDecksTableProps {
   customButtons: JSX.Element[];
+  onEdit: (deck: Deck) => void;
+  onDelete: (deck: Deck) => void;
 }
 
-export const DecksTable = ({ customButtons }: IDecksTableProps) => {
+export const DecksTable = ({
+  customButtons,
+  onEdit,
+  onDelete,
+}: IDecksTableProps) => {
+  const { userId } = useAuth();
   const { allUsers } = useUser();
   const { getFilteredDecks, decksLoading } = useDeck();
   const { allFormats } = useFormat();
+  const { hasDeckBeenUsed } = useMatch();
   const { mode } = useTheme();
 
   const {
@@ -70,7 +80,15 @@ export const DecksTable = ({ customButtons }: IDecksTableProps) => {
   );
 
   const columns = useMemo(
-    () => getDecksColumns(userProfileMap, deckCategoriesMap),
+    () =>
+      getDecksColumns({
+        hasDeckBeenUsed,
+        onEdit,
+        onDelete,
+        currentUserId: userId as string,
+        usersMap: userProfileMap,
+        formatsMap: deckCategoriesMap,
+      }),
     [userProfileMap, deckCategoriesMap],
   );
 
@@ -82,7 +100,12 @@ export const DecksTable = ({ customButtons }: IDecksTableProps) => {
       filterColor,
     });
 
-    return computeDeckStats(baseDecks, includeUnranked);
+    const computed = computeDeckStats(baseDecks, includeUnranked);
+    // sort decks so that the most recently updated appear first
+    return [...computed].sort(
+      (a, b) =>
+        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+    );
   }, [
     includeInactive,
     filterUser,

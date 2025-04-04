@@ -6,10 +6,9 @@ export interface Deck {
   formatId: string;
   displayName: string;
   formatStats: FormatStats;
-  commanderName: string;
-  commanderColors?: string[];
+  deckColors: string[];
+  commanderName?: string;
   secondCommanderName?: string;
-  secondCommanderColors?: (string | null)[];
   link?: string;
   cost?: number;
   inactive?: boolean;
