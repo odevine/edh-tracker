@@ -143,14 +143,13 @@ export const NavToolbar = () => {
       transformOrigin={{ vertical: "top", horizontal: "right" }}
       sx={{ top: 6 }}
     >
-      {isAuthenticated ? (
-        <>
-          <MenuItem onClick={() => handleNavigate(`/users/${userId}`)}>
-            view profile
-          </MenuItem>
-          <MenuItem onClick={handleSignOut}>log out</MenuItem>
-        </>
-      ) : (
+      {isAuthenticated && (
+        <MenuItem onClick={() => handleNavigate(`/users/${userId}`)}>
+          view profile
+        </MenuItem>
+      )}
+      {isAuthenticated && <MenuItem onClick={handleSignOut}>log out</MenuItem>}
+      {!isAuthenticated && (
         <MenuItem onClick={() => handleNavigate("/login")}>log in</MenuItem>
       )}
     </Menu>
