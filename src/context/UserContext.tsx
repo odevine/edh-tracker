@@ -26,7 +26,9 @@ export const UserProvider = ({ children }: PropsWithChildren<{}>) => {
     queryKey: ["users"],
     queryFn: async () => {
       const res = await fetchWithAuth("/users", accessToken);
-      if (!res.ok) throw new Error("failed to fetch users");
+      if (!res.ok) {
+        throw new Error("failed to fetch users");
+      }
       return res.json();
     },
     enabled: !!accessToken && !isInitializing,

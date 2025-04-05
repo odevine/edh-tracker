@@ -1,14 +1,17 @@
+import { Edit } from "@mui/icons-material";
 import {
   Avatar,
+  Badge,
   Box,
-  Button,
   Card,
   CardContent,
   CardHeader,
   Container,
   Divider,
+  IconButton,
   Stack,
   Switch,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { useMemo, useState } from "react";
@@ -107,26 +110,45 @@ export const ProfilePage = ({ profileId }: { profileId: string }) => {
           >
             <CardContent sx={{ height: "100%" }}>
               <Stack spacing={2} alignItems="center" sx={{ height: "100%" }}>
-                <Avatar
-                  sx={{ height: 120, width: 120 }}
-                  src={currentProfile.profilePictureURL ?? ""}
-                />
+                {ownUser ? (
+                  <Badge
+                    overlap="circular"
+                    anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                    badgeContent={
+                      <Tooltip title="edit profile" arrow placement="right">
+                        <IconButton
+                          onClick={() => setEditOpen(true)}
+                          sx={(theme) => ({
+                            backgroundColor: "primary.main",
+                            color: "primary.contrastText",
+                            border: `1px solid ${theme.palette.primary.contrastText}`,
+                            "&:hover": {
+                              backgroundColor: "primary.light",
+                            },
+                          })}
+                        >
+                          <Edit />
+                        </IconButton>
+                      </Tooltip>
+                    }
+                  >
+                    <Avatar
+                      sx={{ height: 120, width: 120 }}
+                      src={currentProfile.profilePictureURL ?? ""}
+                    />
+                  </Badge>
+                ) : (
+                  <Avatar
+                    sx={{ height: 120, width: 120 }}
+                    src={currentProfile.profilePictureURL ?? ""}
+                  />
+                )}
                 <Typography
                   variant="h5"
                   sx={{ color: userColor ?? "inherit", fontWeight: 600 }}
                 >
                   {currentProfile.displayName}
                 </Typography>
-
-                {ownUser && (
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    onClick={() => setEditOpen(true)}
-                  >
-                    edit profile
-                  </Button>
-                )}
 
                 <Divider sx={{ width: "100%", my: 1 }} />
 

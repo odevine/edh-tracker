@@ -34,13 +34,13 @@ export const UserProfileModal = ({
   onClose: () => void;
 }) => {
   const { isAuthenticated } = useAuth();
-  const { currentUserProfile, updateUserProfile } = useUser();
+  const { currentUserProfile, updateUserProfile, usersLoading } = useUser();
 
   const [displayName, setDisplayName] = useState("");
+  const [status, setStatus] = useState("");
   const [lightThemeColor, setLightThemeColor] = useState("");
   const [darkThemeColor, setDarkThemeColor] = useState("");
   const [profilePictureURL, setProfilePictureURL] = useState("");
-  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
 
   useEffect(() => {
@@ -55,15 +55,19 @@ export const UserProfileModal = ({
   const validateForm = (): boolean => {
     const localErrors: string[] = [];
 
-    if (displayName.length > 16) {
-      localErrors.push("16 character limit on display names");
+    if (displayName.trim().length > 16 || displayName.trim().length < 3) {
+      localErrors.push("display names should be 3-16 characters");
+    }
+
+    if (status.trim().length > 40) {
+      localErrors.push("statuses should be less than 40 characters");
     }
 
     if (lightThemeColor && !convertToColor(lightThemeColor)) {
-      localErrors.push("Invalid light theme color");
+      localErrors.push("invalid light theme color");
     }
     if (darkThemeColor && !convertToColor(darkThemeColor)) {
-      localErrors.push("Invalid dark theme color");
+      localErrors.push("invalid dark theme color");
     }
 
     setErrors(localErrors);
@@ -76,21 +80,15 @@ export const UserProfileModal = ({
     }
 
     const updateData: UpdateUserInput = {
-      displayName,
+      displayName: displayName.trim(),
+      status: status.trim(),
       lightThemeColor: convertToColor(lightThemeColor) ?? undefined,
       darkThemeColor: convertToColor(darkThemeColor) ?? undefined,
       profilePictureURL: profilePictureURL || undefined,
     };
 
-    setLoading(true);
-    try {
-      await updateUserProfile(updateData);
-      onClose();
-    } catch (e) {
-      console.error("Update failed", e);
-    } finally {
-      setLoading(false);
-    }
+    await updateUserProfile(updateData);
+    onClose();
   };
 
   return (
@@ -104,20 +102,30 @@ export const UserProfileModal = ({
           backgroundColor: "background.paper",
           borderRadius: 2,
           boxShadow: 24,
-          p: 4,
+          pt: 2,
+          px: 4,
+          pb: 3,
           minWidth: { xs: 310, sm: 420 },
-          maxWidth: "90vw",
           outline: "none",
+          "&:focus": {
+            outline: "none",
+          },
         }}
       >
         <Typography variant="h6" gutterBottom>
           edit profile
         </Typography>
-        <Stack spacing={3}>
+        <Stack spacing={3} sx={{ mt: 2 }}>
           <TextField
+            required
             label="display name"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
+          />
+          <TextField
+            label="status"
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
           />
           <MuiColorInput
             isAlphaHidden
@@ -147,10 +155,10 @@ export const UserProfileModal = ({
             <Button
               onClick={handleSubmit}
               variant="contained"
-              disabled={loading}
+              disabled={usersLoading}
               sx={{ width: 150, height: 40 }}
             >
-              {loading ? <CircularProgress size={24} /> : "update profile"}
+              {usersLoading ? <CircularProgress size={24} /> : "update profile"}
             </Button>
           </Stack>
         </Stack>
