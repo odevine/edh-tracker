@@ -32,8 +32,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run Build
-        run: npm run build
+      - name: Run Frontend Build (dev)
+        if: github.ref == 'refs/heads/dev'
+        run: npm run build:frontend:dev
+
+      - name: Run Frontend Build (prod)
+        if: github.ref == 'refs/heads/main'
+        run: npm run build:frontend:prod
 
       - name: Install jq
         run: sudo apt-get install -y jq
