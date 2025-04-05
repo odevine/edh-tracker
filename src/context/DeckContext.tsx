@@ -175,19 +175,10 @@ export const DeckProvider = ({ children }: PropsWithChildren<{}>) => {
     filterColor: string[];
   }): Deck[] =>
     allDecks.filter((deck) => {
-      const commanderColors = deck.commanderColors ?? [];
-      const secondCommanderColors = (deck.secondCommanderColors ??
-        []) as string[];
-      const combinedColors = [
-        ...new Set([...commanderColors, ...secondCommanderColors]),
-      ];
-
-      return (
-        (includeInactive || !deck.inactive) &&
+      (includeInactive || !deck.inactive) &&
         (filterUser === "" || deck.userId === filterUser) &&
         (!filterFormat || deck.formatId === filterFormat) &&
-        matchesExactColors(combinedColors, filterColor)
-      );
+        matchesExactColors(deck.deckColors, filterColor);
     });
 
   return (
