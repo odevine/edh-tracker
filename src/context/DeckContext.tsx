@@ -175,10 +175,12 @@ export const DeckProvider = ({ children }: PropsWithChildren<{}>) => {
     filterColor: string[];
   }): Deck[] =>
     allDecks.filter((deck) => {
-      (includeInactive || !deck.inactive) &&
+      return (
+        (includeInactive || !deck.inactive) &&
         (filterUser === "" || deck.userId === filterUser) &&
         (!filterFormat || deck.formatId === filterFormat) &&
-        matchesExactColors(deck.deckColors, filterColor);
+        matchesExactColors(deck.deckColors, filterColor)
+      );
     });
 
   return (
