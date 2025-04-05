@@ -51,10 +51,15 @@ export const useCommanderSearch = () => {
   const debouncedSearch = useRef(
     debounce(async (searchTerm: string, alternateFilters?: string) => {
       if (searchTerm.length >= 3) {
+        const baseSearchUrl = `https://api.scryfall.com/cards/search?q=${encodeURIComponent(searchTerm)}+`;
+        let commanderFilters = alternateFilters;
+        if (!commanderFilters || commanderFilters.length === 0) {
+          commanderFilters = "game%3Apaper+is%3Acommander";
+        }
+        const fullSearchUrl = baseSearchUrl + commanderFilters;
+
         try {
-          const response = await axios.get(
-            `https://api.scryfall.com/cards/search?q=${encodeURIComponent(searchTerm)}+${alternateFilters ?? "game%3Apaper+is%3Acommander"}`,
-          );
+          const response = await axios.get(fullSearchUrl);
           setSearchResults(response.data.data);
         } catch (err) {
           console.error("Scryfall search failed", err);
@@ -149,9 +154,11 @@ export const matchesExactColors = (
   if (filterColors.length === 0) {
     return true;
   }
-  if (filterColors.includes("C")) {
-    return deckColors.length === 0 && filterColors.length === 1;
+
+  if (deckColors.includes("C")) {
+    return filterColors.includes("C");
   }
+
   return (
     deckColors.length === filterColors.length &&
     deckColors.every((color) => filterColors.includes(color))
