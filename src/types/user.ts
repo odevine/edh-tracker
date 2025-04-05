@@ -6,16 +6,16 @@ export type AuthContext = {
 };
 
 export interface User {
+  createdAt: string;
+  updatedAt: string;
   id: string;
   displayName: string;
   formatStats: FormatStats;
-  description?: string;
+  status?: string;
   lightThemeColor?: string;
   darkThemeColor?: string;
   profilePictureURL?: string;
   lastOnline?: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export type CreateUserInput = Omit<User, "id" | "createdAt" | "updatedAt"> & {
