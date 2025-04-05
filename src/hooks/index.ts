@@ -2,6 +2,7 @@ export * from "./useApp";
 export * from "./useAuth";
 export * from "./useDeck";
 export * from "./useDecksFilters";
+export * from "./useDynamicFavicon";
 export * from "./useFormat";
 export * from "./useMatch";
 export * from "./useMatchFilters";

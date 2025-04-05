@@ -22,7 +22,7 @@ import {
   useMemo,
 } from "react";
 
-import { useUser } from "@/hooks";
+import { useDynamicFavicon, useUser } from "@/hooks";
 import { usePersistentState } from "@/hooks/usePersistentState";
 
 interface ThemeContextType {
@@ -83,6 +83,8 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
       thumbColor: mode === "light" ? "#999692" : "#524c54",
     };
   }, [mode, lightColor, darkColor]);
+
+  useDynamicFavicon(themeColors.primary);
 
   // Final MUI theme
   const muiTheme = useMemo(
