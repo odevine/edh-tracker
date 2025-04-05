@@ -48,7 +48,7 @@ jobs:
           fi
           OUTPUTS=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --query "Stacks[0].Outputs" --output json)
           DIST_ID=$(echo $OUTPUTS | jq -r '.[] | select(.OutputKey=="FrontendDistributionId") | .OutputValue')
-          BUCKET_NAME=$(echo $OUTPUTS | jq -r '.[] | select(.OutputKey=="FrontendURL") | .OutputValue' | sed 's|https://||' | cut -d. -f1)
+          BUCKET_NAME=$(echo $OUTPUTS | jq -r '.[] | select(.OutputKey=="FrontendBucketName") | .OutputValue')
           echo "distribution_id=$DIST_ID" >> $GITHUB_OUTPUT
           echo "bucket_name=$BUCKET_NAME" >> $GITHUB_OUTPUT
         env:
