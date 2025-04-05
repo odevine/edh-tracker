@@ -1,18 +1,81 @@
+import { HistoryEdu, LibraryBooks, RocketLaunch } from "@mui/icons-material";
 import {
   Box,
   Button,
   Container,
-  Grid,
   Link,
   Modal,
   Paper,
   Stack,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
+
 import { navigate } from "raviger";
 import { useState } from "react";
 
-import { useAuth } from "@/hooks";
+import { useAuth, useTheme } from "@/hooks";
+
+const features = [
+  {
+    icon: <LibraryBooks fontSize="large" color="primary" />,
+    title: "deck management",
+    description: "organize, edit, and manage your decks with ease",
+  },
+  {
+    icon: <HistoryEdu fontSize="large" color="primary" />,
+    title: "match history",
+    description: "log and edit match results for detailed statistics",
+  },
+  {
+    icon: <RocketLaunch fontSize="large" color="primary" />,
+    title: "easy setup",
+    description: "get started quickly with a user-friendly interface",
+  },
+];
+
+const FeatureCards = (): JSX.Element => {
+  const { muiTheme } = useTheme();
+  const isSm = useMediaQuery(muiTheme.breakpoints.down("sm"));
+
+  return (
+    <Box
+      display="flex"
+      flexWrap="wrap"
+      justifyContent="center"
+      gap={4}
+      sx={{ mt: 4 }}
+    >
+      {features.map((feature) => (
+        <Paper
+          key={feature.title}
+          elevation={0}
+          sx={{
+            flex: `1 1 ${isSm ? "100%" : "250px"}`,
+            padding: 3,
+            border: "1px solid",
+            borderColor: "divider",
+            backgroundColor: "background.default",
+            borderRadius: 2,
+            minWidth: "250px",
+            maxWidth: "300px",
+            textAlign: "center",
+          }}
+        >
+          <Stack spacing={1} alignItems="center">
+            {feature.icon}
+            <Typography variant="subtitle1" fontWeight={600}>
+              {feature.title}
+            </Typography>
+            <Typography variant="body2" color="textSecondary">
+              {feature.description}
+            </Typography>
+          </Stack>
+        </Paper>
+      ))}
+    </Box>
+  );
+};
 
 export const LandingPage = (): JSX.Element => {
   const [accessRequestOpen, setAccessRequestOpen] = useState(false);
@@ -109,54 +172,8 @@ export const LandingPage = (): JSX.Element => {
       </Modal>
 
       <Container sx={{ py: 8, flexGrow: 1 }} maxWidth="md">
-        <Grid container spacing={4}>
-          <Grid item xs={12} sm={6} md={4}>
-            <Paper elevation={3} sx={{ padding: 2 }}>
-              <Typography variant="h5" gutterBottom>
-                deck management
-              </Typography>
-              <Typography>
-                organize, edit, and manage your decks with ease
-              </Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <Paper elevation={3} sx={{ padding: 2 }}>
-              <Typography variant="h5" gutterBottom>
-                match history
-              </Typography>
-              <Typography>
-                log and edit match results for detailed statistics
-              </Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <Paper elevation={3} sx={{ padding: 2 }}>
-              <Typography variant="h5" gutterBottom>
-                easy setup
-              </Typography>
-              <Typography>
-                get started quickly with a user-friendly interface
-              </Typography>
-            </Paper>
-          </Grid>
-        </Grid>
+        <FeatureCards />
       </Container>
-
-      <Box sx={{ bgcolor: "background.paper", py: 1 }}>
-        <Container maxWidth="lg">
-          <Typography variant="body2" align="center">
-            © {new Date().getFullYear()} odevine | licensed under the{" "}
-            <Link
-              href="https://opensource.org/licenses/MIT"
-              target="_blank"
-              rel="noopener"
-            >
-              MIT License
-            </Link>
-          </Typography>
-        </Container>
-      </Box>
     </Box>
   );
 };

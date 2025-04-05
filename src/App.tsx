@@ -1,5 +1,5 @@
-import { Box, Stack, Typography } from "@mui/material";
-import { useRoutes } from "raviger";
+import { Box, Container, Link, Stack, Typography } from "@mui/material";
+import { useMatch as useRouteMatch, useRoutes } from "raviger";
 
 import {
   AppAlertList,
@@ -77,23 +77,45 @@ export const App = () => {
   const { decksLoading } = useDeck();
   const routeResult = useRoutes(baseRoutes);
 
+  const isLandingPage = useRouteMatch("/");
+
   const showLoading = usersLoading || matchesLoading || decksLoading;
 
   return (
-    <Stack flexDirection="column" height="100vh" overflow="hidden">
-      <Toolbar />
-      <Box
-        sx={{
-          flex: 1,
-          overflowY: "auto",
-          scrollbarGutter: "stable",
-          p: 3,
-        }}
+    <>
+      <Stack
+        flexDirection="column"
+        height={isLandingPage ? "calc(100vh - 36px)" : "100vh"}
+        overflow="hidden"
       >
-        {routeResult ?? <h1>404 Not Found</h1>}
+        <Toolbar />
+        <Box
+          sx={{
+            flex: 1,
+            overflowY: "auto",
+            scrollbarGutter: "stable",
+            p: 3,
+          }}
+        >
+          {routeResult ?? <h1>404 Not Found</h1>}
+        </Box>
+        {showLoading && <LoadingBackdrop />}
+        <AppAlertList messages={appMessages} onDelete={deleteAppMessage} />
+      </Stack>
+      <Box sx={{ bgcolor: "background.paper", py: 1 }}>
+        <Container maxWidth="xl">
+          <Typography variant="body2" align="center">
+            © {new Date().getFullYear()} odevine | licensed under the{" "}
+            <Link
+              href="https://opensource.org/licenses/MIT"
+              target="_blank"
+              rel="noopener"
+            >
+              MIT License
+            </Link>
+          </Typography>
+        </Container>
       </Box>
-      {showLoading && <LoadingBackdrop />}
-      <AppAlertList messages={appMessages} onDelete={deleteAppMessage} />
-    </Stack>
+    </>
   );
 };
