@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 import { ColorSelector } from "@/components";
 import { useAuth, useDeck, useFormat, useMatch } from "@/hooks";
 import { CreateDeckInput, Format, UpdateDeckInput } from "@/types";
-import { getCommanderColors, useCommanderSearch } from "@/utils";
+import { getCommanderColors, sortColors, useCommanderSearch } from "@/utils";
 
 interface ICommander {
   label: string;
@@ -181,16 +181,20 @@ export const DeckModal = (props: {
 
   const handleSubmit = () => {
     if (isAuthenticated && validateDeckDetails()) {
-      // Union + sort logic
+      // union + sort logic
       let combinedColors: string[] = [];
       if (commander?.colors?.length || secondCommander?.colors?.length) {
         const colorSet = new Set([
           ...(commander?.colors ?? []),
           ...(secondCommander?.colors ?? []),
         ]);
-        combinedColors = Array.from(colorSet).sort();
+        combinedColors = sortColors(Array.from(colorSet));
       } else {
         combinedColors = deckColors;
+      }
+
+      if (combinedColors.length === 0) {
+        combinedColors.push("C");
       }
 
       const deckInput: CreateDeckInput | UpdateDeckInput = {
