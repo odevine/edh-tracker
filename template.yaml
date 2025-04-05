@@ -448,6 +448,10 @@ Outputs:
     Description: "CloudFront URL for the frontend"
     Value: !Sub "https://${FrontendDistribution.DomainName}"
 
+  FrontendBucketName:
+    Description: "Name of the S3 bucket for the frontend"
+    Value: !Ref FrontendBucket
+
   FrontendDistributionId:
     Description: "CloudFront Distribution ID"
     Value: !Ref FrontendDistribution
