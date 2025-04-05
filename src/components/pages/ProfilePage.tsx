@@ -121,7 +121,7 @@ export const ProfilePage = ({ profileId }: { profileId: string }) => {
                           sx={(theme) => ({
                             backgroundColor: "primary.main",
                             color: "primary.contrastText",
-                            border: `1px solid ${theme.palette.primary.contrastText}`,
+                            border: `2px solid ${theme.palette.primary.contrastText}`,
                             "&:hover": {
                               backgroundColor: "primary.light",
                             },
@@ -133,7 +133,7 @@ export const ProfilePage = ({ profileId }: { profileId: string }) => {
                     }
                   >
                     <Avatar
-                      sx={{ height: 120, width: 120 }}
+                      sx={{ height: 120, width: 120, border: theme => `2px solid ${theme.palette.primary.main}` }}
                       src={currentProfile.profilePictureURL ?? ""}
                     />
                   </Badge>

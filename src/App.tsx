@@ -1,5 +1,5 @@
 import { Box, Container, Link, Stack, Typography } from "@mui/material";
-import { useMatch as useRouteMatch, useRoutes } from "raviger";
+import { usePath, useRoutes } from "raviger";
 
 import {
   AppAlertList,
@@ -9,9 +9,9 @@ import {
   LoadingBackdrop,
   LoginPage,
   MatchesPage,
+  NavToolbar,
   ProfilePage,
   RequireAuth,
-  Toolbar,
   UsersPage,
 } from "@/components";
 import { useApp, useDeck, useMatch, useUser } from "@/hooks";
@@ -77,7 +77,7 @@ export const App = () => {
   const { decksLoading } = useDeck();
   const routeResult = useRoutes(baseRoutes);
 
-  const isLandingPage = useRouteMatch("/");
+  const isLandingPage = usePath() === "/";
 
   const showLoading = usersLoading || matchesLoading || decksLoading;
 
@@ -88,7 +88,7 @@ export const App = () => {
         height={isLandingPage ? "calc(100vh - 36px)" : "100vh"}
         overflow="hidden"
       >
-        <Toolbar />
+        <NavToolbar />
         <Box
           sx={{
             flex: 1,
@@ -102,20 +102,22 @@ export const App = () => {
         {showLoading && <LoadingBackdrop />}
         <AppAlertList messages={appMessages} onDelete={deleteAppMessage} />
       </Stack>
-      <Box sx={{ bgcolor: "background.paper", py: 1 }}>
-        <Container maxWidth="xl">
-          <Typography variant="body2" align="center">
-            © {new Date().getFullYear()} odevine | licensed under the{" "}
-            <Link
-              href="https://opensource.org/licenses/MIT"
-              target="_blank"
-              rel="noopener"
-            >
-              MIT License
-            </Link>
-          </Typography>
-        </Container>
-      </Box>
+      {isLandingPage && (
+        <Box sx={{ bgcolor: "background.paper", py: 1 }}>
+          <Container maxWidth="xl">
+            <Typography variant="body2" align="center">
+              © {new Date().getFullYear()} odevine | licensed under the{" "}
+              <Link
+                href="https://opensource.org/licenses/MIT"
+                target="_blank"
+                rel="noopener"
+              >
+                MIT License
+              </Link>
+            </Typography>
+          </Container>
+        </Box>
+      )}
     </>
   );
 };
