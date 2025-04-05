@@ -1,11 +1,13 @@
-import { Box, Stack, Typography, useMediaQuery } from "@mui/material";
+import { Add } from "@mui/icons-material";
+import { Box, Button, Stack, Typography, useMediaQuery } from "@mui/material";
 import { useCallback, useState } from "react";
 
 import { FormatDetailPanel, FormatListCard, FormatModal } from "@/components";
-import { useFormat, useTheme } from "@/hooks";
+import { useAuth, useFormat, useTheme } from "@/hooks";
 import { Format } from "@/types";
 
 export const FormatsPage = () => {
+  const { isAdmin } = useAuth();
   const { allFormats } = useFormat();
   const { muiTheme } = useTheme();
   const showBreakoutDetails = useMediaQuery(muiTheme.breakpoints.up("lg"));
@@ -34,9 +36,27 @@ export const FormatsPage = () => {
     <>
       <Stack flexDirection={{ xs: "column-reverse", lg: "row" }} gap={3}>
         <Box flex={{ xs: "1 1 100%", lg: "0 0 35%" }}>
-          <Typography variant="h5" sx={{ mb: 1 }}>
-            active formats
-          </Typography>
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+            sx={{ mb: 2 }}
+          >
+            <Typography variant="h5">active formats</Typography>
+            {isAdmin && (
+              <Button
+                variant="contained"
+                size="small"
+                startIcon={<Add fontSize="small" />}
+                onClick={() => {
+                  setEditingFormatId("");
+                  setModalOpen(true);
+                }}
+              >
+                add format
+              </Button>
+            )}
+          </Stack>
           {allFormats
             .filter((format) => !format.inactive)
             .map((format) => (
@@ -48,7 +68,7 @@ export const FormatsPage = () => {
                 onEdit={handleEdit}
               />
             ))}
-          <Typography variant="h5" sx={{ mt: 3, mb: 1 }}>
+          <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>
             retired formats
           </Typography>
           {allFormats
@@ -64,7 +84,7 @@ export const FormatsPage = () => {
             ))}
         </Box>
         {showBreakoutDetails && (
-          <Box flex={1} sx={{ mt: 5 }}>
+          <Box flex={1} sx={{ mt: 0 }}>
             <FormatDetailPanel format={selectedFormat} onEdit={handleEdit} />
           </Box>
         )}

@@ -133,7 +133,7 @@ export const FormatModal = (props: {
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          backgroundColor: (theme) => theme.palette.background.paper,
+          backgroundColor: "background.paper",
           borderRadius: 1,
           boxShadow: 24,
           pt: 2,
@@ -145,10 +145,10 @@ export const FormatModal = (props: {
           },
         }}
       >
-        <Typography variant="h4" gutterBottom>
+        <Typography variant="h6" gutterBottom>
           {editingFormat ? "update" : "new"} format
         </Typography>
-        <Stack spacing={3}>
+        <Stack spacing={3} sx={{ mt: 2 }}>
           <TextField
             fullWidth
             required
