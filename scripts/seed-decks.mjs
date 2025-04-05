@@ -89,7 +89,9 @@ function parseCSV(filePath) {
 
 async function batchWrite(items) {
   const chunks = [];
-  while (items.length) chunks.push(items.splice(0, 25));
+  while (items.length) {
+    chunks.push(items.splice(0, 25));
+  }
 
   for (const chunk of chunks) {
     const params = {
@@ -114,9 +116,7 @@ async function batchWrite(items) {
 (async () => {
   try {
     await deleteAllDecks();
-    const decks = await parseCSV(
-      "./scripts/seed-data/decks_with_deckColors.csv",
-    );
+    const decks = await parseCSV("./scripts/seed-data/decks.csv");
     await batchWrite(decks);
     console.log("🎉 Deck table seeded successfully.");
   } catch (err) {

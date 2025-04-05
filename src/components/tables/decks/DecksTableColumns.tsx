@@ -7,7 +7,7 @@ import { navigate } from "raviger";
 
 import {
   CardImageMiniCard,
-  CommanderColors,
+  DeckColorCell,
   ProfileMiniCard,
 } from "@/components";
 import { Deck, DeckWithStats, Format, User } from "@/types";
@@ -154,7 +154,7 @@ export const getDecksColumns = ({
       sortable: false,
       type: "custom",
       renderCell: (params: GridRenderCellParams<DeckWithStats>) => (
-        <CommanderColors colors={params.row.deckColors} />
+        <DeckColorCell deckColors={params.row.deckColors} />
       ),
     },
     {

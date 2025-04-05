@@ -149,9 +149,11 @@ export const matchesExactColors = (
   if (filterColors.length === 0) {
     return true;
   }
-  if (filterColors.includes("C")) {
-    return deckColors.length === 0 && filterColors.length === 1;
+
+  if (deckColors.includes("C")) {
+    return filterColors.includes("C");
   }
+
   return (
     deckColors.length === filterColors.length &&
     deckColors.every((color) => filterColors.includes(color))
