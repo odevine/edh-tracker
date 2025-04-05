@@ -149,8 +149,8 @@ export const LandingPage = (): JSX.Element => {
             requesting access
           </Typography>
           <Typography sx={{ mt: 2 }} align="center" variant="body2">
-            the application is not currently open to the public, if you would
-            like to request access, please email:
+            this application is not currently open to the public, but if you
+            would like to request access, please email:
           </Typography>
           <Link
             href="mailto:edh@devine.dev?subject=Access&Request&body=Message%20Here"
