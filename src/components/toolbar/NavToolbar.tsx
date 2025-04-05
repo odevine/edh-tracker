@@ -47,7 +47,7 @@ export const NavToolbar = () => {
       label: "formats",
       action: () => navigate("/formats"),
       pathMatch: /^\/formats$/,
-      disabled: false,
+      disabled: !isAuthenticated,
     },
     {
       label: "users",
