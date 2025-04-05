@@ -2,7 +2,6 @@ import { HistoryEdu, LibraryBooks, RocketLaunch } from "@mui/icons-material";
 import {
   Box,
   Button,
-  Container,
   Link,
   Modal,
   Paper,
@@ -39,13 +38,7 @@ const FeatureCards = (): JSX.Element => {
   const isSm = useMediaQuery(muiTheme.breakpoints.down("sm"));
 
   return (
-    <Box
-      display="flex"
-      flexWrap="wrap"
-      justifyContent="center"
-      gap={4}
-      sx={{ mt: 4 }}
-    >
+    <Stack direction="row" flexWrap="wrap" justifyContent="center" gap={2}>
       {features.map((feature) => (
         <Paper
           key={feature.title}
@@ -57,7 +50,7 @@ const FeatureCards = (): JSX.Element => {
             borderColor: "divider",
             backgroundColor: "background.default",
             borderRadius: 2,
-            minWidth: "250px",
+            minWidth: "240px",
             maxWidth: "300px",
             textAlign: "center",
           }}
@@ -73,7 +66,7 @@ const FeatureCards = (): JSX.Element => {
           </Stack>
         </Paper>
       ))}
-    </Box>
+    </Stack>
   );
 };
 
@@ -82,50 +75,50 @@ export const LandingPage = (): JSX.Element => {
   const { isAuthenticated } = useAuth();
 
   return (
-    <Box height="100%" display="flex" flexDirection="column">
-      <Box sx={{ py: 8 }}>
-        <Container maxWidth="md">
-          <Typography variant="h3" gutterBottom align="center">
-            edh tracker
-          </Typography>
-          <Typography
-            variant="h6"
-            align="center"
-            color="textSecondary"
-            paragraph
-          >
-            manage your commander decks and track your match history
-            effortlessly
-          </Typography>
-          {!isAuthenticated && (
-            <Stack
-              direction="column"
-              justifyContent="center"
-              alignItems="center"
-              spacing={2}
-              sx={{ mt: 4 }}
-            >
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => navigate("/login")}
-                sx={{ width: 200 }}
-              >
-                login
-              </Button>
-              <Typography color="textSecondary">or</Typography>
-              <Button
-                variant="outlined"
-                color="secondary"
-                onClick={() => setAccessRequestOpen(true)}
-                sx={{ width: 200 }}
-              >
-                request access
-              </Button>
-            </Stack>
-          )}
-        </Container>
+    <Stack
+      height="100%"
+      flexDirection="column"
+      alignItems="center"
+      justifyContent="center"
+      spacing={6}
+    >
+      <FeatureCards />
+      <Box>
+        <Typography variant="h3" gutterBottom align="center">
+          edh tracker
+        </Typography>
+        <Typography variant="h6" align="center" color="textSecondary" paragraph>
+          manage your commander decks and track your match history effortlessly
+        </Typography>
       </Box>
+
+      {!isAuthenticated && (
+        <Stack
+          direction="row"
+          justifyContent="center"
+          alignItems="center"
+          spacing={2}
+          sx={{ mt: 6 }}
+        >
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => navigate("/login")}
+            sx={{ width: 200 }}
+          >
+            login
+          </Button>
+          <Typography color="textSecondary">or</Typography>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={() => setAccessRequestOpen(true)}
+            sx={{ width: 200 }}
+          >
+            request access
+          </Button>
+        </Stack>
+      )}
 
       <Modal
         open={accessRequestOpen}
@@ -162,6 +155,7 @@ export const LandingPage = (): JSX.Element => {
           </Link>
           <Button
             variant="contained"
+            size="small"
             color="primary"
             onClick={() => setAccessRequestOpen(false)}
             sx={{ display: "block", margin: "20px auto 0" }}
@@ -170,10 +164,6 @@ export const LandingPage = (): JSX.Element => {
           </Button>
         </Box>
       </Modal>
-
-      <Container sx={{ py: 8, flexGrow: 1 }} maxWidth="md">
-        <FeatureCards />
-      </Container>
-    </Box>
+    </Stack>
   );
 };
