@@ -103,6 +103,13 @@ Resources:
           AcmCertificateArn: arn:aws:acm:us-east-1:471112850924:certificate/19698d67-7f6d-437b-92e1-7341aebd420a
           SslSupportMethod: sni-only
           MinimumProtocolVersion: TLSv1.2_2021
+        CustomErrorResponses:
+          - ErrorCode: 403
+            ResponsePagePath: /index.html
+            ResponseCode: 200
+          - ErrorCode: 404
+            ResponsePagePath: /index.html
+            ResponseCode: 200
 
   # ----- TABLES -----
   FormatTable:
