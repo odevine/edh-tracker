@@ -14,7 +14,7 @@ export const createTestDeck = (id: string, userId: string): Deck => ({
   formatId: "commander",
   displayName: `Deck for ${userId}`,
   commanderName: "Test Commander",
-  commanderColors: ["U"],
+  deckColors: ["U"],
   formatStats: {},
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
