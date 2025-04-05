@@ -51,7 +51,11 @@ export function FormatDetailPanel({ format, onEdit }: FormatDetailPanelProps) {
           <Typography variant="h4">{currentFormat.displayName}</Typography>
         )}
         {isAdmin && (
-          <Button variant="contained" onClick={() => onEdit(currentFormat.id)}>
+          <Button
+            variant="contained"
+            size="small"
+            onClick={() => onEdit(currentFormat.id)}
+          >
             edit format
           </Button>
         )}
