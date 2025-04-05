@@ -1,5 +1,13 @@
 import { Delete, Edit } from "@mui/icons-material";
-import { Box, Chip, IconButton, Link, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Chip,
+  IconButton,
+  Link,
+  Stack,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import PopupState, { bindHover, bindPopover } from "material-ui-popup-state";
 import HoverPopover from "material-ui-popup-state/HoverPopover";
@@ -16,6 +24,7 @@ interface DeckColumnOptions {
   usersMap: Map<string, User>;
   formatsMap: Map<string, Format>;
   currentUserId: string;
+  filterFormat: string;
   onEdit: (deck: Deck) => void;
   onDelete: (deck: Deck) => void;
   hasDeckBeenUsed: (deckId: string) => boolean;
@@ -25,10 +34,17 @@ export const getDecksColumns = ({
   usersMap,
   formatsMap,
   currentUserId,
+  filterFormat,
   onEdit,
   onDelete,
   hasDeckBeenUsed,
 }: DeckColumnOptions): GridColDef[] => {
+  const filteredFormat = formatsMap.get(filterFormat);
+  let includeCommanderColumn = true;
+  if (filteredFormat && !filteredFormat.requiresCommander) {
+    includeCommanderColumn = false;
+  }
+
   return [
     {
       field: "displayName",
@@ -50,58 +66,67 @@ export const getDecksColumns = ({
         </Stack>
       ),
     },
-    {
-      field: "commanderName",
-      headerName: "commander",
-      flex: 1,
-      minWidth: 300,
-      valueGetter: (_value, row) =>
-        `${row.commanderName ?? ""} ${row.secondCommanderName ?? ""}`,
-      renderCell: (params: GridRenderCellParams<DeckWithStats>) => (
-        <>
-          {[params.row.commanderName, params.row.secondCommanderName].map(
-            (name, index) =>
-              name && (
-                <PopupState key={index} variant="popover">
-                  {(popupState) => (
-                    <Box>
-                      <Typography
-                        {...bindHover(popupState)}
-                        variant="body2"
-                        component="span"
-                        sx={{
-                          cursor: "pointer",
-                          overflow: "hidden",
-                          whiteSpace: "nowrap",
-                          textOverflow: "ellipsis",
-                        }}
-                      >
-                        {name}
-                      </Typography>
-                      <HoverPopover
-                        {...bindPopover(popupState)}
-                        anchorOrigin={{ vertical: "top", horizontal: "left" }}
-                        transformOrigin={{
-                          vertical: "center",
-                          horizontal: "right",
-                        }}
-                      >
-                        <CardImageMiniCard cardName={name} />
-                      </HoverPopover>
-                    </Box>
-                  )}
-                </PopupState>
-              ),
-          )}
-        </>
-      ),
-    },
+    ...(includeCommanderColumn
+      ? [
+          {
+            field: "commanderName",
+            headerName: "commander",
+            flex: 1,
+            minWidth: 300,
+            filterable: false,
+            valueGetter: (_value, row) =>
+              `${row.commanderName ?? ""} ${row.secondCommanderName ?? ""}`,
+            renderCell: (params: GridRenderCellParams<DeckWithStats>) => (
+              <>
+                {[params.row.commanderName, params.row.secondCommanderName].map(
+                  (name, index) =>
+                    name && (
+                      <PopupState key={index} variant="popover">
+                        {(popupState) => (
+                          <Box>
+                            <Typography
+                              {...bindHover(popupState)}
+                              variant="body2"
+                              component="span"
+                              sx={{
+                                cursor: "pointer",
+                                overflow: "hidden",
+                                whiteSpace: "nowrap",
+                                textOverflow: "ellipsis",
+                              }}
+                            >
+                              {name}
+                            </Typography>
+                            <HoverPopover
+                              {...bindPopover(popupState)}
+                              anchorOrigin={{
+                                vertical: "top",
+                                horizontal: "left",
+                              }}
+                              transformOrigin={{
+                                vertical: "center",
+                                horizontal: "right",
+                              }}
+                            >
+                              <CardImageMiniCard cardName={name} />
+                            </HoverPopover>
+                          </Box>
+                        )}
+                      </PopupState>
+                    ),
+                )}
+              </>
+            ),
+          } as GridColDef,
+        ]
+      : []),
     {
       field: "userId",
       headerName: "player",
       minWidth: 120,
       maxWidth: 130,
       flex: 1,
+      filterable: false,
       valueGetter: (value) => usersMap.get(value)?.displayName,
       renderCell: (params: GridRenderCellParams<DeckWithStats>) => {
         const ownerProfile = usersMap.get(params.row.userId);
@@ -148,10 +173,11 @@ export const getDecksColumns = ({
       valueGetter: (value) => formatsMap.get(value)?.displayName ?? "-",
     },
     {
-      field: "commanderColors",
+      field: "deckColors",
       headerName: "colors",
       width: 100,
       sortable: false,
+      filterable: false,
       type: "custom",
       renderCell: (params: GridRenderCellParams<DeckWithStats>) => (
         <DeckColorCell deckColors={params.row.deckColors} />
@@ -207,8 +233,12 @@ export const getDecksColumns = ({
       sortable: false,
       filterable: false,
       width: 80,
-      renderCell: (params: GridRenderCellParams<Deck>) =>
-        params.row.userId === currentUserId && (
+      renderCell: (params: GridRenderCellParams<Deck>) => {
+        if (params.row.userId !== currentUserId) {
+          return null;
+        }
+        const usedDeck = hasDeckBeenUsed(params.row.id);
+        return (
           <Stack direction="row" spacing={0.5}>
             {onEdit && (
               <IconButton size="small" onClick={() => onEdit(params.row)}>
@@ -216,16 +246,29 @@ export const getDecksColumns = ({
               </IconButton>
             )}
             {onDelete && (
-              <IconButton
-                size="small"
-                onClick={() => onDelete(params.row)}
-                disabled={hasDeckBeenUsed(params.row.id)}
+              <Tooltip
+                arrow
+                placement="bottom-end"
+                title={
+                  usedDeck
+                    ? "deck cannot be deleted as it is used in a match, you may instead mark it as inactive"
+                    : undefined
+                }
               >
-                <Delete fontSize="small" />
-              </IconButton>
+                <Box component="span">
+                  <IconButton
+                    size="small"
+                    onClick={() => onDelete(params.row)}
+                    disabled={usedDeck}
+                  >
+                    <Delete fontSize="small" />
+                  </IconButton>
+                </Box>
+              </Tooltip>
             )}
           </Stack>
-        ),
+        );
+      },
     },
   ];
 };

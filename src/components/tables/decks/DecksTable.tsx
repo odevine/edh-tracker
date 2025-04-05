@@ -88,8 +88,9 @@ export const DecksTable = ({
         currentUserId: userId as string,
         usersMap: userProfileMap,
         formatsMap: deckCategoriesMap,
+        filterFormat: filterFormat,
       }),
-    [userProfileMap, deckCategoriesMap],
+    [userProfileMap, deckCategoriesMap, filterFormat],
   );
 
   const filteredDecks: DeckWithStats[] = useMemo(() => {
