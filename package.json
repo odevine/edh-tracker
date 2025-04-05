@@ -1,23 +1,39 @@
 {
   "name": "edh-tracker",
   "private": true,
-  "version": "1.4.1",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
+    "clean": "npm run clean:backend && npm run clean:frontend",
+    "clean:frontend": "rimraf dist",
+    "clean:backend": "rimraf .aws-sam",
     "start": "vite",
+    "preview": "vite preview",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "deploy:dev": "npm run clean:backend && sam build && sam deploy --config-env dev",
+    "deploy:prod": "npm run clean:backend && sam build && sam deploy --config-env prod",
+    "seed": "node scripts/seed-all.mjs",
+    "seed:prod": "SEED_ENV=prod node scripts/seed-all.mjs",
+    "test": "vitest run",
+    "build:frontend:dev": "vite build --mode dev",
+    "build:frontend:prod": "vite build --mode prod",
+    "deploy:frontend:dev": "npm run clean:frontend && npm run build:frontend:dev && aws s3 sync ./dist s3://edhtracker-frontend-dev --delete && aws cloudfront create-invalidation --distribution-id E1RH2N8EDHG45M --paths /*",
+    "deploy:frontend:prod": "npm run clean:frontend && npm run build:frontend:prod && aws s3 sync ./dist s3://edhtracker-frontend-prod --delete && aws cloudfront create-invalidation --distribution-id <PROD_DIST_ID> --paths /*"
   },
   "dependencies": {
-    "@aws-amplify/ui-react": "^6.1.8",
+    "@aws-sdk/client-cognito-identity-provider": "^3.777.0",
+    "@aws-sdk/client-dynamodb": "^3.772.0",
+    "@aws-sdk/lib-dynamodb": "^3.772.0",
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@fontsource-variable/noto-sans-mono": "^5.0.20",
     "@mui/icons-material": "^5.15.15",
     "@mui/material": "^5.15.15",
+    "@mui/x-charts": "^7.28.0",
     "@mui/x-data-grid": "^7.23.3",
     "@mui/x-date-pickers": "^7.4.0",
-    "aws-amplify": "^6.1.4",
+    "@tanstack/react-query": "^5.70.0",
+    "aws-lambda": "^1.0.7",
     "axios": "^1.7.7",
     "lodash": "^4.17.21",
     "luxon": "^3.4.4",
@@ -30,15 +46,21 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "@types/aws-lambda": "^8.10.148",
     "@types/lodash": "^4.17.1",
     "@types/luxon": "^3.4.2",
     "@types/node": "^20.12.7",
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
     "@vitejs/plugin-react-swc": "^3.6.0",
+    "cross-env": "^7.0.3",
+    "csv-parser": "^3.2.0",
+    "dotenv": "^16.4.7",
     "prettier": "^3.2.5",
     "prettier-plugin-organize-imports": "^3.2.4",
+    "rimraf": "^6.0.1",
     "typescript": "^5.2.2",
-    "vite": "^5.2.0"
+    "vite": "^5.2.0",
+    "vitest": "^3.0.9"
   }
 }

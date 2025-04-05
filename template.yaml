@@ -1,0 +1,477 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: SAM Template for EDH Tracker REST API.
+
+Parameters:
+  Env:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - prod
+    Description: "Deployment environment (dev or prod)."
+  AllowedOrigin:
+    Type: String
+    Description: "Origin allowed for CORS"
+    Default: "http://localhost:5173"
+  UserPoolId:
+    Type: String
+  UserPoolClientId:
+    Type: String
+  DomainName:
+    Type: String
+    Description: "The custom domain name for the CloudFront distribution (e.g., edh.devine.dev or edh-dev.devine.dev)"
+
+Globals:
+  Function:
+    Runtime: nodejs18.x
+    Timeout: 10
+    Tags:
+      Project: edh-tracker
+      Env: !Ref Env
+    Environment:
+      Variables:
+        COGNITO_USER_POOL_ID: !Ref UserPoolId
+
+Resources:
+  # ----- OAC -----
+  FrontendOriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub "edhtracker-oac-${Env}"
+        Description: Access control for CloudFront to S3
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  # ----- S3 BUCKET -----
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub edhtracker-frontend-${Env}
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: index.html
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+    DeletionPolicy: Retain
+
+  FrontendBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref FrontendBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowCloudFrontServicePrincipalReadOnly
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub "${FrontendBucket.Arn}/*"
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${FrontendDistribution}"
+
+  # ----- CLOUDFRONT -----
+  FrontendDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Aliases:
+          - !Ref DomainName
+        Origins:
+          - Id: S3Origin
+            DomainName: !GetAtt FrontendBucket.RegionalDomainName
+            S3OriginConfig: {}
+            OriginAccessControlId: !GetAtt FrontendOriginAccessControl.Id
+        Enabled: true
+        DefaultRootObject: index.html
+        DefaultCacheBehavior:
+          TargetOriginId: S3Origin
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods: [GET, HEAD]
+          ForwardedValues:
+            QueryString: false
+            Cookies:
+              Forward: none
+        ViewerCertificate:
+          AcmCertificateArn: arn:aws:acm:us-east-1:471112850924:certificate/19698d67-7f6d-437b-92e1-7341aebd420a
+          SslSupportMethod: sni-only
+          MinimumProtocolVersion: TLSv1.2_2021
+
+  # ----- TABLES -----
+  FormatTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub EDH-Format-${Env}
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+    DeletionPolicy: Retain
+
+  UserTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub EDH-User-${Env}
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+    DeletionPolicy: Retain
+
+  DeckTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub EDH-Deck-${Env}
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+    DeletionPolicy: Retain
+
+  MatchTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub EDH-Match-${Env}
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+      BillingMode: PAY_PER_REQUEST
+    DeletionPolicy: Retain
+
+  # ----- API -----
+  TrackerApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: !Ref Env
+      CorsConfiguration:
+        AllowCredentials: True
+        AllowMethods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+        AllowHeaders:
+          - Content-Type
+          - Authorization
+          - X-Amz-Date
+          - X-Api-Key
+          - X-Amz-Security-Token
+        AllowOrigins: !Ref AllowedOrigin
+      Auth:
+        Authorizers:
+          CognitoAuthorizer:
+            IdentitySource: $request.header.Authorization
+            JwtConfiguration:
+              issuer: !Sub "https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPoolId}"
+              audience:
+                - !Ref UserPoolClientId
+        DefaultAuthorizer: CognitoAuthorizer
+
+  # ----- FUNCTIONS -----
+  UserFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "edhtracker-user-function-${Env}"
+      CodeUri: src/api/user/
+      Handler: userHandler.userHandler
+      Description: "Handles REST API operations for user profiles."
+      MemorySize: 128
+      Environment:
+        Variables:
+          USER_TABLE: !Ref UserTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UserTable
+      Events:
+        GetUsers:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref TrackerApi
+            Path: /users
+            Method: GET
+            Auth:
+              Authorizer: CognitoAuthorizer
+        GetUser:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref TrackerApi
+            Path: /users/{id}
+            Method: GET
+            Auth:
+              Authorizer: CognitoAuthorizer
+        CreateUser:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref TrackerApi
+            Path: /users
+            Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
+        UpdateUser:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref TrackerApi
+            Path: /users/{id}
+            Method: PUT
+            Auth:
+              Authorizer: CognitoAuthorizer
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        EntryPoints:
+          - userHandler.ts
+        Minify: true
+        Sourcemap: false
+
+  FormatFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "edhtracker-format-function-${Env}"
+      CodeUri: src/api/format/
+      Handler: formatHandler.formatHandler
+      Description: "Handles REST API operations for formats."
+      MemorySize: 128
+      Environment:
+        Variables:
+          FORMAT_TABLE: !Ref FormatTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref FormatTable
+      Events:
+        GetFormats:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref TrackerApi
+            Path: /formats
+            Method: GET
+            Auth:
+              Authorizer: CognitoAuthorizer
+        GetFormat:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref TrackerApi
+            Path: /formats/{id}
+            Method: GET
+            Auth:
+              Authorizer: CognitoAuthorizer
+        CreateFormat:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref TrackerApi
+            Path: /formats
+            Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
+        UpdateFormat:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref TrackerApi
+            Path: /formats/{id}
+            Method: PUT
+            Auth:
+              Authorizer: CognitoAuthorizer
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        EntryPoints:
+          - formatHandler.ts
+        Minify: true
+        Sourcemap: false
+
+  DeckFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "edhtracker-deck-function-${Env}"
+      CodeUri: src/api/deck/
+      Handler: deckHandler.deckHandler
+      Description: "Handles REST API operations for decks."
+      MemorySize: 128
+      Environment:
+        Variables:
+          DECK_TABLE: !Ref DeckTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DeckTable
+      Events:
+        GetDecks:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref TrackerApi
+            Path: /decks
+            Method: GET
+            Auth:
+              Authorizer: CognitoAuthorizer
+        GetDeck:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref TrackerApi
+            Path: /decks/{id}
+            Method: GET
+            Auth:
+              Authorizer: CognitoAuthorizer
+        CreateDeck:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref TrackerApi
+            Path: /decks
+            Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
+        UpdateDeck:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref TrackerApi
+            Path: /decks/{id}
+            Method: PUT
+            Auth:
+              Authorizer: CognitoAuthorizer
+        DeleteDeck:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref TrackerApi
+            Path: /decks/{id}
+            Method: DELETE
+            Auth:
+              Authorizer: CognitoAuthorizer
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        EntryPoints:
+          - deckHandler.ts
+        Minify: true
+        Sourcemap: false
+
+  MatchFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "edhtracker-match-function-${Env}"
+      CodeUri: src/api/match/
+      Handler: matchHandler.matchHandler
+      Description: "Handles REST API operations for matches and participants."
+      MemorySize: 128
+      Environment:
+        Variables:
+          MATCH_TABLE: !Ref MatchTable
+          USER_TABLE: !Ref UserTable
+          DECK_TABLE: !Ref DeckTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MatchTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UserTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DeckTable
+      Events:
+        GetMatches:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref TrackerApi
+            Path: /matches
+            Method: GET
+            Auth:
+              Authorizer: CognitoAuthorizer
+        GetMatch:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref TrackerApi
+            Path: /matches/{id}
+            Method: GET
+            Auth:
+              Authorizer: CognitoAuthorizer
+        CreateMatch:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref TrackerApi
+            Path: /matches
+            Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
+        UpdateMatch:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref TrackerApi
+            Path: /matches/{id}
+            Method: PUT
+            Auth:
+              Authorizer: CognitoAuthorizer
+        DeleteMatch:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref TrackerApi
+            Path: /matches/{id}
+            Method: DELETE
+            Auth:
+              Authorizer: CognitoAuthorizer
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        EntryPoints:
+          - matchHandler.ts
+        External:
+          - aws-sdk
+        Minify: true
+        Sourcemap: false
+
+Outputs:
+  UserPoolId:
+    Description: "Cognito User Pool ID (injected via parameter)"
+    Value: !Ref UserPoolId
+
+  UserPoolClientId:
+    Description: "Cognito User Pool Client ID (injected via parameter)"
+    Value: !Ref UserPoolClientId
+
+  FrontendURL:
+    Description: "CloudFront URL for the frontend"
+    Value: !Sub "https://${FrontendDistribution.DomainName}"
+
+  FrontendBucketName:
+    Description: "Name of the S3 bucket for the frontend"
+    Value: !Ref FrontendBucket
+
+  FrontendDistributionId:
+    Description: "CloudFront Distribution ID"
+    Value: !Ref FrontendDistribution
+
+  TrackerApiUrl:
+    Description: "URL of the deployed User REST API."
+    Value: !Sub "https://${TrackerApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/"
+
+  UserFunctionName:
+    Description: "User Lambda Function Name"
+    Value: !Ref UserFunction
+
+  FormatFunctionName:
+    Description: "Format Lambda Function Name"
+    Value: !Ref FormatFunction
+
+  DeckFunctionName:
+    Description: "Deck Lambda Function Name"
+    Value: !Ref DeckFunction
+
+  MatchFunctionName:
+    Description: "Match Lambda Function Name"
+    Value: !Ref MatchFunction
