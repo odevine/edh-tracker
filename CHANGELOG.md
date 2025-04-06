@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.2](https://github.com/odevine/edh-tracker/compare/edh-tracker-v1.4.1...edh-tracker-v1.4.2) (2025-04-06)
+
+
+### Miscellaneous Chores
+
+* release 1.4.2 ([043b504](https://github.com/odevine/edh-tracker/commit/043b5041360ce50c539d5e47854f14bb3c463231))
+
 ## [1.4.1](https://github.com/odevine/edh-tracker/compare/v1.4.0...v1.4.1) (2025-01-25)
 
 
