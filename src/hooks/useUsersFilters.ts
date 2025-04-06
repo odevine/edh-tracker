@@ -11,8 +11,14 @@ export const useUsersFilters = () => {
   );
   const [activeRecentOnly, setActiveRecentOnly] = usePersistentState<boolean>(
     "users_active_recent_only",
-    true,
+    false,
   );
+
+  const resetUserFilters = () => {
+    setFilterFormat("");
+    setIncludeUnranked(false);
+    setActiveRecentOnly(false);
+  };
 
   return {
     filterFormat,
@@ -21,5 +27,6 @@ export const useUsersFilters = () => {
     setIncludeUnranked,
     activeRecentOnly,
     setActiveRecentOnly,
+    resetUserFilters,
   };
 };
