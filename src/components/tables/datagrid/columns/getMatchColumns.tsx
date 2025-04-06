@@ -5,21 +5,21 @@ import { DateTime } from "luxon";
 
 import { Match } from "@/types";
 
-interface ColumnOptions {
-  formatLookup: Map<string, string>; // formatId -> displayName
-  deckLookup: Map<string, string>; // deckId -> deck name
+interface MatchColumnOptions {
+  formatMap: Map<string, string>;
+  decksMap: Map<string, string>;
   showActions?: boolean;
   onEdit?: (match: Match) => void;
   onDelete?: (match: Match) => void;
 }
 
-export const getMatchesColumns = ({
-  formatLookup,
-  deckLookup,
+export const getMatchColumns = ({
+  formatMap,
+  decksMap,
   showActions = false,
   onEdit,
   onDelete,
-}: ColumnOptions): GridColDef[] => {
+}: MatchColumnOptions): GridColDef[] => {
   const columns: GridColDef[] = [
     {
       field: "datePlayed",
@@ -33,7 +33,7 @@ export const getMatchesColumns = ({
       headerName: "format",
       minWidth: 120,
       valueGetter: (_value, row: Match) =>
-        formatLookup.get(String(row.formatId)) ?? "-",
+        formatMap.get(String(row.formatId)) ?? "-",
     },
     {
       field: "winningDeckId",
@@ -41,7 +41,7 @@ export const getMatchesColumns = ({
       minWidth: 180,
       flex: 1,
       valueGetter: (_value, row: Match) =>
-        deckLookup.get(String(row.winningDeckId)) ?? "-",
+        decksMap.get(String(row.winningDeckId)) ?? "-",
       renderCell: (params: GridRenderCellParams<Match>) => (
         <Typography variant="body2" noWrap>
           {params.value}
@@ -56,7 +56,7 @@ export const getMatchesColumns = ({
       sortable: false,
       renderCell: (params: GridRenderCellParams<Match>) => {
         const names = params.row.matchParticipants
-          ?.map((p) => deckLookup.get(p.deckId || "") || "")
+          ?.map((p) => decksMap.get(p.deckId || "") || "")
           .filter(Boolean);
 
         return (
@@ -97,4 +97,4 @@ export const getMatchesColumns = ({
   }
 
   return columns;
-}
+};

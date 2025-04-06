@@ -47,7 +47,7 @@ export const NavToolbar = () => {
       label: "formats",
       action: () => navigate("/formats"),
       pathMatch: /^\/formats$/,
-      disabled: false,
+      disabled: !isAuthenticated,
     },
     {
       label: "users",
@@ -219,8 +219,8 @@ export const NavToolbar = () => {
               onClick={handleUserMenuOpen}
               src={currentUserProfile?.profilePictureURL ?? ""}
               sx={{
-                backgroundColor: isAuthenticated ? "primary.main" : "grey.400",
-                color: "background.paper",
+                backgroundColor: isAuthenticated ? "primary.main" : "background.paper",
+                color: "primary.main",
                 cursor: "pointer",
                 width: 42,
                 height: 42,
