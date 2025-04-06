@@ -7,7 +7,7 @@ import { useDeck } from "@/hooks";
 import { Deck } from "@/types";
 
 export const DecksPage = (): JSX.Element => {
-  const { deleteDeckById } = useDeck();
+  const { deleteDeckById, updateExistingDeck } = useDeck();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingDeck, setEditingDeck] = useState<Deck | null>(null);
@@ -27,6 +27,16 @@ export const DecksPage = (): JSX.Element => {
           ) {
             deleteDeckById(deck.id);
           }
+        }}
+        onActiveToggle={(deck: Deck) => {
+          const { id, createdAt, updatedAt, ...updateInput } = deck;
+          updateExistingDeck({
+            deckId: id,
+            input: {
+              ...updateInput,
+              inactive: !deck.inactive,
+            },
+          });
         }}
         customButtons={[
           <Button
