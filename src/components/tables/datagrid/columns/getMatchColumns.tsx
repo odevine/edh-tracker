@@ -1,7 +1,8 @@
-import { Delete, Edit } from "@mui/icons-material";
-import { IconButton, Stack, Typography } from "@mui/material";
+import { Delete, Edit, MoreVert } from "@mui/icons-material";
+import { IconButton, Menu, MenuItem, Stack, Typography } from "@mui/material";
 import { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { DateTime } from "luxon";
+import { useState } from "react";
 
 import { Match } from "@/types";
 
@@ -78,21 +79,57 @@ export const getMatchColumns = ({
       headerName: "",
       sortable: false,
       filterable: false,
-      width: 100,
-      renderCell: (params: GridRenderCellParams<Match>) => (
-        <Stack direction="row" spacing={1}>
-          {onEdit && (
-            <IconButton onClick={() => onEdit(params.row)}>
-              <Edit fontSize="small" />
+      width: 56,
+      renderCell: (params: GridRenderCellParams<Match>) => {
+        const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+        const open = Boolean(anchorEl);
+
+        const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
+          setAnchorEl(event.currentTarget);
+        };
+
+        const handleClose = () => {
+          setAnchorEl(null);
+        };
+
+        return (
+          <>
+            <IconButton onClick={handleOpen}>
+              <MoreVert fontSize="small" />
             </IconButton>
-          )}
-          {onDelete && (
-            <IconButton onClick={() => onDelete(params.row)}>
-              <Delete fontSize="small" />
-            </IconButton>
-          )}
-        </Stack>
-      ),
+            <Menu
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleClose}
+              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+              transformOrigin={{ vertical: "top", horizontal: "right" }}
+            >
+              {onEdit && (
+                <MenuItem
+                  onClick={() => {
+                    onEdit(params.row);
+                    handleClose();
+                  }}
+                >
+                  <Edit fontSize="small" sx={{ mr: 1 }} />
+                  edit
+                </MenuItem>
+              )}
+              {onDelete && (
+                <MenuItem
+                  onClick={() => {
+                    onDelete(params.row);
+                    handleClose();
+                  }}
+                >
+                  <Delete fontSize="small" sx={{ mr: 1 }} />
+                  delete
+                </MenuItem>
+              )}
+            </Menu>
+          </>
+        );
+      },
     });
   }
 
