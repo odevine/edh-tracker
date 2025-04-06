@@ -30,7 +30,7 @@ export const MatchesPage = (): JSX.Element => {
           setModalOpen(true);
         }}
         onDelete={(match) => {
-          if (confirm(`Are you sure you want to delete "${match.id}"?`)) {
+          if (confirm(`are you sure you want to delete "${match.id}"?`)) {
             deleteMatch(match.id);
           }
         }}

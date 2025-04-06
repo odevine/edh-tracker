@@ -22,6 +22,14 @@ export const useDecksFilters = () => {
     false,
   );
 
+  const resetDeckFilters = () => {
+    setFilterColor([]);
+    setFilterFormat("");
+    setFilterUser("");
+    setIncludeInactive(false);
+    setIncludeUnranked(false);
+  } 
+
   return {
     filterColor,
     setFilterColor,
@@ -33,5 +41,6 @@ export const useDecksFilters = () => {
     setIncludeInactive,
     includeUnranked,
     setIncludeUnranked,
+    resetDeckFilters,
   };
 };

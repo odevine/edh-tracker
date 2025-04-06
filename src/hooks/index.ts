@@ -9,4 +9,5 @@ export * from "./useMatchFilters";
 export * from "./usePersistentState";
 export * from "./useTheme";
 export * from "./useUser";
+export * from "./useUserColorRowClasses";
 export * from "./useUsersFilters";
