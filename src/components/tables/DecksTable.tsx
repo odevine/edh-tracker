@@ -26,12 +26,14 @@ interface IDecksTableProps {
   customButtons: JSX.Element[];
   onEdit: (deck: Deck) => void;
   onDelete: (deck: Deck) => void;
+  onActiveToggle: (deck: Deck) => void;
 }
 
 export const DecksTable = ({
   customButtons,
   onEdit,
   onDelete,
+  onActiveToggle,
 }: IDecksTableProps) => {
   const { userId } = useAuth();
   const { allUsers } = useUser();
@@ -74,6 +76,7 @@ export const DecksTable = ({
         hasDeckBeenUsed,
         onEdit,
         onDelete,
+        onActiveToggle,
         currentUserId: userId as string,
         usersMap: userProfileMap,
         formatsMap,

@@ -151,7 +151,7 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
                   whiteSpace: "nowrap",
                   border: "none",
                 },
-                "& .MuiDataGrid-cell:focus": {
+                "& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within": {
                   outline: "none",
                 },
                 "&.MuiDataGrid-root--densityCompact .MuiDataGrid-cell": {
@@ -172,18 +172,6 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
               },
             },
           },
-          // MuiAppBar: {
-          //   styleOverrides: {
-          //     root: ({ theme }) => ({
-          //       backgroundColor:
-          //         theme.palette.mode === "light"
-          //           ? "#f5f5f5"
-          //           : theme.palette.background.default,
-          //       borderBottom:
-          //         theme.palette.mode === "light" ? "1px solid #ddd" : "none",
-          //     }),
-          //   },
-          // },
         },
       }),
     [mode, themeColors],
