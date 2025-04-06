@@ -1,0 +1,17 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "packages": {
+    ".": {
+      "release-type": "node",
+      "package-name": "edh-tracker",
+      "default-branch": "main"
+    },
+    "dev": {
+      "release-type": "node",
+      "package-name": "edh-tracker",
+      "default-branch": "dev",
+      "prerelease": true,
+      "include-component-in-tag": false
+    }
+  }
+}

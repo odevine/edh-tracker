@@ -1,9 +1,17 @@
-import { Delete, Edit } from "@mui/icons-material";
+import {
+  AddCircleOutline,
+  Delete,
+  Edit,
+  MoreVert,
+  RemoveCircleOutline,
+} from "@mui/icons-material";
 import {
   Box,
   Chip,
   IconButton,
   Link,
+  Menu,
+  MenuItem,
   Stack,
   Tooltip,
   Typography,
@@ -12,6 +20,7 @@ import { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import PopupState, { bindHover, bindPopover } from "material-ui-popup-state";
 import HoverPopover from "material-ui-popup-state/HoverPopover";
 import { navigate } from "raviger";
+import { useState } from "react";
 
 import {
   CardImageMiniCard,
@@ -27,6 +36,7 @@ interface DeckColumnOptions {
   filterFormat: string;
   onEdit: (deck: Deck) => void;
   onDelete: (deck: Deck) => void;
+  onActiveToggle: (deck: Deck) => void;
   hasDeckBeenUsed: (deckId: string) => boolean;
 }
 
@@ -37,6 +47,7 @@ export const getDecksColumns = ({
   filterFormat,
   onEdit,
   onDelete,
+  onActiveToggle,
   hasDeckBeenUsed,
 }: DeckColumnOptions): GridColDef[] => {
   const filteredFormat = formatsMap.get(filterFormat);
@@ -232,41 +243,89 @@ export const getDecksColumns = ({
       headerName: "",
       sortable: false,
       filterable: false,
-      width: 80,
+      width: 56,
       renderCell: (params: GridRenderCellParams<Deck>) => {
         if (params.row.userId !== currentUserId) {
           return null;
         }
+
         const usedDeck = hasDeckBeenUsed(params.row.id);
+        const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+        const open = Boolean(anchorEl);
+
+        const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
+          setAnchorEl(event.currentTarget);
+        };
+
+        const handleClose = () => {
+          setAnchorEl(null);
+        };
+
         return (
-          <Stack direction="row" spacing={0.5}>
-            {onEdit && (
-              <IconButton size="small" onClick={() => onEdit(params.row)}>
-                <Edit fontSize="small" />
-              </IconButton>
-            )}
-            {onDelete && (
+          <>
+            <IconButton size="small" onClick={handleOpen}>
+              <MoreVert fontSize="small" />
+            </IconButton>
+            <Menu
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleClose}
+              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+              transformOrigin={{ vertical: "top", horizontal: "right" }}
+            >
+              <MenuItem
+                onClick={() => {
+                  onEdit(params.row);
+                  handleClose();
+                }}
+              >
+                <Edit fontSize="small" style={{ marginRight: 8 }} />
+                edit deck
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  onActiveToggle(params.row);
+                  handleClose();
+                }}
+              >
+                {params.row.inactive ? (
+                  <AddCircleOutline
+                    fontSize="small"
+                    style={{ marginRight: 8 }}
+                  />
+                ) : (
+                  <RemoveCircleOutline
+                    fontSize="small"
+                    style={{ marginRight: 8 }}
+                  />
+                )}
+                mark {params.row.inactive ? "" : "in"}active
+              </MenuItem>
               <Tooltip
-                arrow
-                placement="bottom-end"
                 title={
                   usedDeck
                     ? "deck cannot be deleted as it is used in a match, you may instead mark it as inactive"
-                    : undefined
+                    : ""
                 }
+                placement="left"
+                arrow
+                disableHoverListener={!usedDeck}
               >
                 <Box component="span">
-                  <IconButton
-                    size="small"
-                    onClick={() => onDelete(params.row)}
+                  <MenuItem
+                    onClick={() => {
+                      onDelete(params.row);
+                      handleClose();
+                    }}
                     disabled={usedDeck}
                   >
-                    <Delete fontSize="small" />
-                  </IconButton>
+                    <Delete fontSize="small" style={{ marginRight: 8 }} />
+                    delete deck
+                  </MenuItem>
                 </Box>
               </Tooltip>
-            )}
-          </Stack>
+            </Menu>
+          </>
         );
       },
     },
