@@ -33,13 +33,11 @@ export const DeckModal = (props: {
   const { allDecks, createNewDeck, updateExistingDeck } = useDeck();
   const { hasDeckBeenUsed } = useMatch();
 
-  // find the editing deck based on the editingDeckId
   const editingDeck = allDecks.find((deck) => deck.id === editingDeckId);
   const playedDeck = hasDeckBeenUsed(editingDeckId);
 
-  // state for the deck fields
   const [displayName, setDisplayName] = useState("");
-  const [deckFormat, setDeckFormat] = useState<Format | "">("");
+  const [deckFormat, setDeckFormat] = useState<Format | null>(null);
   const [deckColors, setDeckColors] = useState<string[]>([]);
   const [commander, setCommander] = useState<ICommander | null>(null);
   const [commanderSearchTerm, setCommanderSearchTerm] = useState("");
@@ -57,44 +55,54 @@ export const DeckModal = (props: {
   const [deckCost, setDeckCost] = useState("");
   const [deckIsInactive, setDeckIsInactive] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
+  const [unrankedIncludeCommander, setUnrankedIncludeCommander] =
+    useState(false);
 
-  // Update state when editingDeck changes
+  const isUnrankedFormat = deckFormat?.id === "unranked";
+  const effectiveRequiresCommander =
+    deckFormat?.requiresCommander ??
+    (isUnrankedFormat && unrankedIncludeCommander);
+
   useEffect(() => {
     const initializeDeckData = async () => {
       if (editingDeck) {
         setDisplayName(editingDeck.displayName);
-        setDeckFormat(
-          allFormats.find((f) => f.id === editingDeck.formatId) ?? "",
-        );
+        const format =
+          allFormats.find((f) => f.id === editingDeck.formatId) ?? null;
+        setDeckFormat(format);
         setDeckLink(editingDeck?.link ?? "");
         setDeckCost(String(editingDeck?.cost) ?? "");
         setDeckIsInactive(Boolean(editingDeck?.inactive));
 
-        const format = allFormats.find((f) => f.id === editingDeck.formatId);
-        const requiresCommander = format?.requiresCommander;
+        const hasCommander = Boolean(editingDeck.commanderName);
 
-        if (requiresCommander && editingDeck.commanderName) {
+        const isUnranked = format && format.id === "unranked";
+        const requiresCommander =
+          format && (format.requiresCommander || (isUnranked && hasCommander));
+
+        if (requiresCommander && hasCommander) {
+          if (isUnranked) {
+            setUnrankedIncludeCommander(true);
+          }
+
           const commanderColors = await getCommanderColors(
-            editingDeck.commanderName,
+            editingDeck.commanderName as string,
           );
-          const existingCommander: ICommander = {
-            label: editingDeck.commanderName,
+          setCommander({
+            label: editingDeck.commanderName as string,
             colors: commanderColors,
-          };
-          setCommander(existingCommander);
-          setCommanderSearchTerm(editingDeck.commanderName);
+          });
+          setCommanderSearchTerm(editingDeck.commanderName as string);
 
           if (editingDeck.secondCommanderName) {
             const secondCommanderColors = await getCommanderColors(
               editingDeck.secondCommanderName,
             );
-            const existingSecondCommander: ICommander = {
+            setMultiCommander(true);
+            setSecondCommander({
               label: editingDeck.secondCommanderName,
               colors: secondCommanderColors,
-            };
-            setMultiCommander(true);
-            setSecondCommander(existingSecondCommander);
-            setSecondCommanderSearchTerm("");
+            });
           }
         }
       } else {
@@ -102,7 +110,7 @@ export const DeckModal = (props: {
         setCommander(null);
         setCommanderSearchTerm("");
         setCommanderOptions([]);
-        setDeckFormat("");
+        setDeckFormat(null);
         setDeckLink("");
         setDeckCost("");
         setDeckIsInactive(false);
@@ -111,10 +119,11 @@ export const DeckModal = (props: {
         setSecondCommander(null);
         setSecondCommanderSearchTerm("");
         setSecondCommanderOptions([]);
+        setUnrankedIncludeCommander(false);
       }
     };
 
-    void initializeDeckData(); // Run the async init
+    void initializeDeckData();
   }, [editingDeck, open]);
 
   const { commanderSearch, searchResults } = useCommanderSearch();
@@ -134,10 +143,7 @@ export const DeckModal = (props: {
     const newErrors: string[] = [];
 
     const validations = [
-      {
-        condition: displayName === "",
-        message: "deck name is required.",
-      },
+      { condition: displayName === "", message: "deck name is required." },
       {
         condition: allDecks.some(
           (deck) =>
@@ -145,20 +151,13 @@ export const DeckModal = (props: {
         ),
         message: "deck name must be unique.",
       },
+      { condition: !deckFormat, message: "deck format is required" },
       {
-        condition: deckFormat === "",
-        message: "deck format is required",
-      },
-      {
-        condition:
-          !commander && deckFormat !== "" && deckFormat.requiresCommander,
+        condition: !commander && effectiveRequiresCommander,
         message: "at least one commander is required",
       },
       {
-        condition:
-          deckFormat !== "" &&
-          !deckFormat.requiresCommander &&
-          deckColors.length === 0,
+        condition: !effectiveRequiresCommander && deckColors.length === 0,
         message: "assigning deck colors is required",
       },
       {
@@ -172,7 +171,9 @@ export const DeckModal = (props: {
     ];
 
     validations.forEach(({ condition, message }) => {
-      if (condition) newErrors.push(message);
+      if (condition) {
+        newErrors.push(message);
+      }
     });
 
     setErrors(newErrors);
@@ -181,7 +182,6 @@ export const DeckModal = (props: {
 
   const handleSubmit = () => {
     if (isAuthenticated && validateDeckDetails()) {
-      // union + sort logic
       let combinedColors: string[] = [];
       if (commander?.colors?.length || secondCommander?.colors?.length) {
         const colorSet = new Set([
@@ -192,7 +192,6 @@ export const DeckModal = (props: {
       } else {
         combinedColors = deckColors;
       }
-
       if (combinedColors.length === 0) {
         combinedColors.push("C");
       }
@@ -259,22 +258,20 @@ export const DeckModal = (props: {
           px: 4,
           pb: 3,
           minWidth: { xs: 310, sm: 480 },
-          "&:focus": {
-            outline: "none",
-          },
+          "&:focus": { outline: "none" },
         }}
       >
         <Typography variant="h4" gutterBottom>
           {editingDeck ? "update" : "new"} deck
         </Typography>
-        <Stack height={"100%"} justifyContent="space-between" spacing={3}>
+        <Stack height="100%" justifyContent="space-between" spacing={3}>
           <Stack spacing={2}>
             <TextField
               fullWidth
               required
               label="deck name"
               value={displayName}
-              onChange={(event) => setDisplayName(event?.target.value)}
+              onChange={(e) => setDisplayName(e.target.value)}
             />
             <TextField
               fullWidth
@@ -282,12 +279,14 @@ export const DeckModal = (props: {
               select
               disabled={Boolean(editingDeck && playedDeck)}
               label="deck format"
-              placeholder="paste a moxfield or archidekt link here"
-              value={(deckFormat as Format)?.id ?? ""}
-              onChange={(event) => {
-                setDeckFormat(
-                  allFormats.find((f) => f.id === event.target.value) ?? "",
-                );
+              value={deckFormat?.id ?? ""}
+              onChange={(e) => {
+                const format =
+                  allFormats.find((f) => f.id === e.target.value) ?? null;
+                setDeckFormat(format);
+                if (format && format.id !== "unranked") {
+                  setUnrankedIncludeCommander(false);
+                }
               }}
             >
               {allFormats.map((format) => (
@@ -296,52 +295,50 @@ export const DeckModal = (props: {
                 </MenuItem>
               ))}
             </TextField>
-            {deckFormat !== "" && deckFormat.requiresCommander && (
+            {isUnrankedFormat && (
+              <Stack direction="row" alignItems="center">
+                <Checkbox
+                  checked={unrankedIncludeCommander}
+                  onChange={(e) =>
+                    setUnrankedIncludeCommander(e.target.checked)
+                  }
+                />
+                <Typography component="span">include commander(s)?</Typography>
+              </Stack>
+            )}
+            {effectiveRequiresCommander && (
               <>
-                <Stack
-                  direction="row"
-                  sx={{ width: "100%" }}
-                  alignItems="center"
-                  spacing={2}
-                >
+                <Stack direction="row" spacing={2}>
                   <Autocomplete
-                    key={open ? "open" : "closed"}
                     fullWidth
                     freeSolo
-                    options={commanderOptions.map((option) => ({
-                      label: option.name,
-                      colors: option.color_identity,
+                    options={commanderOptions.map((o) => ({
+                      label: o.name,
+                      colors: o.color_identity,
                     }))}
                     value={commander}
-                    onInputChange={(_event, value) =>
+                    onInputChange={(_e, v) =>
                       handleCommanderSearchChange(
-                        value,
+                        v,
                         deckFormat?.validCommanderFilters,
                       )
                     }
-                    onChange={(_event, value) =>
-                      setCommander(value as ICommander)
-                    }
+                    onChange={(_e, v) => setCommander(v as ICommander)}
                     renderInput={(params) => (
                       <TextField
                         {...params}
                         required
                         value={commanderSearchTerm}
-                        placeholder="start typing to search commanders..."
                         label="commander"
                       />
                     )}
                   />
-                  <Stack
-                    direction="column"
-                    justifyContent="center"
-                    alignItems="center"
-                  >
+                  <Stack alignItems="center">
                     <Typography variant="caption">multi?</Typography>
                     <Checkbox
                       size="small"
                       checked={multiCommander}
-                      onChange={(_event, checked) => {
+                      onChange={(_e, checked) => {
                         setMultiCommander(checked);
                         if (!checked) {
                           setSecondCommander(null);
@@ -354,26 +351,22 @@ export const DeckModal = (props: {
                 </Stack>
                 {multiCommander && (
                   <Autocomplete
-                    key={open ? "open" : "closed"}
                     fullWidth
                     freeSolo
-                    options={secondCommanderOptions.map((option) => ({
-                      label: option.name,
-                      colors: option.colors,
+                    options={secondCommanderOptions.map((o) => ({
+                      label: o.name,
+                      colors: o.colors,
                     }))}
                     value={secondCommander}
-                    onInputChange={(_event, value) =>
-                      handleSecondCommanderSearchChange(value)
+                    onInputChange={(_e, v) =>
+                      handleSecondCommanderSearchChange(v)
                     }
-                    onChange={(_event, value) =>
-                      setSecondCommander(value as ICommander)
-                    }
+                    onChange={(_e, v) => setSecondCommander(v as ICommander)}
                     renderInput={(params) => (
                       <TextField
                         {...params}
                         required
                         value={secondCommanderSearchTerm}
-                        placeholder="start typing to search commanders..."
                         label="second commander"
                       />
                     )}
@@ -381,7 +374,7 @@ export const DeckModal = (props: {
                 )}
               </>
             )}
-            {deckFormat !== "" && !deckFormat.requiresCommander && (
+            {!effectiveRequiresCommander && (
               <ColorSelector
                 filterColor={deckColors}
                 setFilterColor={setDeckColors}
@@ -393,29 +386,26 @@ export const DeckModal = (props: {
               label="deck link"
               placeholder="paste a moxfield or archidekt link here"
               value={deckLink}
-              onChange={(event) => setDeckLink(event?.target.value)}
+              onChange={(e) => setDeckLink(e.target.value)}
             />
             <TextField
               fullWidth
               label="deck cost"
               value={deckCost}
-              onChange={(event) => handleCostChange(event?.target.value)}
+              onChange={(e) => handleCostChange(e.target.value)}
             />
-            <Stack spacing={0}>
-              {errors.length > 0 &&
-                errors.map((err) => (
-                  <Typography key={err} color="error">
-                    {err}
-                  </Typography>
-                ))}
-            </Stack>
+            {errors.map((err) => (
+              <Typography key={err} color="error">
+                {err}
+              </Typography>
+            ))}
           </Stack>
-          <Stack justifyContent="space-between" direction="row">
+          <Stack direction="row" justifyContent="space-between">
             {editingDeck ? (
               <Stack direction="row" alignItems="center">
                 <Checkbox
                   checked={deckIsInactive}
-                  onChange={(event) => setDeckIsInactive(event.target.checked)}
+                  onChange={(e) => setDeckIsInactive(e.target.checked)}
                 />
                 <Typography component="span">inactive?</Typography>
               </Stack>
