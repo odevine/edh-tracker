@@ -3,8 +3,9 @@
   "packages": {
     ".": {
       "release-type": "node",
-      "default-branch": "dev",
       "prerelease": true,
+      "prerelease-type": "beta",
+      "draft-pull-request": true,
       "bootstrap-sha": "bf1576dfb0a01ac696377b4d3f826e147e874d09"
     }
   }
