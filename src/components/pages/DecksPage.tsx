@@ -22,7 +22,7 @@ export const DecksPage = (): JSX.Element => {
         onDelete={(deck: Deck) => {
           if (
             confirm(
-              `Are you sure you want to delete deck "${deck.displayName}"?`,
+              `are you sure you want to delete deck "${deck.displayName}"?`,
             )
           ) {
             deleteDeckById(deck.id);
