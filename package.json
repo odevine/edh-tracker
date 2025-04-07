@@ -9,16 +9,16 @@
     "clean:backend": "rimraf .aws-sam",
     "start": "vite",
     "preview": "vite preview",
-    "build": "tsc && vite build",
-    "deploy:dev": "npm run clean:backend && sam build && sam deploy --config-env dev",
-    "deploy:prod": "npm run clean:backend && sam build && sam deploy --config-env prod",
-    "seed": "node scripts/seed-all.mjs",
-    "seed:prod": "cross-env SEED_ENV=prod node scripts/seed-all.mjs",
     "test": "vitest run",
+    "build": "tsc && vite build",
     "build:frontend:dev": "vite build --mode dev",
     "build:frontend:prod": "vite build --mode prod",
     "deploy:frontend:dev": "npm run clean:frontend && npm run build:frontend:dev && aws s3 sync ./dist s3://edhtracker-frontend-dev --delete && aws cloudfront create-invalidation --distribution-id E1RH2N8EDHG45M --paths /*",
-    "deploy:frontend:prod": "npm run clean:frontend && npm run build:frontend:prod && aws s3 sync ./dist s3://edhtracker-frontend-prod --delete && aws cloudfront create-invalidation --distribution-id <PROD_DIST_ID> --paths /*"
+    "deploy:frontend:prod": "npm run clean:frontend && npm run build:frontend:prod && aws s3 sync ./dist s3://edhtracker-frontend-prod --delete && aws cloudfront create-invalidation --distribution-id <PROD_DIST_ID> --paths /*",
+    "deploy:dev": "npm run clean:backend && sam build && sam deploy --config-env dev",
+    "deploy:prod": "npm run clean:backend && sam build && sam deploy --config-env prod",
+    "seed:dev": "node scripts/seed-all.mjs",
+    "seed:prod": "cross-env SEED_ENV=prod node scripts/seed-all.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.777.0",
