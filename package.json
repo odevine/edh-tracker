@@ -13,7 +13,7 @@
     "deploy:dev": "npm run clean:backend && sam build && sam deploy --config-env dev",
     "deploy:prod": "npm run clean:backend && sam build && sam deploy --config-env prod",
     "seed": "node scripts/seed-all.mjs",
-    "seed:prod": "SEED_ENV=prod node scripts/seed-all.mjs",
+    "seed:prod": "cross-env SEED_ENV=prod node scripts/seed-all.mjs",
     "test": "vitest run",
     "build:frontend:dev": "vite build --mode dev",
     "build:frontend:prod": "vite build --mode prod",
