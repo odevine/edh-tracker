@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.0.0](https://github.com/odevine/edh-tracker/compare/edh-tracker-v1.4.2...edh-tracker-v2.0.0) (2025-04-07)
+
+
+### Bug Fixes
+
+* final tweaks to scripts and configs before initiating 2.0.0 release ([621911e](https://github.com/odevine/edh-tracker/commit/621911e1c93bf78fc4afd1c8f81664b978fb1664))
+* final tweaks to scripts and configs before initiating 2.0.0 release ([729248f](https://github.com/odevine/edh-tracker/commit/729248fa6336576671f559f8840691259a0c15bf))
+* unranked commanders getting removed ([784416c](https://github.com/odevine/edh-tracker/commit/784416cdf4eeb6cd8720821d30cad309ccd983d1))
+
+
+### Miscellaneous Chores
+
+* release 2.0.0 ([7aa68ab](https://github.com/odevine/edh-tracker/commit/7aa68ab66bc751d3b6fb826d2f11a8f139dc5509))
+
 ## [1.4.2](https://github.com/odevine/edh-tracker/compare/edh-tracker-v1.4.1...edh-tracker-v1.4.2) (2025-04-06)
 
 
