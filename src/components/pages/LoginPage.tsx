@@ -5,9 +5,9 @@ import {
   Box,
   Button,
   CircularProgress,
-  Container,
   CssBaseline,
   Paper,
+  Stack,
   TextField,
   Typography,
 } from "@mui/material";
@@ -32,7 +32,7 @@ export const LoginPage = () => {
     try {
       await signIn(username, password);
     } catch (err: any) {
-      setError(err?.message || "Login failed");
+      setError(err?.message || "login failed");
     } finally {
       setLoading(false);
     }
@@ -43,15 +43,17 @@ export const LoginPage = () => {
   }
 
   return (
-    <Container component="main" maxWidth="xs">
-      <CssBaseline />
-      <Paper elevation={3} sx={{ mt: 8, p: 4, borderRadius: 2 }}>
-        <Box display="flex" flexDirection="column" alignItems="center">
+    <Stack alignItems="center" justifyContent="center" sx={{ height: "100%" }}>
+      <Paper
+        elevation={3}
+        sx={{ p: 4, borderRadius: 2, minWidth: 300, maxWidth: 440 }}
+      >
+        <Stack alignItems="center">
           <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
-            Sign In
+            sign in
           </Typography>
           {error && (
             <Alert severity="error" sx={{ mt: 2, width: "100%" }}>
@@ -75,7 +77,7 @@ export const LoginPage = () => {
             <TextField
               fullWidth
               required
-              label="Password"
+              label="password"
               type="password"
               margin="normal"
               value={password}
@@ -89,11 +91,11 @@ export const LoginPage = () => {
               disabled={loading}
               sx={{ mt: 3, mb: 2 }}
             >
-              {loading ? <CircularProgress size={24} /> : "Sign In"}
+              {loading ? <CircularProgress size={24} /> : "sign in"}
             </Button>
           </Box>
-        </Box>
+        </Stack>
       </Paper>
-    </Container>
+    </Stack>
   );
 };
