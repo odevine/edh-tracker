@@ -1,0 +1,19 @@
+version = 0.1
+
+[dev.deploy.parameters]
+stack_name = "edhtracker-dev"
+resolve_s3 = true
+s3_prefix = "edhtracker-dev"
+region = "us-east-1"
+capabilities = "CAPABILITY_IAM"
+image_repositories = []
+parameter_overrides = "Env=dev DomainName=edh-dev.devine.dev AllowedOrigin=https://edh-dev.devine.dev UserPoolId=us-east-1_iPn4x3a9C UserPoolClientId=41qbj916lk93d01uanequq57bj"
+
+[prod.deploy.parameters]
+stack_name = "edhtracker-prod"
+resolve_s3 = true
+s3_prefix = "edhtracker-prod"
+region = "us-east-1"
+capabilities = "CAPABILITY_IAM"
+image_repositories = []
+parameter_overrides = "Env=prod DomainName=edh.devine.dev AllowedOrigin=https://edh.devine.dev UserPoolId=us-east-1_iPn4x3a9C UserPoolClientId=41qbj916lk93d01uanequq57bj"
