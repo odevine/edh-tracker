@@ -30,11 +30,11 @@ export const ProfileMiniCard: React.FC<ProfileMiniCardProps> = ({
   const deckCount = allDecks.filter(
     (deck) => deck.userId === profile.id,
   ).length;
-  const totalWins = Object.values(profile.formatStats).reduce(
+  const totalWins = Object.values(profile?.formatStats ?? {}).reduce(
     (acc, value) => acc + value.gamesWon,
     0,
   );
-  const totalMatches = Object.values(profile.formatStats).reduce(
+  const totalMatches = Object.values(profile?.formatStats ?? {}).reduce(
     (acc, value) => acc + value.gamesPlayed,
     0,
   );
