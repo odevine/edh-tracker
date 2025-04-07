@@ -7,13 +7,7 @@ s3_prefix = "edhtracker-dev"
 region = "us-east-1"
 capabilities = "CAPABILITY_IAM"
 image_repositories = []
-parameter_overrides = """
-  "Env=dev",
-  "DomainName=edh-api.devine.dev",
-  "AllowedOrigin=https://edh-dev.devine.dev",
-  "UserPoolId=us-east-1_wFlWS5ImG",
-  "UserPoolClientId=5isdd7vi6i37ovejrnibvh03q2""
-"""    
+parameter_overrides = "Env=dev DomainName=edh-dev.devine.dev AllowedOrigin=https://edh-dev.devine.dev UserPoolId=us-east-1_wFlWS5ImG UserPoolClientId=5isdd7vi6i37ovejrnibvh03q2"
 
 [prod.deploy.parameters]
 stack_name = "edhtracker-prod"
@@ -22,10 +16,4 @@ s3_prefix = "edhtracker-prod"
 region = "us-east-1"
 capabilities = "CAPABILITY_IAM"
 image_repositories = []
-parameter_overrides = """
-  "Env=prod"
-  "DomainName=edh-api.devine.dev"
-  "AllowedOrigin=https://edh.devine.dev"
-  "UserPoolId=us-east-1_wFlWS5ImG"
-  "UserPoolClientId=5isdd7vi6i37ovejrnibvh03q2"
-"""
+parameter_overrides = "Env=prod DomainName=edh.devine.dev AllowedOrigin=https://edh.devine.dev UserPoolId=us-east-1_wFlWS5ImG UserPoolClientId=5isdd7vi6i37ovejrnibvh03q2"
