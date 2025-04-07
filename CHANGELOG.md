@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1](https://github.com/odevine/edh-tracker/compare/edh-tracker-v2.0.0...edh-tracker-v2.0.1) (2025-04-07)
+
+
+### Bug Fixes
+
+* ProfileMiniCard crashing the app when users don't have a formatStats prop ([4f3bc31](https://github.com/odevine/edh-tracker/commit/4f3bc31e81d2eed4e5309a7eb201ec7dbf49ebb6))
+
 ## [2.0.0](https://github.com/odevine/edh-tracker/compare/edh-tracker-v1.4.1...edh-tracker-v2.0.0) (2025-04-07)
 
 
