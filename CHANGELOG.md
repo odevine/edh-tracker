@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/odevine/edh-tracker/compare/edh-tracker-v2.0.1...edh-tracker-v2.1.0) (2025-04-15)
+
+
+### Features
+
+* add a "forgot password" flow for user onboarding ([c68df57](https://github.com/odevine/edh-tracker/commit/c68df5752999b3b687d0db7826bc92d667431b2a))
+
 ## [2.0.1](https://github.com/odevine/edh-tracker/compare/edh-tracker-v2.0.0...edh-tracker-v2.0.1) (2025-04-07)
 
 
