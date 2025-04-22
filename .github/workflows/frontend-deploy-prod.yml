@@ -1,9 +1,9 @@
-name: Frontend Deploy (CD)
+name: Frontend Deploy (Production)
 
 on:
   push:
-    branches: [main, dev]
-  workflow_dispatch:
+    tags:
+      - "edh-tracker-v*"
 
 jobs:
   deploy:
@@ -29,12 +29,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run Frontend Build (dev)
-        if: github.ref == 'refs/heads/dev'
-        run: npm run build:frontend:dev
-
       - name: Run Frontend Build (prod)
-        if: github.ref == 'refs/heads/main'
         run: npm run build:frontend:prod
 
       - name: Install jq
@@ -43,11 +38,7 @@ jobs:
       - name: Get CloudFormation Outputs
         id: cfn
         run: |
-          if [[ "${GITHUB_REF##*/}" == "main" ]]; then
-            STACK_NAME="edhtracker-prod"
-          else
-            STACK_NAME="edhtracker-dev"
-          fi
+          STACK_NAME="edhtracker-prod"
           OUTPUTS=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --query "Stacks[0].Outputs" --output json)
           DIST_ID=$(echo $OUTPUTS | jq -r '.[] | select(.OutputKey=="FrontendDistributionId") | .OutputValue')
           BUCKET_NAME=$(echo $OUTPUTS | jq -r '.[] | select(.OutputKey=="FrontendBucketName") | .OutputValue')
